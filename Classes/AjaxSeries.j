@@ -1,3 +1,11 @@
+/*
+ * AjaxSeries.j
+ * GitIssues
+ *
+ * Created by Randall Luecke on February 20, 2010.
+ * Copyright 2010, Randall Luecke All rights reserved.
+ */
+
 @implementation AjaxSeries : CPObject
 {
     CPArray connections;

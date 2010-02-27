@@ -1,3 +1,10 @@
+/*
+ * AppController.j
+ * GitIssues
+ *
+ * Created by Randall Luecke on February 20, 2010.
+ * Copyright 2010, Randall Luecke All rights reserved.
+ */
 //This is class which displays a specific issue in detail
 
 @import <Foundation/CPObject.j>
