@@ -25,6 +25,7 @@
         0: all
         1: title
         2: body
+        3: tags
     */
     unsigned            searchFilter;
     CPString            searchValue;
@@ -78,7 +79,7 @@
 - (void)tableViewSelectionDidChange:(id)notification
 {
     var index = [[[notification object] selectedRowIndexes] firstIndex];
-    activeIssue = [theIssues objectAtIndex:index];
+    activeIssue = [visibleIssues objectAtIndex:index];
     [self commentsForActiveIssue];
     [issueView setIssue:activeIssue];
 }
@@ -204,14 +205,21 @@
         var item = [theIssues objectAtIndex:i];
 
         // FIX ME: This is really bad... 
-        if (searchFilter === 0 || searchFilter === 1 && [[item valueForKey:@"title"] lowercaseString].match(searchValue))
+        if ((searchFilter === 0 || searchFilter === 1) && [[item valueForKey:@"title"] lowercaseString].match(searchValue))
         {
             [visibleIssues addObject:[theIssues objectAtIndex:i]];
             // we continue to avoid duplicates if "all" is selected.
             continue;
         }
 
-        if (searchFilter === 0 || searchFilter === 2 && [[item valueForKey:@"body"] lowercaseString].match(searchValue))
+        if ((searchFilter === 0 || searchFilter === 2) && [[item valueForKey:@"body"] lowercaseString].match(searchValue))
+        {
+            [visibleIssues addObject:[theIssues objectAtIndex:i]];
+            continue;
+        }
+        
+        var tags = [[item valueForKey:@"labels"] componentsJoinedByString:@" "];
+        if ((searchFilter === 0 || searchFilter === 3) && [tags lowercaseString].match(searchValue))
         {
             [visibleIssues addObject:[theIssues objectAtIndex:i]];
         }

@@ -220,7 +220,8 @@ GITHUBPASSWORD = "";
     var allRadio = [CPRadio radioWithTitle:@"All"],
         titleRadio = [CPRadio radioWithTitle:@"Title"],
         bodyRadio = [CPRadio radioWithTitle:@"Body"],
-        radioButtons = [allRadio, titleRadio, bodyRadio];
+        labelsRadio = [CPRadio radioWithTitle:@"Labels"],
+        radioButtons = [allRadio, titleRadio, bodyRadio, labelsRadio];
     for (var i=0, count = radioButtons.length; i < count; i++)
     {
         var thisRadio = radioButtons[i];
@@ -240,6 +241,7 @@ GITHUBPASSWORD = "";
         [thisRadio sizeToFit];
  
         [thisRadio setTarget:issuesController];
+        [thisRadio setAction:@selector(filterDidChange:)];
  
         [searchFilterBar addSubview:thisRadio];
     }
@@ -247,18 +249,17 @@ GITHUBPASSWORD = "";
     searchFilterRadioGroup = [allRadio radioGroup];
     [titleRadio setRadioGroup:searchFilterRadioGroup];
     [bodyRadio setRadioGroup:searchFilterRadioGroup];
+    [labelsRadio setRadioGroup:searchFilterRadioGroup];
 
     [allRadio setTag:0];
     [titleRadio setTag:1];
     [bodyRadio setTag:2];
+    [labelsRadio setTag:3];
 
     [allRadio setFrameOrigin:CGPointMake(8, 6)];
     [titleRadio setFrameOrigin:CGPointMake(CGRectGetMaxX([allRadio frame]) + 8, CGRectGetMinY([allRadio frame]))];
     [bodyRadio setFrameOrigin:CGPointMake(CGRectGetMaxX([titleRadio frame]) + 8, CGRectGetMinY([titleRadio frame]))];
-
-    [allRadio setAction:@selector(filterDidChange:)];
-    [titleRadio setAction:@selector(filterDidChange:)];
-    [bodyRadio setAction:@selector(filterDidChange:)];
+    [labelsRadio setFrameOrigin:CGPointMake(CGRectGetMaxX([bodyRadio frame]) + 8, CGRectGetMinY([bodyRadio frame]))];
 
     issuesScrollView = [[CPScrollView alloc] initWithFrame:[view bounds]];
     // leave room for the button bar below... if we actually have one

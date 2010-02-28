@@ -19,7 +19,7 @@
     CPScrollView scrollView;
     CPView       containerView;
 
-    CPTextField title;
+    /*CPTextField title;
     CPTextField modified; 
     CPTextField body;
     CPTextField creationDate;
@@ -28,9 +28,11 @@
     CPTextField votes;
     CPTextField updatedDate;
     CPTextField number;
-    CPTextField status;
+    CPTextField status;*/
     
     CPArray comments;
+
+    CPString    issueHTML;
 }
 
 - (id)initWithFrame:(CGRect)aFrame
@@ -56,13 +58,14 @@
         //content area
         var toolbarHeight = CGRectGetMaxY([toolbar frame]),
         scrollView = [[CPScrollView alloc] initWithFrame:CGRectMake(0, toolbarHeight, CGRectGetWidth([self bounds]), CGRectGetHeight([self bounds]) - toolbarHeight)];
-        containerView = [[CPView alloc] initWithFrame:[scrollView bounds]];
-        [scrollView setDocumentView:containerView];
-        [scrollView setAutohidesScrollers:YES];
-        [scrollView setAutoresizingMask:CPViewWidthSizable|CPViewHeightSizable];
-        //[containerView setAutoresizingMask:CPViewWidthSizable|CPViewHeightSizable];
-
-        title = [[CPTextField alloc] initWithFrame:CGRectMake(10, 5, width, 30)];
+        containerView = [[CPWebView alloc] initWithFrame:CGRectMake(0, toolbarHeight, CGRectGetWidth([self bounds]), CGRectGetHeight([self bounds]) - toolbarHeight)];
+        //[scrollView setDocumentView:containerView];
+        //[scrollView setAutohidesScrollers:YES];
+        //[scrollView setAutoresizingMask:CPViewWidthSizable|CPViewHeightSizable];
+        [containerView setAutoresizingMask:CPViewWidthSizable|CPViewHeightSizable];
+        [self addSubview:toolbar];
+        [self addSubview:containerView];
+        /*title = [[CPTextField alloc] initWithFrame:CGRectMake(10, 5, width, 30)];
         [title setFont:[CPFont boldSystemFontOfSize:20]];
         [title setLineBreakMode:CPLineBreakByWordWrapping];
         
@@ -79,7 +82,7 @@
 
         
         
-        [self addSubview:toolbar];
+       
         [containerView addSubview:creationDate];
         [containerView addSubview:title];
         [containerView addSubview:modified];
@@ -90,7 +93,7 @@
         //[title setStringValue:@"This is an EPIC title!"];
         //[creationDate setStringValue:@"12-31-1990"];
 
-        [self sizeAllToFitAndLayout];   
+        [self sizeAllToFitAndLayout];  */ 
     }
 
     return self;  
@@ -111,19 +114,21 @@
     // after setting all the values and sizing shit to fit we resize the view itself
     // as to adjust the scrollview.
     activeIssue = anIssue;
-
-    [title setStringValue: [anIssue valueForKey:@"title"]];
+    
+    /*[title setStringValue: [anIssue valueForKey:@"title"]];
     [creationDate setStringValue:@"Created on: " + [CPDate simpleDate:[anIssue valueForKey:@"created_at"]]];
     [user setStringValue: "by " + [anIssue valueForKey:@"user"]];
     [modified setStringValue:@"Modified on: " + [CPDate simpleDate:[anIssue valueForKey:@"updated_at"]]];
     [body setStringValue: [anIssue valueForKey:@"body"]];
 
-    [self sizeAllToFitAndLayout];
+    [self sizeAllToFitAndLayout];*/
+    [containerView loadHTMLString:[self parseIssueIntoHTML:anIssue]];
 }
 
 - (void)setComments:(CPArray)theComments
 {
-    var startY = CGRectGetMaxY([body frame]);
+    [containerView loadHTMLString:[self parseCommentsIntoHTML:theComments]];
+    /*var startY = CGRectGetMaxY([body frame]);
     for (var i = 0; i < [theComments count]; i++)
     {
         var comment = [theComments objectAtIndex:i],
@@ -150,7 +155,7 @@
     }
 
     var width = MAX(MAX(CGRectGetMaxX([title frame]), CGRectGetMaxX([body frame])), CGRectGetMaxX([user frame]));
-    [containerView setFrameSize:CGSizeMake(width + 10, startY + 10)];
+    [containerView setFrameSize:CGSizeMake(width + 10, startY + 10)];*/
 }
 - (void)sizeAllToFitAndLayout
 {
@@ -171,5 +176,41 @@
     [containerView setFrameSize:CGSizeMake(width + 10, CGRectGetMaxY([body frame]) + 10)];
 }
 
+- (CPString)parseIssueIntoHTML:(id)anIssue
+{
+    var title = [anIssue valueForKey:@"title"],
+        creationDate = @"Created on: " + [CPDate simpleDate:[anIssue valueForKey:@"created_at"]],
+        user = "by " + [anIssue valueForKey:@"user"],
+        modified = @"Modified on: " + [CPDate simpleDate:[anIssue valueForKey:@"updated_at"]],
+        body = [anIssue valueForKey:@"body"];
+
+    var html = "<style>body{font-family:\"Helvetica Neue\", Arial, Helvetica, Geneva, sans-serif}h1{margin:0}.subinfo{font-size:10px;line-height:10px}.issueBody{margin-bottom:20px;font-size:13px}.commentUser{font-weight:700;font-size:12px}.commentBody{font-size:12px;margin-bottom:10px}</style>";
+        html += "<h1>" + title + "</h1><br />";
+        html += "<span class='subinfo'>" + creationDate + " <strong>" + user + "</strong> <br />";
+        html += modified + "</span> <br /><br />";
+        html += "<div class='issueBody'>" + body + "</div>";
+
+    issueHTML = html;
+    return html;
+}
+
+- (CPString)parseCommentsIntoHTML:(CPArray)theComments
+{
+    var html = "";
+    for (var i = 0; i < [theComments count]; i++)
+    {
+        var comment = [theComments objectAtIndex:i],
+            username = [comment valueForKey:@"user"],
+            updated = [comment valueForKey:@"updated_at"],
+            created = [comment valueForKey:@"created_at"],
+            commentId = [comment valueForKey:@"id"],
+            bodyText = [comment valueForKey:@"body"];
+
+        html += "<span class='commentUser'>" + username + "</span><br />";
+        html += "<div class='commentBody'>" + bodyText + "</div>";
+    }
+    issueHTML += html;
+    return issueHTML;
+}
 
 @end
