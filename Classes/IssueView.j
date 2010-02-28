@@ -122,7 +122,7 @@
     [body setStringValue: [anIssue valueForKey:@"body"]];
 
     [self sizeAllToFitAndLayout];*/
-    [containerView loadHTMLString:[self parseIssueIntoHTML:anIssue]];
+    [self parseIssueIntoHTML:anIssue];
 }
 
 - (void)setComments:(CPArray)theComments
