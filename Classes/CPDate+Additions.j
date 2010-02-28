@@ -57,6 +57,9 @@
 
 + (CPString)simpleDate:(CPString)aDate
 {
+    if(!aDate)
+        return;
+
     aDate = [aDate stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
     aDate = [[CPDate alloc] initWithString:aDate];
 

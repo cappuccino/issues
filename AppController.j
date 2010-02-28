@@ -26,9 +26,14 @@ GITHUBPASSWORD = "";
 {
     CPWindow    theWindow;
     CPSplitView outsideSplitView;
+    CPView      searchFilterBar;
+    CPSearchField searchField; // FIX ME: get rid of this and do it right please. :) 
+    CPScrollView issuesScrollView;
     CPTableView sourceList @accessors;
     CPTableView issuesTable @accessors;
     IssueView  issueView @accessors;
+
+    CPRadioGroup searchFilterRadioGroup;
 
     // controllers
     id          projectsController;
@@ -61,6 +66,11 @@ GITHUBPASSWORD = "";
     followedUsersCookie = [[CPCookie alloc] initWithName:@"GitIssuesFollowedUsers"];
 
     [self beginInitalRepoDownloads];
+
+    searchField = [[CPSearchField alloc] initWithFrame:CGRectMake(0,0, 140, 30)];
+    [searchField setTarget:issuesController];
+    [searchField setAction:@selector(searchFieldDidChange:)];
+    [searchField setSendsSearchStringImmediately:YES];
 
     var toolbar = [[CPToolbar alloc] initWithIdentifier:@"MainToolbar"];
     [toolbar setDelegate:self];
@@ -125,7 +135,7 @@ GITHUBPASSWORD = "";
 
 - (void)setupSourceList:(id)view
 {
-    var scrollView = [[CPScrollView alloc] initWithFrame:[view bounds]];
+    var scrollView = [[CPScrollView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth([view bounds]), CGRectGetHeight([view bounds]) - 26)];
     // leave room for the button bar below... if we actually have one
     sourceList = [[CPOutlineView alloc] initWithFrame:[view bounds]];//[[CPTableView alloc] initWithFrame:CGRectMake(0,0,CGRectGetWidth([view bounds]), CGRectGetHeight([view bounds]) - 32)];
     [sourceList setAutoresizingMask:CPViewWidthSizable|CPViewHeightSizable];
@@ -158,19 +168,19 @@ GITHUBPASSWORD = "";
     [sourceList sizeLastColumnToFit];
 
 
-    var buttonBarTop = [view frame].size.height - 27;
+    var buttonBarTop = [view frame].size.height - 26;
     sourceViewButtonBar = [[CPButtonBar alloc] initWithFrame:CGRectMake(0, buttonBarTop, [view frame].size.width, 26)];
     [sourceViewButtonBar setAutoresizingMask:CPViewWidthSizable|CPViewMinYMargin];
     [view addSubview:sourceViewButtonBar];
-    sourceViewAddButton = [[CPButton alloc] initWithFrame:CGRectMake(0,0,35,27)];
-    sourceViewRemoveButton = [[CPButton alloc] initWithFrame:CGRectMake(34,0,35,27)];
+    sourceViewAddButton = [[CPButton alloc] initWithFrame:CGRectMake(0,0,35,26)];
+    sourceViewRemoveButton = [[CPButton alloc] initWithFrame:CGRectMake(34,0,35,26)];
     [sourceViewAddButton setBordered:NO];
     [sourceViewRemoveButton setBordered:NO];
     
-    [sourceViewAddButton setImage:[[CPImage alloc] initWithContentsOfFile:@"Resources/PlusButton.png" size:CGSizeMake(35, 27)]];
-    [sourceViewRemoveButton setImage:[[CPImage alloc] initWithContentsOfFile:@"Resources/MinusButton.png" size:CGSizeMake(35, 27)]];
-    [sourceViewAddButton setAlternateImage:[[CPImage alloc] initWithContentsOfFile:@"Resources/PlusButtonHighlight.png" size:CGSizeMake(35, 27)]];
-    [sourceViewRemoveButton setAlternateImage:[[CPImage alloc] initWithContentsOfFile:@"Resources/MinusButtonHighlight.png" size:CGSizeMake(35, 27)]];
+    [sourceViewAddButton setImage:[[CPImage alloc] initWithContentsOfFile:@"Resources/PlusButton.png" size:CGSizeMake(35, 26)]];
+    [sourceViewRemoveButton setImage:[[CPImage alloc] initWithContentsOfFile:@"Resources/MinusButton.png" size:CGSizeMake(35, 26)]];
+    [sourceViewAddButton setAlternateImage:[[CPImage alloc] initWithContentsOfFile:@"Resources/PlusButtonHighlight.png" size:CGSizeMake(35, 26)]];
+    [sourceViewRemoveButton setAlternateImage:[[CPImage alloc] initWithContentsOfFile:@"Resources/MinusButtonHighlight.png" size:CGSizeMake(35, 26)]];
     
     [sourceViewAddButton setTarget:self];
     [sourceViewAddButton setAction:@selector(addUser:)];
@@ -194,7 +204,63 @@ GITHUBPASSWORD = "";
 
 - (void)setupIssuesTable:(id)view
 {
-    var scrollView = [[CPScrollView alloc] initWithFrame:[view bounds]];
+    searchFilterBar = [[CPView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth([view bounds]), 32)];
+    var headerImage = [[CPImage alloc] initWithContentsOfFile:@"Resources/HeaderBackground.png" size:CGSizeMake(14, 32)];
+    [searchFilterBar setBackgroundColor:[CPColor colorWithPatternImage:headerImage]];
+    [searchFilterBar setAutoresizingMask:CPViewWidthSizable];
+    [view addSubview:searchFilterBar];
+    [searchFilterBar setHidden:YES];
+
+    var bundle = [CPBundle bundleForClass:[self class]],
+        leftCapImage = [[CPImage alloc] initWithContentsOfFile:[bundle pathForResource:@"MediaFilterLeftCap.png"] size:CGSizeMake(9, 19)],
+        rightCapImage = [[CPImage alloc] initWithContentsOfFile:[bundle pathForResource:@"MediaFilterRightCap.png"] size:CGSizeMake(9, 19)],
+        centerImage = [[CPImage alloc] initWithContentsOfFile:[bundle pathForResource:@"MediaFilterCenter.png"] size:CGSizeMake(1, 19)],
+        bezelImage = [[CPThreePartImage alloc] initWithImageSlices:[leftCapImage, centerImage, rightCapImage] isVertical:NO];
+
+    var allRadio = [CPRadio radioWithTitle:@"All"],
+        titleRadio = [CPRadio radioWithTitle:@"Title"],
+        bodyRadio = [CPRadio radioWithTitle:@"Body"],
+        radioButtons = [allRadio, titleRadio, bodyRadio];
+    for (var i=0, count = radioButtons.length; i < count; i++)
+    {
+        var thisRadio = radioButtons[i];
+        
+        [thisRadio setAlignment:CPCenterTextAlignment];
+        [thisRadio setValue:[CPColor clearColor] forThemeAttribute:@"bezel-color"];
+        [thisRadio setValue:[CPColor colorWithPatternImage:bezelImage] forThemeAttribute:@"bezel-color" inState:CPThemeStateSelected];
+        [thisRadio setValue:CGInsetMake(0.0, 10.0, 0.0, 10.0) forThemeAttribute:@"content-inset"];
+        [thisRadio setValue:CGSizeMake(0.0, 19.0) forThemeAttribute:@"min-size"];
+    
+        [thisRadio setValue:CGSizeMake(0.0, 1.0) forThemeAttribute:@"text-shadow-offset" inState:CPThemeStateBordered];
+        [thisRadio setValue:[CPColor colorWithCalibratedWhite:79.0 / 255.0 alpha:1.0] forThemeAttribute:@"text-color"];
+        [thisRadio setValue:[CPColor colorWithCalibratedWhite:240.0 / 255.0 alpha:1.0] forThemeAttribute:@"text-shadow-color"];
+        [thisRadio setValue:[CPColor colorWithCalibratedWhite:1.0 alpha:1.0] forThemeAttribute:@"text-color" inState:CPThemeStateSelected];
+        [thisRadio setValue:[CPColor colorWithCalibratedWhite:79 / 255.0 alpha:1.0] forThemeAttribute:@"text-shadow-color" inState:CPThemeStateSelected];
+    
+        [thisRadio sizeToFit];
+ 
+        [thisRadio setTarget:issuesController];
+ 
+        [searchFilterBar addSubview:thisRadio];
+    }
+
+    searchFilterRadioGroup = [allRadio radioGroup];
+    [titleRadio setRadioGroup:searchFilterRadioGroup];
+    [bodyRadio setRadioGroup:searchFilterRadioGroup];
+
+    [allRadio setTag:0];
+    [titleRadio setTag:1];
+    [bodyRadio setTag:2];
+
+    [allRadio setFrameOrigin:CGPointMake(8, 6)];
+    [titleRadio setFrameOrigin:CGPointMake(CGRectGetMaxX([allRadio frame]) + 8, CGRectGetMinY([allRadio frame]))];
+    [bodyRadio setFrameOrigin:CGPointMake(CGRectGetMaxX([titleRadio frame]) + 8, CGRectGetMinY([titleRadio frame]))];
+
+    [allRadio setAction:@selector(filterDidChange:)];
+    [titleRadio setAction:@selector(filterDidChange:)];
+    [bodyRadio setAction:@selector(filterDidChange:)];
+
+    issuesScrollView = [[CPScrollView alloc] initWithFrame:[view bounds]];
     // leave room for the button bar below... if we actually have one
     issuesTable = [[CPTableView alloc] initWithFrame:CGRectMake(0,0,CGRectGetWidth([view bounds]), CGRectGetHeight([view bounds]) - 32)];
     [issuesTable setAutoresizingMask:CPViewWidthSizable|CPViewHeightSizable];
@@ -257,18 +323,21 @@ GITHUBPASSWORD = "";
     [issuesTable setColumnAutoresizingStyle:CPTableViewUniformColumnAutoresizingStyle];
 
 
-    [scrollView setDocumentView:issuesTable];
-    [scrollView setAutohidesScrollers:YES];
-    [scrollView setAutoresizingMask:CPViewWidthSizable|CPViewHeightSizable];
-    [view addSubview:scrollView];
+    [issuesScrollView setDocumentView:issuesTable];
+    [issuesScrollView setAutohidesScrollers:YES];
+    [issuesScrollView setAutoresizingMask:CPViewWidthSizable|CPViewHeightSizable];
+    [view addSubview:issuesScrollView];
 
     //[issuesTable sizeLastColumnToFit];
+
+    [titleRadio performClick:nil];
 }
 
 - (void)addUser:(id)sender
 {
     var newUser = prompt("Enter the new GitHub user");
-    [projectsController allReposForUser:newUser];
+    if(newUser)
+        [projectsController allReposForUser:newUser];
 }
 
 - (void)removeUser:(id)sender
@@ -312,8 +381,7 @@ GITHUBPASSWORD = "";
         break;
 
         case @"searchfield":
-            var search = [[CPSearchField alloc] initWithFrame:CGRectMake(0,0, 140, 30)]
-            [toolbarItem setView:search];
+            [toolbarItem setView:searchField];
             [toolbarItem setLabel:"Search Issues"];
             [toolbarItem setTag:@"Search Issues"];
             
@@ -324,5 +392,31 @@ GITHUBPASSWORD = "";
     return toolbarItem;
 }
 
+- (void)toolbar:(id)aToolbar itemForItemIdentifier:(id)anID willbeInsertedIntoToolbar:(BOOL)aFlag
+{
+    console.log(anID);
+}
+
 @end
 
+@implementation AppController (search)
+- (void)showSearchFilter
+{
+    if(![searchFilterBar isHidden])    
+        return;
+
+    var bounds = [issuesScrollView bounds];
+    [issuesScrollView setFrame:CGRectMake(0, 32, CGRectGetWidth(bounds), CGRectGetHeight(bounds) - 32)];
+    [searchFilterBar setHidden:NO];
+}
+
+- (void)hideSearchFilter
+{
+    if([searchFilterBar isHidden])    
+        return;
+
+    var bounds = [issuesScrollView bounds];
+    [issuesScrollView setFrame:CGRectMake(0, 0, CGRectGetWidth(bounds), CGRectGetHeight(bounds) + 32)];
+    [searchFilterBar setHidden:YES];
+}
+@end

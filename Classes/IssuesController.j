@@ -15,9 +15,19 @@
     id                  appController @accessors;
     IssueView           issueView @accessors;
     CPArray             theIssues;
+    CPArray             visibleIssues;
     CPDictionary        activeIssue @accessors;
     CPString            activeRepo @accessors;
     AjaxSeries          requests;
+
+    /*
+        search filter values:
+        0: all
+        1: title
+        2: body
+    */
+    unsigned            searchFilter;
+    CPString            searchValue;
 }
 - (id)init
 {
@@ -26,6 +36,7 @@
     if(self)
     {
         requests = [[AjaxSeries alloc] initWithDelegate:self];
+        visibleIssues = [CPArray array];
     }
 
     return self;
@@ -75,7 +86,7 @@
 - (id)tableView:(CPTableView)aTableView objectValueForTableColumn:(int)aColumn row:(int)aRow
 {
     var column = [aColumn identifier],
-        issue  = [theIssues objectAtIndex:aRow],
+        issue  = [visibleIssues objectAtIndex:aRow],
         value = [issue valueForKey:column];
     
     //special cases
@@ -87,7 +98,7 @@
 
 - (int)numberOfRowsInTableView:(CPTableView)aTableView
 {
-    return [theIssues count];
+    return [visibleIssues count];
 }
 
 - (void)tableView:(CPTableView)aTableView sortDescriptorsDidChange:(CPArray)oldDescriptors
@@ -95,6 +106,7 @@
     var newDescriptors = [aTableView sortDescriptors];
 
     [theIssues sortUsingDescriptors:newDescriptors];
+    [self searchFieldDidChange:nil];
 
 	[aTableView reloadData];
 
@@ -136,7 +148,8 @@
             var anIssue = [CPDictionary dictionaryWithJSObject:issue recursively:NO];
             [theIssues addObject:anIssue];
         }
-
+        visibleIssues = [CPArray arrayWithArray:theIssues];
+        [self searchFieldDidChange:nil];
         [[appController issuesTable] reloadData];
     }
     else if(connection === downloadCommentsConnection)
@@ -158,9 +171,58 @@
         //console.log(data);
         // here we have a list of all the labels. 
         // we then update the menu to display only those specific tags
-        tags = data.labels;
+        //tags = data.labels;
         //console.log(tags);
         //[appController updateTagsButtonWithTags:tags];
     }
+}
+@end
+
+@implementation IssuesController (search)
+- (void)searchFieldDidChange:(id)sender
+{
+    if(sender)
+        searchValue = [sender stringValue];
+    
+    //console.log(sender);
+    if (searchValue)
+    {
+        searchValue = [searchValue lowercaseString];
+        [appController showSearchFilter];
+        [visibleIssues removeAllObjects];
+    }
+    else
+    {
+        [appController hideSearchFilter];
+        visibleIssues = [CPArray arrayWithArray:theIssues];
+        [[appController issuesTable] reloadData];
+        return;
+    }
+
+    for (var i = 0; i < [theIssues count]; i++)
+    {
+        var item = [theIssues objectAtIndex:i];
+
+        // FIX ME: This is really bad... 
+        if (searchFilter === 0 || searchFilter === 1 && [[item valueForKey:@"title"] lowercaseString].match(searchValue))
+        {
+            [visibleIssues addObject:[theIssues objectAtIndex:i]];
+            // we continue to avoid duplicates if "all" is selected.
+            continue;
+        }
+
+        if (searchFilter === 0 || searchFilter === 2 && [[item valueForKey:@"body"] lowercaseString].match(searchValue))
+        {
+            [visibleIssues addObject:[theIssues objectAtIndex:i]];
+        }
+    }
+
+    [[appController issuesTable] reloadData];
+}
+
+- (void)filterDidChange:(id)sender
+{
+    searchFilter = [sender tag];
+    [self searchFieldDidChange:nil];
 }
 @end
