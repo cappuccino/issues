@@ -77,52 +77,39 @@
 
 -(void)connection:(CPURLConnection)connection didReceiveData:(CPString)data
 {
-    //we're looking for a json object back but we might get a stringified json object
-    //console.log(typeof(data));
-    //if(typeof(data) === "string")
-      //  data = JSON.parse(data);
-    
     if(data.error)
     {
         console.log(data.error);
         alert("An error has occured, check the console dude.");
         return;
     }
-    
-    //if(connection === downloadAllRepos)
-    //{
-        // from here we've got a json object of all the issues need to be displayed
-        // once parsed display update the table
-        var userRepos = [CPArray array];
-        //console.log(data.repositories);
-        for (var i = 0; i < data.repositories.length; i++)
-        //@each (var repo in data.repositories)
-        {
-            var repo = data.repositories[i];
+    // from here we've got a json object of all the issues need to be displayed
+    // once parsed display update the table
+    var userRepos = [CPArray array];
+    for (var i = 0; i < data.repositories.length; i++)
+    //@each (var repo in data.repositories)
+    {
+        var repo = data.repositories[i];
             if (!repo.fork)
-            {
-                var aRepo = [CPDictionary dictionaryWithJSObject:repo recursively:NO];
-                [userRepos addObject:aRepo];
-            }
-        }
-        [followedUsers addObject:userRepos];
-        [[appController sourceList] reloadData];
-
-
-        //console.log();
-        var values = [];
-        for (var i=0; i < followedUsers.length; i++)
         {
-            var value = [followedUsers[i][0] valueForKey:@"owner"];
-            [values addObject:value];
+            var aRepo = [CPDictionary dictionaryWithJSObject:repo recursively:NO];
+            [userRepos addObject:aRepo];
         }
-        var values = JSON.stringify(values);
-        //console.log("blah: "+values);
-        
-        //set the cookie
-        //console.log("setCookie");
-        [[appController followedUsersCookie] setValue:values expires:[CPDate distantFuture] domain:nil];
-    //}
+    }
+    [followedUsers addObject:userRepos];
+    [[appController sourceList] reloadData];
+
+    var values = [];
+    for (var i=0; i < followedUsers.length; i++)
+    {
+        var value = [followedUsers[i][0] valueForKey:@"owner"];
+        [values addObject:value];
+    }
+    var values = JSON.stringify(values);
+    
+    //set the cookie
+
+    [[appController followedUsersCookie] setValue:values expires:[CPDate distantFuture] domain:nil];
 }
 
 

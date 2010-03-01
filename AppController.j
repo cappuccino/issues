@@ -122,7 +122,7 @@ GITHUBPASSWORD = "";
 
     var issuesTable = [[CPView alloc] initWithFrame:[outsideSplitView bounds]];
 
-    var issueView = [[IssueView alloc] initWithFrame:[outsideSplitView bounds]];
+    var issueView = [[IssueView alloc] initWithFrame:[outsideSplitView bounds] controller:issuesController];
     [issuesController setIssueView:issueView];
     [issuesSplitView addSubview:issuesTable];
     [issuesSplitView addSubview:issueView];
@@ -386,8 +386,8 @@ GITHUBPASSWORD = "";
             [toolbarItem setLabel:"Search Issues"];
             [toolbarItem setTag:@"Search Issues"];
             
-            [toolbarItem setMinSize:CGSizeMake(140, 30)];
-            [toolbarItem setMaxSize:CGSizeMake(140, 30)];
+            [toolbarItem setMinSize:CGSizeMake(200, 30)];
+            [toolbarItem setMaxSize:CGSizeMake(200, 30)];
         break;
     }
     return toolbarItem;

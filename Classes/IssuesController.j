@@ -12,6 +12,9 @@
     CPJSONPConnection   downloadIssuesConnection;
     CPJSONPConnection   downloadCommentsConnection;
     CPJSONPConnection   downloadTagsConnection;
+    CPJSONPConnection   addCommentConnection;
+    CPJSONPConnection   closeIssueConnection;
+    CPJSONPConnection   reopenIssueConnection;
     id                  appController @accessors;
     IssueView           issueView @accessors;
     CPArray             theIssues;
@@ -54,11 +57,8 @@
 
 - (void)allTagsForRepo:(CPString)theRepo user:(id)theUser
 {
-    //var theReadURL = "https://github.com/api/v2/json/issues/labels/" + theUser + "/" + theRepo + "?login=" + GITHUBUSERNAME + "&token=" + GITHUBAPITOKEN,  
     var theReadURL = "https://" + GITHUBUSERNAME + ":" + GITHUBPASSWORD + "@github.com/api/v2/json/issues/labels/" + theUser + "/" + theRepo,
         theRequest = [[CPURLRequest alloc] initWithURL:theReadURL];
-    //console.log(theReadURL);
-    //[requests addReqeust theRequest];
     downloadTagsConnection = [[CPJSONPConnection alloc] initWithRequest:theRequest callback:@"callback" delegate:self startImmediately:YES];
 }
 
@@ -74,6 +74,59 @@
     //console.log(getCommentsURL);
     downloadCommentsConnection = [[CPJSONPConnection alloc] initWithRequest:getCommentsRequest callback:@"callback" delegate:self startImmediately:YES];
 }
+
+- (void)promptUserForComment:(id)sender
+{
+    var comment = prompt("enter comment");
+    [self commentOnActiveIssue:comment];
+}
+
+- (void)commentOnActiveIssue:(CPString)aComment
+{
+    // FIX ME: THIS API ONLY SUPPORTS POST I THINK!!!
+   var theUser = [activeRepo valueForKey:@"owner"],
+       anIssueNumber = [activeIssue valueForKey:@"number"],
+       repo = [activeRepo valueForKey:@"name"],
+        aComment = escape(aComment);
+
+    var theReadURL = "https://" + GITHUBUSERNAME + ":" + GITHUBPASSWORD + "@github.com/api/v2/json/issues/comment/" + theUser + "/" + repo + "/" + anIssueNumber + "?comment=" + aComment,
+        theRequest = [[CPURLRequest alloc] initWithURL:theReadURL];
+
+    addCommentConnection = [[CPJSONPConnection alloc] initWithRequest:theRequest callback:@"callback" delegate:self startImmediately:YES];
+}
+
+- (void)promptUserToCloseIssue:(id)sender
+{
+    // this will make a beautiful sheet... :) 
+    var flag = confirm("Are you sure you want to close this issue?");
+
+    if (flag)
+        [self closeActiveIssue]
+}
+
+- (void)closeActiveIssue
+{
+   var theUser = [activeRepo valueForKey:@"owner"],
+       anIssueNumber = [activeIssue valueForKey:@"number"],
+       repo = [activeRepo valueForKey:@"name"];
+
+    var theReadURL = "https://" + GITHUBUSERNAME + ":" + GITHUBPASSWORD + "@github.com/api/v2/json/issues/close/" + theUser + "/" + repo + "/" + anIssueNumber,
+        theRequest = [[CPURLRequest alloc] initWithURL:theReadURL];
+
+    closeIssueConnection = [[CPJSONPConnection alloc] initWithRequest:theRequest callback:@"callback" delegate:self startImmediately:YES];
+}
+
+- (void)reopenActiveIssue:(id)sender
+{
+   var theUser = [activeRepo valueForKey:@"owner"],
+       anIssueNumber = [activeIssue valueForKey:@"number"],
+       repo = [activeRepo valueForKey:@"name"];
+    var theReadURL = "https://" + GITHUBUSERNAME + ":" + GITHUBPASSWORD + "@github.com/api/v2/json/issues/reopen/" + theUser + "/" + repo + "/" + anIssueNumber,
+        theRequest = [[CPURLRequest alloc] initWithURL:theReadURL];
+
+    reopenIssueConnection = [[CPJSONPConnection alloc] initWithRequest:theRequest callback:@"callback" delegate:self startImmediately:YES];
+}
+
 
 /*Source list Delegates*/
 - (void)tableViewSelectionDidChange:(id)notification
@@ -125,10 +178,6 @@
 
 -(void)connection:(CPURLConnection)connection didReceiveData:(CPString)data
 {
-    //we're looking for a json object back but we might get a stringified json object
-    //console.log(typeof(data));
-    //if(typeof(data) === "string")
-      //  data = JSON.parse(data);
     if(data.error)
     {
         alert("An error has occured, check the console dude.");
@@ -175,6 +224,14 @@
         //tags = data.labels;
         //console.log(tags);
         //[appController updateTagsButtonWithTags:tags];
+    }
+    else if (connection === addCommentConnection)
+    {
+        alert(data.comment.status);
+    }
+    else if (connection === reopenIssueConnection || connection === closeIssueConnection)
+    {
+        [[appController issuesTable] reloadData];
     }
 }
 @end
