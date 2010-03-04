@@ -11,6 +11,8 @@
 @import <AppKit/CPTableView.j>
 @import <AppKit/CPScrollView.j>
 @import <AppKit/CPOutlineView.j>
+@import <AppKit/CPTextField.j>
+@import "Classes/LPMultiLineTextField.j"
 @import "Classes/ProjectsController.j"
 @import "Classes/IssuesController.j"
 @import "Classes/CPDate+Additions.j"
@@ -40,6 +42,10 @@ GITHUBPASSWORD = "";
     id          issuesController;
 
     CPCookie    followedUsersCookie @accessors;
+
+    CPWindow    newIssueWindow @accessors;
+    CPTextField newIssueTitle @accessors;
+    CPTextField newIssueBody @accessors;
 }
 
 - (void)applicationDidFinishLaunching:(CPNotification)aNotification
@@ -75,6 +81,41 @@ GITHUBPASSWORD = "";
     var toolbar = [[CPToolbar alloc] initWithIdentifier:@"MainToolbar"];
     [toolbar setDelegate:self];
     [theWindow setToolbar:toolbar];
+
+    // make the "new issue" window
+    newIssueWindow = [[CPWindow alloc] initWithContentRect:CGRectMake(0, 0, 400, 300) styleMask:CPTitledWindowMask | CPClosableWindowMask | CPResizableWindowMask];
+    [newIssueWindow setTitle:@"New Issue"];
+    newIssueTitle = [[CPTextField alloc] initWithFrame:CGRectMake(15, 10, 370, 29)];
+    [newIssueTitle setAutoresizingMask:CPViewWidthSizable];
+    [newIssueTitle setPlaceholderString:@"Issue Title"];
+    [newIssueTitle setEditable:YES];
+    [newIssueTitle setBezeled:YES];
+    [[newIssueWindow contentView] addSubview:newIssueTitle];
+
+    newIssueBody = [[LPMultiLineTextField alloc] initWithFrame:CGRectMake(15, 49, 370, 205)];
+    [newIssueBody setAutoresizingMask:CPViewWidthSizable | CPViewHeightSizable];
+    [newIssueBody setPlaceholderString:@"Hello World"];
+    [newIssueBody setEditable:YES];
+    [newIssueBody setBezeled:YES];
+    [[newIssueWindow contentView] addSubview:newIssueBody];
+
+    var addButton = [[CPButton alloc] initWithFrame:CGRectMake(280, 260, 100, 24)];
+    [addButton setAutoresizingMask:CPViewMinXMargin | CPViewMinYMargin];
+    [addButton setTitle:@"Add Issue"];
+    [addButton setTarget:issuesController];
+    [addButton setAction:@selector(createNewIssue:)];
+    [[newIssueWindow contentView] addSubview:addButton];
+
+    var cancelButton = [[CPButton alloc] initWithFrame:CGRectMake(160, 260, 100, 24)];
+    [cancelButton setAutoresizingMask:CPViewMinXMargin | CPViewMinYMargin];
+    [cancelButton setTitle:@"Cancel"];
+    [cancelButton setTarget:issuesController];
+    [cancelButton setAction:@selector(cancel:)];
+    [[newIssueWindow contentView] addSubview:cancelButton];
+
+    [newIssueWindow setDefaultButton:addButton];
+    [newIssueWindow center];
+    //[newIssueWindow orderFront:self];
 }
 
 - (void)beginInitalRepoDownloads
@@ -350,12 +391,13 @@ GITHUBPASSWORD = "";
 /*TOOLBAR DELEGATES*/
 -(CPArray)toolbarAllowedItemIdentifiers:(CPToolbar)toolbar
 {
-    return [CPToolbarFlexibleSpaceItemIdentifier, @"searchfield", @"newissue"];
+    return [CPToolbarFlexibleSpaceItemIdentifier, CPToolbarSpaceItemIdentifier, @"searchfield", @"newissue", @"switchViewStatus"];
 }
 
 -(CPArray)toolbarDefaultItemIdentifiers:(CPToolbar)toolbar
 {
-    return [CPToolbarFlexibleSpaceItemIdentifier, @"newissue", @"searchfield"];
+    // Is there a better way to make that segmented control stay centered? 
+    return [@"newissue", CPToolbarFlexibleSpaceItemIdentifier, CPToolbarSpaceItemIdentifier, CPToolbarSpaceItemIdentifier, CPToolbarSpaceItemIdentifier, CPToolbarSpaceItemIdentifier, @"switchViewStatus", CPToolbarFlexibleSpaceItemIdentifier, @"searchfield"];
 }
 
 - (CPToolbarItem)toolbar:(CPToolbar)toolbar itemForItemIdentifier:(CPString)itemIdentifier willBeInsertedIntoToolbar:(BOOL)flag
@@ -372,8 +414,8 @@ GITHUBPASSWORD = "";
             [toolbarItem setImage:image];
             [toolbarItem setAlternateImage:highlighted];
             
-            [toolbarItem setTarget:self];
-            //[toolbarItem setAction:@selector(loadProjectsView:)];
+            [toolbarItem setTarget:issuesController];
+            [toolbarItem setAction:@selector(showNewIssueWindow:)];
             [toolbarItem setLabel:"New Issue"];
             [toolbarItem setTag:@"NewIssue"];
             
@@ -384,10 +426,33 @@ GITHUBPASSWORD = "";
         case @"searchfield":
             [toolbarItem setView:searchField];
             [toolbarItem setLabel:"Search Issues"];
-            [toolbarItem setTag:@"Search Issues"];
+            [toolbarItem setTag:@"SearchIssues"];
             
             [toolbarItem setMinSize:CGSizeMake(200, 30)];
             [toolbarItem setMaxSize:CGSizeMake(200, 30)];
+        break;
+
+        case @"switchViewStatus":
+
+            var aSwitch = [[CPSegmentedControl alloc] initWithFrame:CGRectMake(0,0,0,0)];
+            [aSwitch setTrackingMode:CPSegmentSwitchTrackingSelectOne];
+            [aSwitch setTarget:issuesController];
+            [aSwitch setAction:@selector(changeVisibleIssuesStatus:)];
+            [aSwitch setSegmentCount:2];
+            [aSwitch setWidth:75 forSegment:0];
+            [aSwitch setWidth:75 forSegment:1];
+            [aSwitch setTag:@"Open" forSegment:0];
+            [aSwitch setTag:@"Closed" forSegment:1];
+            [aSwitch setLabel:@"Open" forSegment:0];
+            [aSwitch setLabel:@"Closed" forSegment:1];
+            [aSwitch setSelectedSegment:0];
+
+            [toolbarItem setView:aSwitch];
+            [toolbarItem setLabel:"Change View Status"];
+            [toolbarItem setTag:@"changeViewStatus"];
+            
+            [toolbarItem setMinSize:CGSizeMake(150, 24)];
+            [toolbarItem setMaxSize:CGSizeMake(150, 24)];
         break;
     }
     return toolbarItem;
@@ -395,7 +460,7 @@ GITHUBPASSWORD = "";
 
 - (void)toolbar:(id)aToolbar itemForItemIdentifier:(id)anID willbeInsertedIntoToolbar:(BOOL)aFlag
 {
-    console.log(anID);
+    //console.log(anID);
 }
 
 @end

@@ -12,15 +12,16 @@
     CPJSONPConnection   downloadIssuesConnection;
     CPJSONPConnection   downloadCommentsConnection;
     CPJSONPConnection   downloadTagsConnection;
-    CPJSONPConnection   addCommentConnection;
-    CPJSONPConnection   closeIssueConnection;
-    CPJSONPConnection   reopenIssueConnection;
+    CPURLConnection     addCommentConnection;
+    CPURLConnection     closeIssueConnection;
+    CPURLConnection     reopenIssueConnection;
+    CPURLConnection     createNewIssueConnection;
     id                  appController @accessors;
     IssueView           issueView @accessors;
     CPArray             theIssues;
     CPArray             visibleIssues;
     CPDictionary        activeIssue @accessors;
-    CPString            activeRepo @accessors;
+    CPDictionary        activeRepo @accessors;
     AjaxSeries          requests;
 
     /*
@@ -32,6 +33,10 @@
     */
     unsigned            searchFilter;
     CPString            searchValue;
+    BOOL                viewingOpenIssues;
+
+    //CPString            activeRepo;
+    CPString            activeUser;
 }
 - (id)init
 {
@@ -41,6 +46,7 @@
     {
         requests = [[AjaxSeries alloc] initWithDelegate:self];
         visibleIssues = [CPArray array];
+        viewingOpenIssues = YES;
     }
 
     return self;
@@ -48,7 +54,10 @@
 
 - (void)allIssuesForRepo:(CPString)theRepo user:(id)theUser
 {
-    var theReadURL = "https://" + GITHUBUSERNAME + ":" + GITHUBPASSWORD + "@github.com/api/v2/json/issues/list/" + theUser + "/" + theRepo + "/open",
+    //activeRepo = theRepo;
+    //activeuser = theUser;
+
+    var theReadURL = "https://" + GITHUBUSERNAME + ":" + GITHUBPASSWORD + "@github.com/api/v2/json/issues/list/" + theUser + "/" + theRepo + "/" + ((viewingOpenIssues) ? "open" : "closed"),
         theRequest = [[CPURLRequest alloc] initWithURL:theReadURL];
 
     //[requests addReqeust theRequest];
@@ -64,7 +73,6 @@
 
 - (void)commentsForActiveIssue 
 {
-    //console.log(activeRepo);
     //this is the issue number not the index btw
      var theUser = [activeRepo valueForKey:@"owner"],
          anIssueNumber = [activeIssue valueForKey:@"number"],
@@ -83,16 +91,20 @@
 
 - (void)commentOnActiveIssue:(CPString)aComment
 {
-    // FIX ME: THIS API ONLY SUPPORTS POST I THINK!!!
    var theUser = [activeRepo valueForKey:@"owner"],
        anIssueNumber = [activeIssue valueForKey:@"number"],
        repo = [activeRepo valueForKey:@"name"],
-        aComment = escape(aComment);
+       aComment = escape(aComment),
+       requestSuffix = "comment/" + theUser + "/" + repo + "/" + anIssueNumber + "?comment=" + aComment;
 
-    var theReadURL = "https://" + GITHUBUSERNAME + ":" + GITHUBPASSWORD + "@github.com/api/v2/json/issues/comment/" + theUser + "/" + repo + "/" + anIssueNumber + "?comment=" + aComment,
+    var theReadURL = "GitHubAPI.php",
+        requestBody = "user=" + GITHUBUSERNAME + "&pass=" + GITHUBPASSWORD + "&suffix=" + escape(requestSuffix);
         theRequest = [[CPURLRequest alloc] initWithURL:theReadURL];
+    [theRequest setHTTPMethod:@"POST"];
+    [theRequest setValue:"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
+    [theRequest setHTTPBody:requestBody];
 
-    addCommentConnection = [[CPJSONPConnection alloc] initWithRequest:theRequest callback:@"callback" delegate:self startImmediately:YES];
+    addCommentConnection = [[CPURLConnection alloc] initWithRequest:theRequest delegate:self startImmediately:YES];
 }
 
 - (void)promptUserToCloseIssue:(id)sender
@@ -106,33 +118,108 @@
 
 - (void)closeActiveIssue
 {
-   var theUser = [activeRepo valueForKey:@"owner"],
+    var theUser = [activeRepo valueForKey:@"owner"],
        anIssueNumber = [activeIssue valueForKey:@"number"],
-       repo = [activeRepo valueForKey:@"name"];
+       repo = [activeRepo valueForKey:@"name"],
+       requestSuffix = "close/" + theUser + "/" + repo + "/" + anIssueNumber;
 
-    var theReadURL = "https://" + GITHUBUSERNAME + ":" + GITHUBPASSWORD + "@github.com/api/v2/json/issues/close/" + theUser + "/" + repo + "/" + anIssueNumber,
+    var theReadURL = "GitHubAPI.php",
+        requestBody = "user=" + GITHUBUSERNAME + "&pass=" + GITHUBPASSWORD + "&suffix=" + escape(requestSuffix);
         theRequest = [[CPURLRequest alloc] initWithURL:theReadURL];
+    [theRequest setHTTPMethod:@"POST"];
+    [theRequest setValue:"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
+    [theRequest setHTTPBody:requestBody];
 
-    closeIssueConnection = [[CPJSONPConnection alloc] initWithRequest:theRequest callback:@"callback" delegate:self startImmediately:YES];
+    // to make it look syncronous remove it from the array
+    [theIssues removeObject:activeIssue];
+    [visibleIssues removeObject:activeIssue];
+    [[appController issuesTable] reloadData];
+
+    closeIssueConnection = [[CPURLConnection alloc] initWithRequest:theRequest delegate:self startImmediately:YES];
 }
 
 - (void)reopenActiveIssue:(id)sender
 {
-   var theUser = [activeRepo valueForKey:@"owner"],
+    var theUser = [activeRepo valueForKey:@"owner"],
        anIssueNumber = [activeIssue valueForKey:@"number"],
-       repo = [activeRepo valueForKey:@"name"];
-    var theReadURL = "https://" + GITHUBUSERNAME + ":" + GITHUBPASSWORD + "@github.com/api/v2/json/issues/reopen/" + theUser + "/" + repo + "/" + anIssueNumber,
-        theRequest = [[CPURLRequest alloc] initWithURL:theReadURL];
+       repo = [activeRepo valueForKey:@"name"],
+       requestSuffix = "reopen/" + theUser + "/" + repo + "/" + anIssueNumber;
 
-    reopenIssueConnection = [[CPJSONPConnection alloc] initWithRequest:theRequest callback:@"callback" delegate:self startImmediately:YES];
+    var theReadURL = "GitHubAPI.php",
+        requestBody = "user=" + GITHUBUSERNAME + "&pass=" + GITHUBPASSWORD + "&suffix=" + escape(requestSuffix);
+        theRequest = [[CPURLRequest alloc] initWithURL:theReadURL];
+    [theRequest setHTTPMethod:@"POST"];
+    [theRequest setValue:"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
+    [theRequest setHTTPBody:requestBody];
+
+    // to make it look syncronous remove it from the array
+    [theIssues removeObject:activeIssue];
+    [visibleIssues removeObject:activeIssue];
+    [[appController issuesTable] reloadData];
+
+    reopenIssueConnection = [[CPURLConnection alloc] initWithRequest:theRequest delegate:self startImmediately:YES];
 }
 
+// either view open or closed issues
+- (void)changeVisibleIssuesStatus:(id)sender
+{
+    
+    if ([sender selectedTag] === "Open")
+        viewingOpenIssues = YES;
+    else
+        viewingOpenIssues = NO;
+
+    [self allIssuesForRepo:[activeRepo valueForKey:@"name"] user:[activeRepo valueForKey:@"owner"]];
+    [[appController issuesTable] selectRowIndexes:[CPIndexSet indexSet] byExtendingSelection:NO];
+}
+
+- (void)createNewIssue:(id)sender
+{
+    var theUser = [activeRepo valueForKey:@"owner"],
+       anIssueNumber = [activeIssue valueForKey:@"number"],
+       repo = [activeRepo valueForKey:@"name"],
+       requestSuffix = "open/" + theUser + "/" + repo + "/?title=" + escape([[appController newIssueTitle] stringValue]) + "&body=" + escape([[appController newIssueBody] stringValue]);
+    var theReadURL = "GitHubAPI.php",
+        requestBody = "user=" + GITHUBUSERNAME + "&pass=" + GITHUBPASSWORD + "&suffix=" + escape(requestSuffix);
+        theRequest = [[CPURLRequest alloc] initWithURL:theReadURL];
+    [theRequest setHTTPMethod:@"POST"];
+    [theRequest setValue:"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
+    [theRequest setHTTPBody:requestBody];
+
+    // to make it look syncronous remove it from the array
+    //[theIssues removeObject:activeIssue];
+    //[visibleIssues removeObject:activeIssue];
+    //[[appController issuesTable] reloadData];
+    //console.log(theRequest);
+   createNewIssueConnection = [[CPURLConnection alloc] initWithRequest:theRequest delegate:self startImmediately:YES];
+
+    // reset the fields
+    [self cancel:nil];
+}
+//cancel posting new issue
+- (void)cancel:(id)sender
+{
+    [[appController newIssueTitle] setStringValue:@""];
+    [[appController newIssueBody] setStringValue:@""];
+    [[appController newIssueWindow] close];
+}
+
+- (void)showNewIssueWindow:(id)sender
+{
+    // make sure a repo is selected first...
+    [[appController newIssueWindow] orderFront:self];
+}
 
 /*Source list Delegates*/
 - (void)tableViewSelectionDidChange:(id)notification
 {
     var index = [[[notification object] selectedRowIndexes] firstIndex];
-    activeIssue = [visibleIssues objectAtIndex:index];
+
+    if(index < 0)
+        activeIssue = nil;
+    else
+        activeIssue = [visibleIssues objectAtIndex:index];
+
     [self commentsForActiveIssue];
     [issueView setIssue:activeIssue];
 }
@@ -227,11 +314,24 @@
     }
     else if (connection === addCommentConnection)
     {
-        alert(data.comment.status);
+        alert(data);
     }
     else if (connection === reopenIssueConnection || connection === closeIssueConnection)
     {
-        [[appController issuesTable] reloadData];
+        // not really much to do here... 
+    }
+    else if (connection === createNewIssueConnection)
+    {
+        data = JSON.parse(data);
+        console.log(data.issue);
+        if (viewingOpenIssues)
+        {
+            //{"issue":{"number":6,"votes":0,"created_at":"2010/03/03 23:51:30 -0800","body":"This is the final test","title":"Final","updated_at":"2010/03/03 23:51:30 -0800","closed_at":null,"user":"Me1000","labels":[],"state":"open"}}
+            var anIssue = [CPDictionary dictionaryWithJSObject:data.issue recursively:NO];
+            [theIssues addObject: anIssue];
+            [visibleIssues addObject: anIssue];
+            [[appController issuesTable] reloadData];
+        }
     }
 }
 @end

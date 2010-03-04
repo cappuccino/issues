@@ -77,7 +77,16 @@
 - (void)setIssue:(id)anIssue
 {
     activeIssue = anIssue;
+
+    if(!activeIssue)
+        [containerView loadHTMLString:@""];
     // parse the html, but don't do anything with it.
+
+    if([anIssue valueForKey:@"state"] === "open")
+        [actionsButton selectItemWithTitle:@"Open"];
+    else
+        [actionsButton selectItemWithTitle:@"Close"];
+
     [self parseIssueIntoHTML:anIssue];
 }
 
