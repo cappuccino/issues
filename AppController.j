@@ -26,7 +26,7 @@ GITHUBPASSWORD = "";
 
 @implementation AppController : CPObject
 {
-    CPWindow    theWindow;
+    CPWindow    theWindow @accessors;
     CPSplitView outsideSplitView;
     CPView      searchFilterBar;
     CPSearchField searchField; // FIX ME: get rid of this and do it right please. :) 
@@ -46,6 +46,9 @@ GITHUBPASSWORD = "";
     CPWindow    newIssueWindow @accessors;
     CPTextField newIssueTitle @accessors;
     CPTextField newIssueBody @accessors;
+
+    CPWindow    commentSheet @accessors;
+    CPTextField commentBody @accessors;
 }
 
 - (void)applicationDidFinishLaunching:(CPNotification)aNotification
@@ -84,6 +87,7 @@ GITHUBPASSWORD = "";
 
     // make the "new issue" window
     newIssueWindow = [[CPWindow alloc] initWithContentRect:CGRectMake(0, 0, 400, 300) styleMask:CPTitledWindowMask | CPClosableWindowMask | CPResizableWindowMask];
+    [newIssueWindow setMinSize:CGSizeMake(400,300)];
     [newIssueWindow setTitle:@"New Issue"];
     newIssueTitle = [[CPTextField alloc] initWithFrame:CGRectMake(15, 10, 370, 29)];
     [newIssueTitle setAutoresizingMask:CPViewWidthSizable];
@@ -116,6 +120,32 @@ GITHUBPASSWORD = "";
     [newIssueWindow setDefaultButton:addButton];
     [newIssueWindow center];
     //[newIssueWindow orderFront:self];
+
+    //sheets
+    commentSheet = [[CPWindow alloc] initWithContentRect:CGRectMake(0,0,400,300) styleMask:CPDocModalWindowMask|CPResizableWindowMask];
+    [commentSheet setMinSize:CGSizeMake(400, 300)];
+    [commentSheet setMaxSize:CGSizeMake(400, 700)];
+    commentBody  = [[LPMultiLineTextField alloc] initWithFrame:CGRectMake(15, 10, 370, 246)];
+    [commentBody setEditable:YES];
+    [commentBody setBezeled:YES];
+    [commentBody setAutoresizingMask:CPViewWidthSizable | CPViewHeightSizable];
+
+    var addButton = [[CPButton alloc] initWithFrame:CGRectMake(280, 260, 100, 24)];
+    [addButton setAutoresizingMask:CPViewMinXMargin | CPViewMinYMargin];
+    [addButton setTitle:@"Add Comment"];
+    [addButton setTarget:issuesController];
+    [addButton setAction:@selector(commentOnActiveIssue:)];
+
+    var cancelButton = [[CPButton alloc] initWithFrame:CGRectMake(165, 260, 100, 24)];
+    [cancelButton setAutoresizingMask:CPViewMinXMargin | CPViewMinYMargin];
+    [cancelButton setTitle:@"Cancel"];
+    [cancelButton setTarget:issuesController];
+    [cancelButton setAction:@selector(cancel:)];
+
+    [commentSheet setDefaultButton:addButton];
+    [[commentSheet contentView] addSubview:commentBody];
+    [[commentSheet contentView] addSubview:addButton];
+    [[commentSheet contentView] addSubview:cancelButton];
 }
 
 - (void)beginInitalRepoDownloads

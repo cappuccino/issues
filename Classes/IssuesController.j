@@ -85,16 +85,19 @@
 
 - (void)promptUserForComment:(id)sender
 {
-    var comment = prompt("enter comment");
-    [self commentOnActiveIssue:comment];
+    //var comment = prompt("enter comment");
+    //[self commentOnActiveIssue:comment];
+    [CPApp beginSheet:[appController commentSheet] modalForWindow:[appController theWindow] modalDelegate:self didEndSelector:nil contextInfo:nil];
 }
 
-- (void)commentOnActiveIssue:(CPString)aComment
+- (void)commentOnActiveIssue:(id)sender
 {
+  [CPApp endSheet:[sender window] returnCode:nil];
+
    var theUser = [activeRepo valueForKey:@"owner"],
        anIssueNumber = [activeIssue valueForKey:@"number"],
        repo = [activeRepo valueForKey:@"name"],
-       aComment = escape(aComment),
+       aComment = escape([[appController commentBody] stringValue]),
        requestSuffix = "comment/" + theUser + "/" + repo + "/" + anIssueNumber + "?comment=" + aComment;
 
     var theReadURL = "GitHubAPI.php",
@@ -196,9 +199,13 @@
     // reset the fields
     [self cancel:nil];
 }
+
 //cancel posting new issue
 - (void)cancel:(id)sender
 {
+    if ([sender window] === [appController commentSheet])
+        [CPApp endSheet:[sender window] returnCode:nil];
+    
     [[appController newIssueTitle] setStringValue:@""];
     [[appController newIssueBody] setStringValue:@""];
     [[appController newIssueWindow] close];
