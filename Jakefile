@@ -11,7 +11,8 @@ var ENV = require("system").env,
     task = require("jake").task,
     FileList = require("jake").FileList,
     app = require("cappuccino/jake").app,
-    configuration = ENV["CONFIG"] || ENV["CONFIGURATION"] || ENV["c"] || "Debug";
+    configuration = ENV["CONFIG"] || ENV["CONFIGURATION"] || ENV["c"] || "Release",
+    OS = require("os");
 
 app ("GitIssues", function(task)
 {
@@ -36,3 +37,17 @@ app ("GitIssues", function(task)
 });
 
 task ("default", ["GitIssues"]);
+task ("deploy", function()
+{
+    OS.system("press Build/Release/GitIssues Build/Release/GitIssuesPressed/");
+    OS.system("flatten Build/Release/GitIssuesPressed Build/Release/GitIssuesFlattened/");
+});
+
+task ("closure", function()
+{
+   OS.system("cp -r Build/Release/TimeTableFlattened/ Build/Release/TimeTableClosure/");
+    OS.system("java -jar /Users/randy/Desktop/compiler.jar --js=Build/Release/TimeTableClosure/Application.js  --js_output_file=Build/Release/TimeTableClosure/out.js");
+    OS.system("rm Build/Release/TimeTableClosure/Application.js");
+    OS.system("cp Build/Release/TimeTableClosure/out.js  Build/Release/TimeTableClosure/Application.js");
+    OS.system("rm Build/Release/TimeTableClosure/out.js");
+});

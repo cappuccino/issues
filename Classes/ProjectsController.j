@@ -16,6 +16,7 @@
     id              appController @accessors;
 
     CPURLConnection downloadAllRepos;
+    CPArray         sourceListData;
     CPArray         followedUsers @accessors;
     //CPArray       userRepos;
     AjaxSeries      requests;
@@ -24,10 +25,10 @@
 {
     self = [super init];
 
-    if(self)
+    if (self)
     {
-        //do something
         followedUsers = [CPArray array];
+        sourceListData = [followedUsers];
         requests = [[AjaxSeries alloc] initWithDelegate:self];
     }
 
@@ -83,6 +84,21 @@
         alert("An error has occured, check the console dude.");
         return;
     }
+
+
+    if (connection === [appController downloadFollowedUsers])
+    {
+        //console.log(data);
+        for (var i = 0; i < data.users.length; i++)
+        //@each(var user in data.users)
+        {
+            var user = data.users[i];
+            [self allReposForUser:user];
+        }
+
+        return;
+    }
+
     // from here we've got a json object of all the issues need to be displayed
     // once parsed display update the table
     var userRepos = [CPArray array];

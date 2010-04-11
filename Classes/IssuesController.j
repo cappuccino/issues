@@ -45,7 +45,7 @@
     if(self)
     {
         requests = [[AjaxSeries alloc] initWithDelegate:self];
-        visibleIssues = [CPArray array];
+        visibleIssues = [];
         viewingOpenIssues = YES;
     }
 
@@ -106,7 +106,7 @@
     [theRequest setHTTPMethod:@"POST"];
     [theRequest setValue:"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
     [theRequest setHTTPBody:requestBody];
-
+    console.log(theRequest);
     addCommentConnection = [[CPURLConnection alloc] initWithRequest:theRequest delegate:self startImmediately:YES];
 }
 
@@ -258,7 +258,8 @@
 
 	[aTableView reloadData];
 
-    [aTableView selectRowIndexes:[CPIndexSet indexSetWithIndex:[theIssues indexOfObject:activeIssue]] byExtendingSelection:NO];
+    if ([visibleIssues count] > 0)
+        [aTableView selectRowIndexes:[CPIndexSet indexSetWithIndex:[theIssues indexOfObject:activeIssue]] byExtendingSelection:NO];
 }
 
 /*

@@ -19,6 +19,8 @@
 @import "Classes/IssueView.j"
 @import "Classes/AjaxSeries.j"
 
+//@import <AppKit/CPTouchScrollView.j>
+
 // GitHub credentials
 GITHUBUSERNAME = "";
 GITHUBPASSWORD = "";
@@ -34,6 +36,7 @@ GITHUBPASSWORD = "";
     CPTableView sourceList @accessors;
     CPTableView issuesTable @accessors;
     IssueView  issueView @accessors;
+    CPJSONPConnection downloadFollowedUsers @accessors;
 
     CPRadioGroup searchFilterRadioGroup;
 
@@ -49,13 +52,53 @@ GITHUBPASSWORD = "";
 
     CPWindow    commentSheet @accessors;
     CPTextField commentBody @accessors;
+
+    CPWindow    loginSheet;
+    CPTextField usernameField;
+    CPSecureTextField passwordField;
 }
 
 - (void)applicationDidFinishLaunching:(CPNotification)aNotification
 {
-    // FIX ME: this is nasty...
-    GITHUBUSERNAME = prompt("GitHub Username");    
-    GITHUBPASSWORD = prompt("GitHub Password");
+    loginSheet = [[CPWindow alloc] initWithContentRect:CGRectMake(0,0,300,155) styleMask:CPDocModalWindowMask];
+    
+    var loginLabel = [[CPTextField alloc] initWithFrame:CGRectMake(15, 10, 270, 30)];
+    [loginLabel setStringValue:@"Login to"];
+    [loginLabel setFont:[CPFont boldSystemFontOfSize:13]];
+    [loginLabel sizeToFit];
+
+    var gitHubLogo = [[CPImage alloc] initWithContentsOfFile:[[CPBundle mainBundle] pathForResource:@"GitHubLogoSmall.png"] size:CGSizeMake(33, 15)],
+        logoView   = [[CPImageView alloc] initWithFrame:CGRectMake(CGRectGetMaxX([loginLabel frame]) + 5, 13, 33, 15)];
+
+    [logoView setImage:gitHubLogo];
+
+    usernameField  = [[CPTextField alloc] initWithFrame:CGRectMake(15, 40, 270, 30)];
+    [usernameField setEditable:YES];
+    [usernameField setBezeled:YES];
+    [usernameField setPlaceholderString:@"Username"];
+
+    passwordField  = [[CPTextField alloc] initWithFrame:CGRectMake(15, 80, 270, 30)];
+    [passwordField setEditable:YES];
+    [passwordField setSecure:YES];
+    [passwordField setBezeled:YES];
+    [passwordField setPlaceholderString:@"Password"];
+
+    var loginButton = [[CPButton alloc] initWithFrame:CGRectMake(180, 120, 100, 24)];
+    [loginButton setTitle:@"Login"];
+    [loginButton setTarget:self];
+    [loginButton setAction:@selector(login:)];
+
+    [[loginSheet contentView] addSubview:loginLabel];
+    [[loginSheet contentView] addSubview:logoView];
+    [[loginSheet contentView] addSubview:usernameField];
+    [[loginSheet contentView] addSubview:passwordField];
+    [[loginSheet contentView] addSubview:loginButton];
+    [loginSheet setDefaultButton:loginButton];
+
+    // FIX ME: this is shit!
+    window.setTimeout(function(){
+        [CPApp beginSheet:loginSheet modalForWindow:theWindow modalDelegate:self didEndSelector:nil contextInfo:nil];
+    },0);
 
     theWindow = [[CPWindow alloc] initWithContentRect:CGRectMakeZero() styleMask:CPBorderlessBridgeWindowMask];
     [theWindow orderFront:self];
@@ -74,7 +117,7 @@ GITHUBPASSWORD = "";
 
     followedUsersCookie = [[CPCookie alloc] initWithName:@"GitIssuesFollowedUsers"];
 
-    [self beginInitalRepoDownloads];
+    //[self beginInitalRepoDownloads];
 
     searchField = [[CPSearchField alloc] initWithFrame:CGRectMake(0,0, 140, 30)];
     [searchField setTarget:issuesController];
@@ -150,7 +193,13 @@ GITHUBPASSWORD = "";
 
 - (void)beginInitalRepoDownloads
 {
-    var values = [followedUsersCookie value];
+    var theReadURL = "http://github.com/api/v2/json/user/show/" + GITHUBUSERNAME + "/following",
+    theRequest = [[CPURLRequest alloc] initWithURL:theReadURL];
+    //console.log(theReadURL);
+    //[requests addRequest: theRequest];
+    downloadFollowedUsers = [[CPJSONPConnection alloc] initWithRequest:theRequest callback:@"callback" delegate:projectsController startImmediately:YES];
+
+    /*var values = [followedUsersCookie value];
 
     if(!values)
         return;
@@ -161,7 +210,7 @@ GITHUBPASSWORD = "";
     {
         var user = values[i];
         [projectsController allReposForUser:user];
-    }
+    }*/
 }
 
 - (void)setupViews
@@ -403,6 +452,17 @@ GITHUBPASSWORD = "";
     //[issuesTable sizeLastColumnToFit];
 
     [titleRadio performClick:nil];
+}
+
+- (void)login:(id)sender
+{
+    GITHUBUSERNAME = [usernameField stringValue];   
+    GITHUBPASSWORD = [passwordField stringValue];
+
+    [projectsController allReposForUser:GITHUBUSERNAME];
+
+    [self beginInitalRepoDownloads];
+    [CPApp endSheet:[sender window] returnCode:nil];
 }
 
 - (void)addUser:(id)sender

@@ -60,7 +60,7 @@
     if(!aDate)
         return;
 
-    aDate = [aDate stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
+    //aDate = [aDate stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
     aDate = [[CPDate alloc] initWithString:aDate];
 
     return aDate.getDate() + " " + [aDate monthByName] + ", " + aDate.getFullYear();
