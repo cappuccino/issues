@@ -100,7 +100,7 @@ GITHUBPASSWORD = "";
         [CPApp beginSheet:loginSheet modalForWindow:theWindow modalDelegate:self didEndSelector:nil contextInfo:nil];
     },0);
 
-    theWindow = [[CPWindow alloc] initWithContentRect:CGRectMakeZero() styleMask:CPBorderlessBridgeWindowMask];
+    theWindow = [[CPWindow alloc] initWithContentRect:CGRectMake(100,100,700,500) styleMask: CPResizableWindowMask];
     [theWindow orderFront:self];
 
     // Uncomment the following line to turn on the standard menu bar.
