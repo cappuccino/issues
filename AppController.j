@@ -19,11 +19,11 @@
 @import "Classes/IssueView.j"
 @import "Classes/AjaxSeries.j"
 
-//@import <AppKit/CPTouchScrollView.j>
-
 // GitHub credentials
 GITHUBUSERNAME = "";
 GITHUBPASSWORD = "";
+//BASE_URL = window.location.protocol === "file:" ? "api.github.com" :  "";
+ISLOCAL =  (window.location.protocol === "file:");
 //GITHUBAPITOKEN = "";
 
 @implementation AppController : CPObject

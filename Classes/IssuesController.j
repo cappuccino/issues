@@ -100,13 +100,27 @@
        aComment = escape([[appController commentBody] stringValue]),
        requestSuffix = "comment/" + theUser + "/" + repo + "/" + anIssueNumber + "?comment=" + aComment;
 
-    var theReadURL = "GitHubAPI.php",
-        requestBody = "user=" + GITHUBUSERNAME + "&pass=" + GITHUBPASSWORD + "&suffix=" + escape(requestSuffix);
-        theRequest = [[CPURLRequest alloc] initWithURL:theReadURL];
-    [theRequest setHTTPMethod:@"POST"];
-    [theRequest setValue:"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
-    [theRequest setHTTPBody:requestBody];
-    console.log(theRequest);
+    if (ISLOCAL)
+    {
+        var theReadURL = "https://" + GITHUBUSERNAME + ":" + GITHUBPASSWORD + "@github.com/api/v2/json/issues/" + escape(requestSuffix),
+            //requestBody = "user=" + GITHUBUSERNAME + "&pass=" + GITHUBPASSWORD + "&suffix=" + escape(requestSuffix);
+            theRequest = [[CPURLRequest alloc] initWithURL:theReadURL];
+        [theRequest setHTTPMethod:@"POST"];
+        [theRequest setValue:"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
+        [theRequest setHTTPBody:requestBody];
+    }
+    else
+    {
+        var theReadURL = "GitHubAPI.php",
+            requestBody = "user=" + GITHUBUSERNAME + "&pass=" + GITHUBPASSWORD + "&suffix=" + escape(requestSuffix);
+            theRequest = [[CPURLRequest alloc] initWithURL:theReadURL];
+        [theRequest setHTTPMethod:@"POST"];
+        [theRequest setValue:"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
+        [theRequest setHTTPBody:requestBody];
+    }
+    //console.log(theRequest);
+    //$fullURL = "https://".$this->username.":".$this->password."@github.com/api/v2/json/issues/".$this->urlSuffix;
+    alert(theReadURL);
     addCommentConnection = [[CPURLConnection alloc] initWithRequest:theRequest delegate:self startImmediately:YES];
 }
 
