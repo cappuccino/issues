@@ -356,6 +356,11 @@
         }
     }
 }
+
+-(void)connectionDidFinishLoading:(CPURLConnection)connection
+{
+    
+}
 @end
 
 @implementation IssuesController (search)

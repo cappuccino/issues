@@ -35,6 +35,7 @@ ISLOCAL =  (window.location.protocol === "file:");
     CPScrollView issuesScrollView;
     CPTableView sourceList @accessors;
     CPTableView issuesTable @accessors;
+    CPView      loadingView @accessors;
     IssueView  issueView @accessors;
     CPJSONPConnection downloadFollowedUsers @accessors;
 
@@ -95,14 +96,14 @@ ISLOCAL =  (window.location.protocol === "file:");
     [[loginSheet contentView] addSubview:loginButton];
     [loginSheet setDefaultButton:loginButton];
 
+    theWindow = [[CPWindow alloc] initWithContentRect:CGRectMake(100,100,700,500) styleMask: CPResizableWindowMask];
+    [theWindow orderFront:self];
+
+
     // FIX ME: this is shit!
     window.setTimeout(function(){
         [CPApp beginSheet:loginSheet modalForWindow:theWindow modalDelegate:self didEndSelector:nil contextInfo:nil];
     },0);
-
-    theWindow = [[CPWindow alloc] initWithContentRect:CGRectMake(100,100,700,500) styleMask: CPResizableWindowMask];
-    [theWindow orderFront:self];
-
     // Uncomment the following line to turn on the standard menu bar.
     //[CPMenu setMenuBarVisible:YES];
 
@@ -249,8 +250,11 @@ ISLOCAL =  (window.location.protocol === "file:");
 
     [issuesSplitView setPosition:200 ofDividerAtIndex:0];
 
+    
     [self setupSourceList:sourceListContentView];
     [self setupIssuesTable:issuesTable];
+
+    //[issueView addSubview:loadingView];
 }
 
 - (void)setupSourceList:(id)view
@@ -331,7 +335,7 @@ ISLOCAL =  (window.location.protocol === "file:");
     [view addSubview:searchFilterBar];
     [searchFilterBar setHidden:YES];
 
-    var bundle = [CPBundle bundleForClass:[self class]],
+    var bundle = [CPBundle mainBundle],
         leftCapImage = [[CPImage alloc] initWithContentsOfFile:[bundle pathForResource:@"MediaFilterLeftCap.png"] size:CGSizeMake(9, 19)],
         rightCapImage = [[CPImage alloc] initWithContentsOfFile:[bundle pathForResource:@"MediaFilterRightCap.png"] size:CGSizeMake(9, 19)],
         centerImage = [[CPImage alloc] initWithContentsOfFile:[bundle pathForResource:@"MediaFilterCenter.png"] size:CGSizeMake(1, 19)],
@@ -441,13 +445,27 @@ ISLOCAL =  (window.location.protocol === "file:");
     [issuesTable addTableColumn:updated];
 
 
-    [issuesTable setColumnAutoresizingStyle:CPTableViewUniformColumnAutoresizingStyle];
+    [issuesTable setColumnAutoresizingStyle:CPTableViewLastColumnOnlyAutoresizingStyle];
 
 
     [issuesScrollView setDocumentView:issuesTable];
     [issuesScrollView setAutohidesScrollers:YES];
     [issuesScrollView setAutoresizingMask:CPViewWidthSizable|CPViewHeightSizable];
     [view addSubview:issuesScrollView];
+
+
+    loadingView = [[CPView alloc] initWithFrame:[view bounds]];
+    [loadingView setBackgroundColor:[CPColor colorWithRed:255 green:255 blue:255 alpha:0.5]];
+    [loadingView setAutoresizingMask:CPViewWidthSizable|CPViewHeightSizable];
+    var label = [CPTextField new];
+    [label setStringValue:@"Loading..."];
+    [label setFont:[CPFont boldSystemFontOfSize:16]];
+    [label sizeToFit];
+    [label setCenter:CGPointMake(CGRectGetMidX([loadingView bounds]), CGRectGetMidY([issueView bounds]) - 40)]
+    [label setAutoresizingMask: CPViewMinXMargin | CPViewMaxXMargin | CPViewMinYMargin | CPViewMaxYMargin];
+    [loadingView addSubview:label];
+    [view addSubview:loadingView];
+    [loadingView setHidden:YES];
 
     //[issuesTable sizeLastColumnToFit];
 
