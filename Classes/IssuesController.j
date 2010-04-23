@@ -360,7 +360,8 @@
 
 -(void)connectionDidFinishLoading:(CPURLConnection)connection
 {
-    [[appController loadingView] setHidden:YES];
+    if(connection === downloadIssuesConnection)
+        [[appController loadingView] setHidden:YES];
 }
 @end
 
