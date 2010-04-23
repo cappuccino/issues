@@ -62,6 +62,7 @@
 
     //[requests addReqeust theRequest];
     downloadIssuesConnection = [[CPJSONPConnection alloc] initWithRequest:theRequest callback:@"callback" delegate:self startImmediately:YES];
+    [[appController loadingView] setHidden:NO];
 }
 
 - (void)allTagsForRepo:(CPString)theRepo user:(id)theUser
@@ -359,7 +360,7 @@
 
 -(void)connectionDidFinishLoading:(CPURLConnection)connection
 {
-    
+    [[appController loadingView] setHidden:YES];
 }
 @end
 

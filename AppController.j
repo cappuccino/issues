@@ -97,6 +97,7 @@ ISLOCAL =  (window.location.protocol === "file:");
     [loginSheet setDefaultButton:loginButton];
 
     theWindow = [[CPWindow alloc] initWithContentRect:CGRectMake(100,100,700,500) styleMask: CPResizableWindowMask];
+    [theWindow setFullBridge:YES];
     [theWindow orderFront:self];
 
 
@@ -292,6 +293,7 @@ ISLOCAL =  (window.location.protocol === "file:");
     [sourceList sizeLastColumnToFit];
 
 
+    // FIX ME: redo this with the new 0.8 button bar
     var buttonBarTop = [view frame].size.height - 26;
     sourceViewButtonBar = [[CPButtonBar alloc] initWithFrame:CGRectMake(0, buttonBarTop, [view frame].size.width, 26)];
     [sourceViewButtonBar setAutoresizingMask:CPViewWidthSizable|CPViewMinYMargin];
@@ -461,7 +463,7 @@ ISLOCAL =  (window.location.protocol === "file:");
     [label setStringValue:@"Loading..."];
     [label setFont:[CPFont boldSystemFontOfSize:16]];
     [label sizeToFit];
-    [label setCenter:CGPointMake(CGRectGetMidX([loadingView bounds]), CGRectGetMidY([issueView bounds]) - 40)]
+    [label setFrameOrigin:CGPointMake(CGRectGetMidX([loadingView bounds]) - CGRectGetWidth([label bounds]) / 2, 40)]
     [label setAutoresizingMask: CPViewMinXMargin | CPViewMaxXMargin | CPViewMinYMargin | CPViewMaxYMargin];
     [loadingView addSubview:label];
     [view addSubview:loadingView];
