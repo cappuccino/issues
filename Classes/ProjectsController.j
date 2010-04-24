@@ -16,6 +16,7 @@
     id              appController @accessors;
 
     CPURLConnection downloadAllRepos;
+    CPJSONPConnection pushableRepos;
     CPArray         sourceListData;
     CPArray         followedUsers @accessors;
     //CPArray       userRepos;
@@ -42,6 +43,16 @@
     //console.log(theReadURL);
     [requests addRequest: theRequest];
     //downloadAllRepos = [[CPJSONPConnection alloc] initWithRequest:theRequest callback:@"callback" delegate:self startImmediately:YES];
+}
+
+- (void)downloadPushableRepos
+{
+    var theReadURL = "https://" + GITHUBUSERNAME + ":" + GITHUBPASSWORD + "@github.com/api/v2/json/repos/pushable",
+        theRequest = [[CPURLRequest alloc] initWithURL:theReadURL];
+    //console.log(theReadURL);
+    //[requests addRequest: theRequest];
+    // FIX ME: WTF BBQ?!?! I get a 403 back... could be an API bug.
+    pushableRepos = [[CPJSONPConnection alloc] initWithRequest:theRequest callback:@"callback" delegate:self startImmediately:YES];
 }
 
 /*Source list Delegates*/
@@ -76,6 +87,15 @@
     alert("There was a fail!");
 }
 
+-(void)connectionDidFinishLoading:(CPURLConnection)connection
+{
+    if (connection === pushableRepos)
+    {
+        console.log("asdasdasdasdasd");
+        return;
+    }
+}
+
 -(void)connection:(CPURLConnection)connection didReceiveData:(CPString)data
 {
     if(data.error)
@@ -98,6 +118,13 @@
 
         return;
     }
+
+    if (connection === pushableRepos)
+    {
+        console.log(data);
+        return;
+    }
+
 
     // from here we've got a json object of all the issues need to be displayed
     // once parsed display update the table
@@ -130,21 +157,21 @@
 
 
 /*SplitView delegates*/
-- (CPRect)splitView:(CPSplitView) aSplitView additionalEffectiveRectOfDividerAtIndex:(int)aDividerIndex
+- (CPRect)splitView:(CPSplitView)aSplitView additionalEffectiveRectOfDividerAtIndex:(int)aDividerIndex
 {
-    
+    // making it a little easier to grab the thin resize indicator thing
     var rect = [[aSplitView subviews][0] frame],
-        x = rect.size.width - 13,
-        y = CGRectGetMaxY(rect) - 24;
+        x = rect.size.width - 3,
+        y = 0;
         
-        rect = CGRectMake(x,y,13,24);
+        rect = CGRectMake(x,y,3,CGRectGetMaxY(rect));
     return rect;
 }
 
 - (CGFloat)splitView:(CPSplitView)splitView constrainMaxCoordinate:(float)proposedMax ofSubviewAt:(int)dividerIndex
 {
     
-    return 200;
+    return 300;
 }
 
 - (CGFloat)splitView:(CPSplitView)splitView constrainMinCoordinate:(float)proposedMax ofSubviewAt:(int)dividerIndex

@@ -200,6 +200,7 @@ ISLOCAL =  (window.location.protocol === "file:");
     //console.log(theReadURL);
     //[requests addRequest: theRequest];
     downloadFollowedUsers = [[CPJSONPConnection alloc] initWithRequest:theRequest callback:@"callback" delegate:projectsController startImmediately:YES];
+    [projectsController downloadPushableRepos];
 
     /*var values = [followedUsersCookie value];
 
@@ -293,39 +294,24 @@ ISLOCAL =  (window.location.protocol === "file:");
     [sourceList sizeLastColumnToFit];
 
 
-    // FIX ME: redo this with the new 0.8 button bar
+
     var buttonBarTop = [view frame].size.height - 26;
     sourceViewButtonBar = [[CPButtonBar alloc] initWithFrame:CGRectMake(0, buttonBarTop, [view frame].size.width, 26)];
     [sourceViewButtonBar setAutoresizingMask:CPViewWidthSizable|CPViewMinYMargin];
     [view addSubview:sourceViewButtonBar];
-    sourceViewAddButton = [[CPButton alloc] initWithFrame:CGRectMake(0,0,35,26)];
-    sourceViewRemoveButton = [[CPButton alloc] initWithFrame:CGRectMake(34,0,35,26)];
-    [sourceViewAddButton setBordered:NO];
-    [sourceViewRemoveButton setBordered:NO];
-    
-    [sourceViewAddButton setImage:[[CPImage alloc] initWithContentsOfFile:@"Resources/PlusButton.png" size:CGSizeMake(35, 26)]];
-    [sourceViewRemoveButton setImage:[[CPImage alloc] initWithContentsOfFile:@"Resources/MinusButton.png" size:CGSizeMake(35, 26)]];
-    [sourceViewAddButton setAlternateImage:[[CPImage alloc] initWithContentsOfFile:@"Resources/PlusButtonHighlight.png" size:CGSizeMake(35, 26)]];
-    [sourceViewRemoveButton setAlternateImage:[[CPImage alloc] initWithContentsOfFile:@"Resources/MinusButtonHighlight.png" size:CGSizeMake(35, 26)]];
-    
+    sourceViewAddButton = [CPButtonBar plusButton];
+    sourceViewRemoveButton = [CPButtonBar minusButton];
+    [sourceViewButtonBar setHasResizeControl:YES];
+    [sourceViewButtonBar setButtons:[sourceViewAddButton, sourceViewRemoveButton]];
+       
     [sourceViewAddButton setTarget:self];
     [sourceViewAddButton setAction:@selector(addUser:)];
     
     [sourceViewRemoveButton setTarget:self];
     [sourceViewRemoveButton setAction:@selector(removeUser:)];
-    
-    [sourceViewButtonBar addSubview:sourceViewAddButton];
-    [sourceViewButtonBar addSubview:sourceViewRemoveButton];
-    
-    var resizeImage = [[CPView alloc] initWithFrame:CGRectMake(CGRectGetWidth([sourceViewButtonBar bounds]) - 13, 0, 13, 20)];
-    // [resizeImage setBackgroundColor:[CPColor colorWithPatternImage:[[CPImage alloc] initWithContentsOfFile::"Frameworks/AppKit/Themes/Aristo/Resources/buttonbar-bezel-right.png" size:CGSizeMake(13.0, 26.0)]]];
-    resizeImage._DOMElement.style.cursor = [[CPCursor resizeLeftRightCursor] _cssString];
-    [sourceViewButtonBar addSubview:resizeImage];
 
-    [sourceViewAddButton setAutoresizingMask:nil];
-    [sourceViewRemoveButton setAutoresizingMask:nil];
-    [sourceViewButtonBar setNeedsLayout];
     [view addSubview:sourceViewButtonBar];
+    [outsideSplitView setButtonBar:sourceViewButtonBar forDividerAtIndex:0];
 }
 
 - (void)setupIssuesTable:(id)view
@@ -594,5 +580,22 @@ ISLOCAL =  (window.location.protocol === "file:");
     var bounds = [issuesScrollView bounds];
     [issuesScrollView setFrame:CGRectMake(0, 0, CGRectGetWidth(bounds), CGRectGetHeight(bounds) + 32)];
     [searchFilterBar setHidden:YES];
+}
+@end
+
+@implementation CPButtonBar (resizeIndicator)
+// FIX ME: I'm using this to get the resize cursor when you hover over 
+// the resize indicator. It might be best to take this out completly 
+// because overriding a method in a category is just asking for trouble.
+- (CPView)createEphemeralSubviewNamed:(CPString)aName
+{
+    if (aName === "resize-control-view")
+    {
+        var myView = [[CPView alloc] initWithFrame:CGRectMakeZero()];
+        myView._DOMElement.style.cursor = [[CPCursor resizeLeftRightCursor] _cssString];
+        return myView;
+    }
+
+    return [super createEphemeralSubviewNamed:aName];
 }
 @end
