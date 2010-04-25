@@ -54,11 +54,11 @@
         [toolbar addSubview:commentButton];
 
         //content area
-        var toolbarHeight = CGRectGetMaxY([toolbar frame]);
+        var toolbarHeight = 0;//CGRectGetMaxY([toolbar frame]);
         containerView = [[CPWebView alloc] initWithFrame:CGRectMake(0, toolbarHeight, CGRectGetWidth([self bounds]), CGRectGetHeight([self bounds]) - toolbarHeight)];
 
         [containerView setAutoresizingMask:CPViewWidthSizable|CPViewHeightSizable];
-        [self addSubview:toolbar];
+        //[self addSubview:toolbar];
         [self addSubview:containerView]; 
     }
 

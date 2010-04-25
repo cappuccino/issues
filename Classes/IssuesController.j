@@ -84,7 +84,7 @@
     downloadCommentsConnection = [[CPJSONPConnection alloc] initWithRequest:getCommentsRequest callback:@"callback" delegate:self startImmediately:YES];
 }
 
-- (void)promptUserForComment:(id)sender
+- (void)commentOnSelectedIssue:(id)sender
 {
     //var comment = prompt("enter comment");
     //[self commentOnActiveIssue:comment];
@@ -181,7 +181,6 @@
 // either view open or closed issues
 - (void)changeVisibleIssuesStatus:(id)sender
 {
-    
     if ([sender selectedTag] === "Open")
         viewingOpenIssues = YES;
     else
@@ -189,6 +188,18 @@
 
     [self allIssuesForRepo:[activeRepo valueForKey:@"name"] user:[activeRepo valueForKey:@"owner"]];
     [[appController issuesTable] selectRowIndexes:[CPIndexSet indexSet] byExtendingSelection:NO];
+
+    [[[appController theWindow] toolbar] validateVisibleToolbarItems];
+}
+
+- (void)validateToolbarItem:(CPToolbarItem)anItem
+{
+    if ([anItem itemIdentifier] === "openissue")
+        return !viewingOpenIssues;
+    else if ([anItem itemIdentifier] === "closeissue")
+        return viewingOpenIssues;
+
+    return YES;
 }
 
 - (void)createNewIssue:(id)sender
