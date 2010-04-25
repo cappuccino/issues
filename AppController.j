@@ -18,6 +18,7 @@
 @import "Classes/CPDate+Additions.j"
 @import "Classes/IssueView.j"
 @import "Classes/AjaxSeries.j"
+@import "Classes/RepositoryView.j"
 
 // GitHub credentials
 GITHUBUSERNAME = "";
@@ -37,15 +38,12 @@ ISLOCAL =  (window.location.protocol === "file:");
     CPTableView issuesTable @accessors;
     CPView      loadingView @accessors;
     IssueView  issueView @accessors;
-    CPJSONPConnection downloadFollowedUsers @accessors;
 
     CPRadioGroup searchFilterRadioGroup;
 
     // controllers
     id          projectsController;
     id          issuesController;
-
-    CPCookie    followedUsersCookie @accessors;
 
     CPWindow    newIssueWindow @accessors;
     CPTextField newIssueTitle @accessors;
@@ -57,11 +55,14 @@ ISLOCAL =  (window.location.protocol === "file:");
     CPWindow    loginSheet;
     CPTextField usernameField;
     CPSecureTextField passwordField;
+    CPCheckBox  autopopulateCheckbox;
+
+    BOOL autopopulateRepos @accessors;
 }
 
 - (void)applicationDidFinishLaunching:(CPNotification)aNotification
 {
-    loginSheet = [[CPWindow alloc] initWithContentRect:CGRectMake(0,0,300,155) styleMask:CPDocModalWindowMask];
+    loginSheet = [[CPWindow alloc] initWithContentRect:CGRectMake(0,0,300,185) styleMask:CPDocModalWindowMask];
     
     var loginLabel = [[CPTextField alloc] initWithFrame:CGRectMake(15, 10, 270, 30)];
     [loginLabel setStringValue:@"Login to"];
@@ -77,14 +78,28 @@ ISLOCAL =  (window.location.protocol === "file:");
     [usernameField setEditable:YES];
     [usernameField setBezeled:YES];
     [usernameField setPlaceholderString:@"Username"];
+    [usernameField sizeToFit];
 
-    passwordField  = [[CPTextField alloc] initWithFrame:CGRectMake(15, 80, 270, 30)];
+    [loginSheet setInitialFirstResponder:usernameField];
+
+    passwordField  = [[CPTextField alloc] initWithFrame:CGRectMake(15, 72, 270, 30)];
     [passwordField setEditable:YES];
     [passwordField setSecure:YES];
     [passwordField setBezeled:YES];
     [passwordField setPlaceholderString:@"Password"];
+    [passwordField sizeToFit];
 
-    var loginButton = [[CPButton alloc] initWithFrame:CGRectMake(180, 120, 100, 24)];
+    [usernameField setTarget:passwordField];
+    [usernameField setAction:@selector(selectText:)];
+    [passwordField setTarget:self];
+    [passwordField setAction:@selector(login:)];
+
+    autopopulateCheckbox = [[CPCheckBox alloc] initWithFrame:CGRectMake(18, 108, 270, 18)];
+    [autopopulateCheckbox setTitle:"Automatically populate repository list"];
+    [autopopulateCheckbox setFont:[CPFont systemFontOfSize:12.0]];
+    [autopopulateCheckbox setState:CPOnState];
+
+    var loginButton = [[CPButton alloc] initWithFrame:CGRectMake(180, 150, 100, 24)];
     [loginButton setTitle:@"Login"];
     [loginButton setTarget:self];
     [loginButton setAction:@selector(login:)];
@@ -93,7 +108,9 @@ ISLOCAL =  (window.location.protocol === "file:");
     [[loginSheet contentView] addSubview:logoView];
     [[loginSheet contentView] addSubview:usernameField];
     [[loginSheet contentView] addSubview:passwordField];
+    [[loginSheet contentView] addSubview:autopopulateCheckbox];
     [[loginSheet contentView] addSubview:loginButton];
+
     [loginSheet setDefaultButton:loginButton];
 
     theWindow = [[CPWindow alloc] initWithContentRect:CGRectMake(100,100,700,500) styleMask: CPResizableWindowMask];
@@ -116,10 +133,6 @@ ISLOCAL =  (window.location.protocol === "file:");
     [projectsController setAppController:self];
 
     [self setupViews];
-
-    followedUsersCookie = [[CPCookie alloc] initWithName:@"GitIssuesFollowedUsers"];
-
-    //[self beginInitalRepoDownloads];
 
     searchField = [[CPSearchField alloc] initWithFrame:CGRectMake(0,0, 140, 30)];
     [searchField setTarget:issuesController];
@@ -193,29 +206,6 @@ ISLOCAL =  (window.location.protocol === "file:");
     [[commentSheet contentView] addSubview:cancelButton];
 }
 
-- (void)beginInitalRepoDownloads
-{
-    var theReadURL = "http://github.com/api/v2/json/user/show/" + GITHUBUSERNAME + "/following",
-    theRequest = [[CPURLRequest alloc] initWithURL:theReadURL];
-    //console.log(theReadURL);
-    //[requests addRequest: theRequest];
-    downloadFollowedUsers = [[CPJSONPConnection alloc] initWithRequest:theRequest callback:@"callback" delegate:projectsController startImmediately:YES];
-    [projectsController downloadPushableRepos];
-
-    /*var values = [followedUsersCookie value];
-
-    if(!values)
-        return;
-
-    values = JSON.parse(values);
-    
-    for (var i=0; i<values.length; i++)
-    {
-        var user = values[i];
-        [projectsController allReposForUser:user];
-    }*/
-}
-
 - (void)setupViews
 {
     var contentView = [theWindow contentView];
@@ -241,7 +231,7 @@ ISLOCAL =  (window.location.protocol === "file:");
     [outsideSplitView addSubview:sourceListContentView];
     [outsideSplitView addSubview:issuesSplitView];
 
-    [outsideSplitView setPosition:180 ofDividerAtIndex:0];
+    [outsideSplitView setPosition:220 ofDividerAtIndex:0];
 
     var issuesTable = [[CPView alloc] initWithFrame:[outsideSplitView bounds]];
 
@@ -250,7 +240,7 @@ ISLOCAL =  (window.location.protocol === "file:");
     [issuesSplitView addSubview:issuesTable];
     [issuesSplitView addSubview:issueView];
 
-    [issuesSplitView setPosition:200 ofDividerAtIndex:0];
+    [issuesSplitView setPosition:240 ofDividerAtIndex:0];
 
     
     [self setupSourceList:sourceListContentView];
@@ -263,24 +253,25 @@ ISLOCAL =  (window.location.protocol === "file:");
 {
     var scrollView = [[CPScrollView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth([view bounds]), CGRectGetHeight([view bounds]) - 26)];
     // leave room for the button bar below... if we actually have one
-    sourceList = [[CPOutlineView alloc] initWithFrame:[view bounds]];//[[CPTableView alloc] initWithFrame:CGRectMake(0,0,CGRectGetWidth([view bounds]), CGRectGetHeight([view bounds]) - 32)];
+
+    sourceList = [[CPTableView alloc] initWithFrame:[view bounds]];
     [sourceList setAutoresizingMask:CPViewWidthSizable|CPViewHeightSizable];
     [sourceList setDelegate:projectsController];
     [sourceList setDataSource:projectsController];
     [sourceList setSelectionHighlightStyle:CPTableViewSelectionHighlightStyleSourceList];
+    [sourceList setAllowsEmptySelection:NO];
 
     var column = [[CPTableColumn alloc] initWithIdentifier:"sourcelist"];
     [[column headerView] setStringValue:"Projects"];
 
-    [column setWidth:180.0];
+    [column setWidth:220.0];
     [column setMinWidth:50.0];
-    [column setMaxWidth:250];
     [column setEditable:YES];
+    [column setDataView:[[RepositoryView alloc] init]];
     
     [sourceList addTableColumn:column];
-    [sourceList setOutlineTableColumn:column];
     [sourceList setColumnAutoresizingStyle:CPTableViewUniformColumnAutoresizingStyle];
-    [sourceList setRowHeight:22.0];
+    [sourceList setRowHeight:38.0];
 
     [sourceList setBackgroundColor:[CPColor colorWithHexString:@"dde8f7"]];
 
@@ -305,10 +296,10 @@ ISLOCAL =  (window.location.protocol === "file:");
     [sourceViewButtonBar setButtons:[sourceViewAddButton, sourceViewRemoveButton]];
        
     [sourceViewAddButton setTarget:self];
-    [sourceViewAddButton setAction:@selector(addUser:)];
+    [sourceViewAddButton setAction:@selector(addRepo:)];
     
     [sourceViewRemoveButton setTarget:self];
-    [sourceViewRemoveButton setAction:@selector(removeUser:)];
+    [sourceViewRemoveButton setAction:@selector(removeRepo:)];
 
     [view addSubview:sourceViewButtonBar];
     [outsideSplitView setButtonBar:sourceViewButtonBar forDividerAtIndex:0];
@@ -449,9 +440,11 @@ ISLOCAL =  (window.location.protocol === "file:");
     [label setStringValue:@"Loading..."];
     [label setFont:[CPFont boldSystemFontOfSize:16]];
     [label sizeToFit];
-    [label setFrameOrigin:CGPointMake(CGRectGetMidX([loadingView bounds]) - CGRectGetWidth([label bounds]) / 2, 40)]
+
     [label setAutoresizingMask: CPViewMinXMargin | CPViewMaxXMargin | CPViewMinYMargin | CPViewMaxYMargin];
     [loadingView addSubview:label];
+    [label setCenter:[loadingView center]];
+
     [view addSubview:loadingView];
     [loadingView setHidden:YES];
 
@@ -465,55 +458,106 @@ ISLOCAL =  (window.location.protocol === "file:");
     GITHUBUSERNAME = [usernameField stringValue];   
     GITHUBPASSWORD = [passwordField stringValue];
 
-    [projectsController allReposForUser:GITHUBUSERNAME];
-
-    [self beginInitalRepoDownloads];
     [CPApp endSheet:[sender window] returnCode:nil];
+
+    autopopulateRepos = [autopopulateCheckbox state] === CPOnState;
+
+    [projectsController reloadData];
 }
 
-- (void)addUser:(id)sender
+- (void)addRepo:(id)sender
 {
-    var newUser = prompt("Enter the new GitHub user");
-    if(newUser)
-        [projectsController allReposForUser:newUser];
+    var repoName = prompt("Enter the user/repo to add (e.g. 280north/cappuccino)");
+    [projectsController loadManualRepo:repoName];
 }
 
-- (void)removeUser:(id)sender
+- (void)removeRepo:(id)sender
 {
-    alert("coming soon");
+    [projectsController removeRepoAtIndex:[[sourceList selectedRowIndexes] firstIndex]];
 }
 
 
 /*TOOLBAR DELEGATES*/
+
 -(CPArray)toolbarAllowedItemIdentifiers:(CPToolbar)toolbar
 {
-    return [CPToolbarFlexibleSpaceItemIdentifier, CPToolbarSpaceItemIdentifier, @"searchfield", @"newissue", @"switchViewStatus"];
+    return [CPToolbarFlexibleSpaceItemIdentifier, CPToolbarSpaceItemIdentifier, @"searchfield", @"newissue", @"switchViewStatus", "commentissue", "openissue", "closeissue"];
 }
 
 -(CPArray)toolbarDefaultItemIdentifiers:(CPToolbar)toolbar
 {
-    // Is there a better way to make that segmented control stay centered? 
-    return [@"newissue", CPToolbarFlexibleSpaceItemIdentifier, CPToolbarSpaceItemIdentifier, CPToolbarSpaceItemIdentifier, CPToolbarSpaceItemIdentifier, CPToolbarSpaceItemIdentifier, @"switchViewStatus", CPToolbarFlexibleSpaceItemIdentifier, @"searchfield"];
+    return [@"switchViewStatus", CPToolbarSpaceItemIdentifier, CPToolbarSpaceItemIdentifier, CPToolbarFlexibleSpaceItemIdentifier, @"newissue", CPToolbarSpaceItemIdentifier, @"commentissue", CPToolbarSpaceItemIdentifier, "openissue", "closeissue", CPToolbarFlexibleSpaceItemIdentifier, @"searchfield"];
 }
 
 - (CPToolbarItem)toolbar:(CPToolbar)toolbar itemForItemIdentifier:(CPString)itemIdentifier willBeInsertedIntoToolbar:(BOOL)flag
 {
-    //return [CPToolbarFlexibleSpaceItemIdentifier, @"searchfield", @"newissue"];
     var mainBundle = [CPBundle mainBundle],
         toolbarItem = [[CPToolbarItem alloc] initWithItemIdentifier:itemIdentifier];
+
+    [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityHigh];
+
     switch(itemIdentifier)
     {
         case @"newissue":
-            var image = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"toolbar_main_subscribe.png"] size:CPSizeMake(32, 32)],
-                highlighted = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"toolbar_main_subscribe.png"] size:CPSizeMake(32, 32)];
+            var image = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"newissue.png"] size:CPSizeMake(32, 32)],
+                highlighted = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"newissue.png"] size:CPSizeMake(32, 32)];
+                
+            [toolbarItem setImage:image];
+            [toolbarItem setAlternateImage:highlighted];
+
+            [toolbarItem setTarget:issuesController];
+            [toolbarItem setAction:@selector(showNewIssueWindow:)];
+            [toolbarItem setLabel:"New Issue"];
+            [toolbarItem setTag:@"NewIssue"];
+            
+            [toolbarItem setMinSize:CGSizeMake(32, 32)];
+            [toolbarItem setMaxSize:CGSizeMake(32, 32)];
+        break;
+
+        case @"openissue":
+            var image = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"reopen.png"] size:CPSizeMake(32, 32)],
+                highlighted = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"reopen.png"] size:CPSizeMake(32, 32)];
                 
             [toolbarItem setImage:image];
             [toolbarItem setAlternateImage:highlighted];
             
             [toolbarItem setTarget:issuesController];
-            [toolbarItem setAction:@selector(showNewIssueWindow:)];
-            [toolbarItem setLabel:"New Issue"];
-            [toolbarItem setTag:@"NewIssue"];
+            [toolbarItem setAction:@selector(reopenActiveIssue:)];
+            [toolbarItem setLabel:"Re-open Issue"];
+            [toolbarItem setTag:@"Open"];
+            [toolbarItem setEnabled:NO];
+            
+            [toolbarItem setMinSize:CGSizeMake(32, 32)];
+            [toolbarItem setMaxSize:CGSizeMake(32, 32)];
+        break;
+
+        case @"closeissue":
+            var image = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"close.png"] size:CPSizeMake(32, 32)],
+                highlighted = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"close.png"] size:CPSizeMake(32, 32)];
+                
+            [toolbarItem setImage:image];
+            [toolbarItem setAlternateImage:highlighted];
+            
+            [toolbarItem setTarget:issuesController];
+            [toolbarItem setAction:@selector(promptUserToCloseIssue:)];
+            [toolbarItem setLabel:"Close Issue"];
+            [toolbarItem setTag:@"Close"];
+            
+            [toolbarItem setMinSize:CGSizeMake(32, 32)];
+            [toolbarItem setMaxSize:CGSizeMake(32, 32)];
+        break;
+
+        case @"commentissue":
+            var image = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"comment.png"] size:CPSizeMake(32, 32)],
+                highlighted = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"comment.png"] size:CPSizeMake(32, 32)];
+                
+            [toolbarItem setImage:image];
+            [toolbarItem setAlternateImage:highlighted];
+            
+            [toolbarItem setTarget:issuesController];
+            [toolbarItem setAction:@selector(commentOnSelectedIssue:)];
+            [toolbarItem setLabel:"Add Comment"];
+            [toolbarItem setTag:@"Comment"];
             
             [toolbarItem setMinSize:CGSizeMake(32, 32)];
             [toolbarItem setMaxSize:CGSizeMake(32, 32)];
@@ -529,7 +573,6 @@ ISLOCAL =  (window.location.protocol === "file:");
         break;
 
         case @"switchViewStatus":
-
             var aSwitch = [[CPSegmentedControl alloc] initWithFrame:CGRectMake(0,0,0,0)];
             [aSwitch setTrackingMode:CPSegmentSwitchTrackingSelectOne];
             [aSwitch setTarget:issuesController];
@@ -562,6 +605,7 @@ ISLOCAL =  (window.location.protocol === "file:");
 @end
 
 @implementation AppController (search)
+
 - (void)showSearchFilter
 {
     if(![searchFilterBar isHidden])    
@@ -581,21 +625,5 @@ ISLOCAL =  (window.location.protocol === "file:");
     [issuesScrollView setFrame:CGRectMake(0, 0, CGRectGetWidth(bounds), CGRectGetHeight(bounds) + 32)];
     [searchFilterBar setHidden:YES];
 }
-@end
 
-@implementation CPButtonBar (resizeIndicator)
-// FIX ME: I'm using this to get the resize cursor when you hover over 
-// the resize indicator. It might be best to take this out completly 
-// because overriding a method in a category is just asking for trouble.
-- (CPView)createEphemeralSubviewNamed:(CPString)aName
-{
-    if (aName === "resize-control-view")
-    {
-        var myView = [[CPView alloc] initWithFrame:CGRectMakeZero()];
-        myView._DOMElement.style.cursor = [[CPCursor resizeLeftRightCursor] _cssString];
-        return myView;
-    }
-
-    return [super createEphemeralSubviewNamed:aName];
-}
 @end
