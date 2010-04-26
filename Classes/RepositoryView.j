@@ -18,7 +18,7 @@
         nameField = [[CPTextField alloc] initWithFrame:CGRectMake(22, 4, width - 36, 20)];
 
         [nameField setAutoresizingMask:CPViewWidthSizable];
-        [nameField setFont:[CPFont boldSystemFontOfSize:13.0]];
+        [nameField setFont:[CPFont systemFontOfSize:13.0]];
         [nameField setLineBreakMode:CPLineBreakByTruncatingTail];
 
         [self addSubview:nameField];
