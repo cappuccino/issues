@@ -62,7 +62,7 @@ ISLOCAL =  (window.location.protocol === "file:");
 
 - (void)applicationDidFinishLaunching:(CPNotification)aNotification
 {
-    loginSheet = [[CPWindow alloc] initWithContentRect:CGRectMake(0,0,300,185) styleMask:CPDocModalWindowMask];
+    loginSheet = [[CPPanel alloc] initWithContentRect:CGRectMake(0,0,300,185) styleMask:CPClosableWindowMask];
     
     var loginLabel = [[CPTextField alloc] initWithFrame:CGRectMake(15, 10, 270, 30)];
     [loginLabel setStringValue:@"Login to"];
@@ -120,7 +120,8 @@ ISLOCAL =  (window.location.protocol === "file:");
 
     // FIX ME: this is shit!
     window.setTimeout(function(){
-        [CPApp beginSheet:loginSheet modalForWindow:theWindow modalDelegate:self didEndSelector:nil contextInfo:nil];
+        [loginSheet center];
+        [loginSheet makeKeyAndOrderFront:nil];
     },0);
     // Uncomment the following line to turn on the standard menu bar.
     //[CPMenu setMenuBarVisible:YES];
@@ -459,7 +460,7 @@ ISLOCAL =  (window.location.protocol === "file:");
     GITHUBUSERNAME = [usernameField stringValue];   
     GITHUBPASSWORD = [passwordField stringValue];
 
-    [CPApp endSheet:[sender window] returnCode:nil];
+    [loginSheet orderOut:nil];
 
     autopopulateRepos = [autopopulateCheckbox state] === CPOnState;
 
