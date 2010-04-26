@@ -65,15 +65,6 @@
     return self;  
 }
 
-- (void)doAction:(id)sender
-{
-    // this will either close or open the issue
-    if ([sender titleOfSelectedItem] === "Close")
-        [issueController promptUserToCloseIssue:self];
-    else if ([sender titleOfSelectedItem] === "Open")
-        [issueController reopenActiveIssue:self];
-}
-
 - (void)setIssue:(id)anIssue
 {
     activeIssue = anIssue;

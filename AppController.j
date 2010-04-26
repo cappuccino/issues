@@ -204,6 +204,8 @@ ISLOCAL =  (window.location.protocol === "file:");
     [[commentSheet contentView] addSubview:commentBody];
     [[commentSheet contentView] addSubview:addButton];
     [[commentSheet contentView] addSubview:cancelButton];
+
+    [[theWindow toolbar] validateVisibleToolbarItems];
 }
 
 - (void)setupViews
@@ -259,7 +261,6 @@ ISLOCAL =  (window.location.protocol === "file:");
     [sourceList setDelegate:projectsController];
     [sourceList setDataSource:projectsController];
     [sourceList setSelectionHighlightStyle:CPTableViewSelectionHighlightStyleSourceList];
-    [sourceList setAllowsEmptySelection:NO];
 
     var column = [[CPTableColumn alloc] initWithIdentifier:"sourcelist"];
     [[column headerView] setStringValue:"Projects"];
@@ -495,6 +496,7 @@ ISLOCAL =  (window.location.protocol === "file:");
         toolbarItem = [[CPToolbarItem alloc] initWithItemIdentifier:itemIdentifier];
 
     [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityHigh];
+    [toolbarItem setEnabled:NO];
 
     switch(itemIdentifier)
     {
@@ -525,7 +527,6 @@ ISLOCAL =  (window.location.protocol === "file:");
             [toolbarItem setAction:@selector(reopenActiveIssue:)];
             [toolbarItem setLabel:"Re-open Issue"];
             [toolbarItem setTag:@"Open"];
-            [toolbarItem setEnabled:NO];
             
             [toolbarItem setMinSize:CGSizeMake(32, 32)];
             [toolbarItem setMaxSize:CGSizeMake(32, 32)];
@@ -542,6 +543,7 @@ ISLOCAL =  (window.location.protocol === "file:");
             [toolbarItem setAction:@selector(promptUserToCloseIssue:)];
             [toolbarItem setLabel:"Close Issue"];
             [toolbarItem setTag:@"Close"];
+            [toolbarItem setEnabled:NO];
             
             [toolbarItem setMinSize:CGSizeMake(32, 32)];
             [toolbarItem setMaxSize:CGSizeMake(32, 32)];

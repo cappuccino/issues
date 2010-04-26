@@ -88,6 +88,8 @@
     }
 
     [[appController sourceList] reloadData];
+
+    [[appController sourceList] selectRowIndexes:[CPIndexSet indexSet] byExtendingSelection:NO];    //FIXME an errant cache in CPTableView.
     [[appController sourceList] selectRowIndexes:[CPIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
 }
 
@@ -104,16 +106,16 @@
     repositories.splice(anIndex, 1);
 
     [[appController sourceList] reloadData];
+    [[appController sourceList] deselectAll];
 }
 
 /*Source list Delegates*/
 - (void)tableViewSelectionDidChange:(id)notification
 {
-    var item = [repositories objectAtIndex:[[[appController sourceList] selectedRowIndexes] firstIndex]];
+    var index = [[[appController sourceList] selectedRowIndexes] firstIndex],
+        item = index >= 0 ? [repositories objectAtIndex:index] : nil;
 
     [issuesController setActiveRepo:item];
-    [issuesController allIssuesForRepo:[item valueForKey:@"name"] user:[item valueForKey:@"owner"]];
-    [issuesController allTagsForRepo:[item valueForKey:@"name"] user:[item valueForKey:@"owner"]];
 }
 
 - (id)tableView:(CPTableView)aTableView objectValueForTableColumn:(id)aColumn row:(int)aRow

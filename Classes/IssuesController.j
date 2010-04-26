@@ -52,24 +52,34 @@
     return self;
 }
 
-- (void)allIssuesForRepo:(CPString)theRepo user:(id)theUser
+- (void)setActiveRepo:(id)aRepo
 {
-    //activeRepo = theRepo;
-    //activeuser = theUser;
+    if (activeRepo === aRepo)
+        return;
 
-    var theReadURL = "https://" + GITHUBUSERNAME + ":" + GITHUBPASSWORD + "@github.com/api/v2/json/issues/list/" + theUser + "/" + theRepo + "/" + ((viewingOpenIssues) ? "open" : "closed"),
-        theRequest = [[CPURLRequest alloc] initWithURL:theReadURL];
+    activeRepo = aRepo;
 
-    //[requests addReqeust theRequest];
-    downloadIssuesConnection = [[CPJSONPConnection alloc] initWithRequest:theRequest callback:@"callback" delegate:self startImmediately:YES];
-    [[appController loadingView] setHidden:NO];
+    if (activeRepo)
+        [self reloadData];
+    else
+        visibleIssues = [];
+
+    [[appController issuesTable] reloadData];
+
+    [[[appController theWindow] toolbar] validateVisibleToolbarItems];
 }
 
-- (void)allTagsForRepo:(CPString)theRepo user:(id)theUser
+- (void)reloadData
 {
-    var theReadURL = "https://" + GITHUBUSERNAME + ":" + GITHUBPASSWORD + "@github.com/api/v2/json/issues/labels/" + theUser + "/" + theRepo,
+    visibleIssues = [];
+
+    var theUser = [activeRepo valueForKey:@"owner"],
+        theRepo = [activeRepo valueForKey:@"name"],
+        theReadURL = "https://" + GITHUBUSERNAME + ":" + GITHUBPASSWORD + "@github.com/api/v2/json/issues/list/" + theUser + "/" + theRepo + "/" + ((viewingOpenIssues) ? "open" : "closed"),
         theRequest = [[CPURLRequest alloc] initWithURL:theReadURL];
-    downloadTagsConnection = [[CPJSONPConnection alloc] initWithRequest:theRequest callback:@"callback" delegate:self startImmediately:YES];
+
+    downloadIssuesConnection = [[CPJSONPConnection alloc] initWithRequest:theRequest callback:@"callback" delegate:self startImmediately:YES];
+    [[appController loadingView] setHidden:NO];
 }
 
 - (void)commentsForActiveIssue 
@@ -93,13 +103,13 @@
 
 - (void)commentOnActiveIssue:(id)sender
 {
-  [CPApp endSheet:[sender window] returnCode:nil];
+    [CPApp endSheet:[sender window] returnCode:nil];
 
-   var theUser = [activeRepo valueForKey:@"owner"],
-       anIssueNumber = [activeIssue valueForKey:@"number"],
-       repo = [activeRepo valueForKey:@"name"],
-       aComment = escape([[appController commentBody] stringValue]),
-       requestSuffix = "comment/" + theUser + "/" + repo + "/" + anIssueNumber + "?comment=" + aComment;
+    var theUser = [activeRepo valueForKey:@"owner"],
+        anIssueNumber = [activeIssue valueForKey:@"number"],
+        repo = [activeRepo valueForKey:@"name"],
+        aComment = escape([[appController commentBody] stringValue]),
+        requestSuffix = "comment/" + theUser + "/" + repo + "/" + anIssueNumber + "?comment=" + aComment;
 
     if (ISLOCAL)
     {
@@ -186,20 +196,23 @@
     else
         viewingOpenIssues = NO;
 
-    [self allIssuesForRepo:[activeRepo valueForKey:@"name"] user:[activeRepo valueForKey:@"owner"]];
+    [self reloadData];
     [[appController issuesTable] selectRowIndexes:[CPIndexSet indexSet] byExtendingSelection:NO];
-
-    [[[appController theWindow] toolbar] validateVisibleToolbarItems];
 }
 
 - (void)validateToolbarItem:(CPToolbarItem)anItem
 {
-    if ([anItem itemIdentifier] === "openissue")
-        return !viewingOpenIssues;
-    else if ([anItem itemIdentifier] === "closeissue")
-        return viewingOpenIssues;
+    var hasSelection = [[[appController issuesTable] selectedRowIndexes] count],
+        identifier = [anItem itemIdentifier];
 
-    return YES;
+    if (identifier === "openissue")
+        return !viewingOpenIssues && hasSelection;
+    else if (identifier === "closeissue")
+        return viewingOpenIssues && hasSelection;
+    else if (identifier === "commentissue")
+        return hasSelection;
+    else 
+        return !!activeRepo;
 }
 
 - (void)createNewIssue:(id)sender
@@ -255,6 +268,8 @@
 
     [self commentsForActiveIssue];
     [issueView setIssue:activeIssue];
+
+    [[[appController theWindow] toolbar] validateVisibleToolbarItems];
 }
 
 - (id)tableView:(CPTableView)aTableView objectValueForTableColumn:(int)aColumn row:(int)aRow
@@ -319,7 +334,9 @@
             var anIssue = [CPDictionary dictionaryWithJSObject:issue recursively:NO];
             [theIssues addObject:anIssue];
         }
-        visibleIssues = [CPArray arrayWithArray:theIssues];
+
+        visibleIssues = theIssues;
+
         [self searchFieldDidChange:nil];
         [[appController issuesTable] reloadData];
     }
@@ -377,6 +394,7 @@
 @end
 
 @implementation IssuesController (search)
+
 - (void)searchFieldDidChange:(id)sender
 {
     if(sender)
@@ -430,4 +448,5 @@
     searchFilter = [sender tag];
     [self searchFieldDidChange:nil];
 }
+
 @end
