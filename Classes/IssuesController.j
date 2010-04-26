@@ -256,7 +256,7 @@
     [[appController newIssueWindow] orderFront:self];
 }
 
-/*Source list Delegates*/
+/*Issues Table Delegates*/
 - (void)tableViewSelectionDidChange:(id)notification
 {
     var index = [[[notification object] selectedRowIndexes] firstIndex];
@@ -389,7 +389,10 @@
 -(void)connectionDidFinishLoading:(CPURLConnection)connection
 {
     if(connection === downloadIssuesConnection)
+    {
         [[appController loadingView] setHidden:YES];
+        [[appController issuesTable] deselectAll];
+    }
 }
 @end
 
