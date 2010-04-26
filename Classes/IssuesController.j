@@ -194,6 +194,12 @@
 
 - (void)validateToolbarItem:(CPToolbarItem)anItem
 {
+    if (([anItem itemIdentifier] === @"openissue" || [anItem itemIdentifier] === @"closeissue") && [[[appController issuesTable] selectedRowIndexes] count] < 1)
+    {
+        console.log("asdasdasd"); 
+       return NO;
+    }
+
     if ([anItem itemIdentifier] === "openissue")
         return !viewingOpenIssues;
     else if ([anItem itemIdentifier] === "closeissue")
@@ -243,7 +249,7 @@
     [[appController newIssueWindow] orderFront:self];
 }
 
-/*Source list Delegates*/
+/*Issues Table Delegates*/
 - (void)tableViewSelectionDidChange:(id)notification
 {
     var index = [[[notification object] selectedRowIndexes] firstIndex];
@@ -255,6 +261,8 @@
 
     [self commentsForActiveIssue];
     [issueView setIssue:activeIssue];
+
+    [[[appController theWindow] toolbar] validateVisibleToolbarItems];
 }
 
 - (id)tableView:(CPTableView)aTableView objectValueForTableColumn:(int)aColumn row:(int)aRow
@@ -372,7 +380,10 @@
 -(void)connectionDidFinishLoading:(CPURLConnection)connection
 {
     if(connection === downloadIssuesConnection)
+    {
         [[appController loadingView] setHidden:YES];
+        [[appController issuesTable] deselectAll];
+    }
 }
 @end
 
