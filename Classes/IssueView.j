@@ -95,8 +95,8 @@
         modified = @"Modified on: " + [CPDate simpleDate:[anIssue valueForKey:@"updated_at"]],
         body = [anIssue valueForKey:@"body"];
 
-    var html = "<style>body{font-family:\"Helvetica Neue\", Arial, Helvetica, Geneva, sans-serif}h1{margin:0}.subinfo{font-size:10px;line-height:10px}.issueBody{margin-bottom:20px;font-size:13px}.commentUser{font-weight:700;font-size:12px}.commentBody{font-size:12px;margin-bottom:10px}</style>";
-        html += "<h1>" + title + "</h1><br />";
+    var html = "<html><head><style>body{font-family:\"Helvetica Neue\", Arial, Helvetica, Geneva, sans-serif; padding:0; margin:0;} .wrapper {padding:1em;} h1{margin:0}.subinfo{font-size:10px;line-height:10px}.issueBody{margin-bottom:20px;font-size:13px}.commentUser{font-weight:700;font-size:12px}.commentBody{font-size:12px;margin-bottom:10px}</style></head><body>";
+        html += "<div class='wrapper'><h1>" + title + "</h1><br />";
         html += "<span class='subinfo'>" + creationDate + " <strong>" + user + "</strong> <br />";
         html += modified + "</span> <br /><br />";
         html += "<div class='issueBody'>" + body + "</div>";
@@ -121,6 +121,8 @@
         html += "<div class='commentBody'>" + bodyText + "</div>";
     }
     issueHTML += html;
+    issueHTML += "</div></body></html>"
+    
     return issueHTML;
 }
 

@@ -273,7 +273,7 @@ ISLOCAL =  (window.location.protocol === "file:");
     
     [sourceList addTableColumn:column];
     [sourceList setColumnAutoresizingStyle:CPTableViewUniformColumnAutoresizingStyle];
-    [sourceList setRowHeight:38.0];
+    [sourceList setRowHeight:28.0];
 
     [sourceList setBackgroundColor:[CPColor colorWithHexString:@"dde8f7"]];
 
