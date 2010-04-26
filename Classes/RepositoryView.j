@@ -34,7 +34,7 @@
     repository = aValue;
 
     [nameField setStringValue:[repository objectForKey:"owner"]+"/"+[repository objectForKey:"name"]];
-    [lockImageView setHidden:[repository objectForKey:"private"]];
+    [lockImageView setHidden:![repository objectForKey:"private"]];
 }
 
 - (void)setThemeState:(CPThemeState)aState
