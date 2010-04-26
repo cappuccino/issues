@@ -407,7 +407,7 @@ ISLOCAL =  (window.location.protocol === "file:");
     var desc = [CPSortDescriptor sortDescriptorWithKey:@"votes" ascending:YES],
         votes = [[CPTableColumn alloc] initWithIdentifier:"votes"];
     [[votes headerView] setStringValue:"Votes"];
-    [votes setWidth:100.0];
+    [votes setWidth:50.0];
     [votes setMinWidth:50.0];
 
     [votes setEditable:YES];
