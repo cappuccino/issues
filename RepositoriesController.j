@@ -73,6 +73,19 @@
     if (!repoIdentifier)
         return;
 
+    var count = sortedRepos.length,
+        index = 0;
+
+    for (; index < count; index++)
+    {
+        if (sortedRepos[index].identifier === repoIdentifier)
+        {
+            [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:existingIndex] byExtendingSelection:NO];
+            [self tableViewSelectionDidChange:nil];
+            return;
+        }
+    }
+
     [[GithubAPIController sharedController] loadRepositoryWithIdentifier:repoIdentifier callback:function(repo)
     {
         if (!repo)
@@ -80,6 +93,8 @@
 
         sortedRepos.unshift(repo);
         [sourcesListView reloadData];
+        [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
+        [self tableViewSelectionDidChange:nil];
     }];
 
 	[self hideNoReposView];
@@ -87,8 +102,20 @@
 
 - (@action)removeRepository:(id)sender
 {
+    var selectedRow = [sourcesListView selectedRow];
+    if (selectedRow < 0)
+        return;
+
+    sortedRepos.splice(selectedRow, 1);
+    [sourcesListView reloadData];
+
 	if (sortedRepos.length === 0)
 		[self showNoReposView];
+	else
+	{
+        [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:MAX(MIN(selectedRow, sortedRepos.length - 1), 0)] byExtendingSelection:NO];
+        [self tableViewSelectionDidChange:nil];
+	}
 }
 
 - (void)tableViewSelectionDidChange:(CPNotification)aNotification

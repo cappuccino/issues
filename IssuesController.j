@@ -150,7 +150,11 @@ var IssuesHTMLTemplate = nil;
 	[[GithubAPIController sharedController] loadIssuesForRepository:repo callback:function()
 	{
 		[issuesTableView reloadData];
-		[self showView:nil];
+
+		if (repo[displayedIssuesKey].length)
+			[self showView:nil];
+		else
+			[self showView:noIssuesView];
 	}];
 }
 
