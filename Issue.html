@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Github Issue #{{number}}</title>
+        <style type="text/css" media="screen">
+body {
+    background-color: rgb(237, 241, 244);
+    background-image: -webkit-gradient(linear, left top, left bottom, from(rgb(222, 226, 229)), to(rgb(237, 241, 244)));
+    background-repeat: no-repeat;
+    border-top: 1px solid rgb(208, 212, 215);
+    margin: 0;
+    padding: 0;
+    color: rgb(77, 77, 77);
+    font-size: 10px;
+    font-family: "Helvetica Neue", "Lucida Grande", Arial, sans-serif;
+    line-height: 2em;
+    min-width: 500px;
+}
+
+h1 {
+    color: black;
+    padding-left: 55px;
+    margin-bottom: -1px;
+}
+
+#wrapper {
+    padding: 2em;
+    min-width: 500px;
+}
+
+.issue {
+    background-color: rgb(248, 248, 248);
+    position: relative;
+    font-size: 12px;
+    line-height: 24px;
+    -webkit-box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.3);
+    -moz-box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.3);
+    box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.3);
+}
+
+.issue p {
+    margin: 0;
+    padding: 0;
+    margin-top: 24px;
+}
+
+.issue-wrapper:after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+}
+
+.issue-content {
+    width: 70%;
+    float: left;
+}
+
+.issue-content-wrapper {
+    margin: 1em;
+    padding-top: 0.2em;
+    padding-bottom: 1em;
+}
+
+.issue-meta {
+    width: 30%;
+    float: left;
+    margin-top: 1.5em;
+}
+
+.issue-meta-wrapper {
+    padding: 1em;
+}
+
+.issue-meta-box {
+    border: 1px solid rgb(232, 232, 232);
+    margin-top: -1px;
+    padding: 0.5em 1em;
+}
+
+.issue-meta-box h3 {
+    text-transform: uppercase;
+    color: rgb(194, 194, 194);
+    margin: 0;
+    padding: 0;
+    font-weight: normal;
+    font-size: 11px;
+}
+
+.issue-image-area {
+    position: absolute;
+    top: -8px;
+    right: 6px;
+    -webkit-transform: rotate(4deg);
+    -moz-transform: rotate(4deg);
+    background: white;
+    border: 1px solid rgb(222, 222, 222);
+    -webkit-box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.2);
+    -moz-box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.2);
+    box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.2);
+    width: 82px;
+    height: 82px;
+}
+
+img.issue-author-image {
+    position: absolute;
+    margin: auto;
+    width: 68px;
+    height: 68px;
+    top: 7px;
+    left: 7px;    
+}
+
+.issue-image-paperclip-placeholder {
+    width: 35px;
+    height: 50px;
+    position: absolute;
+    background-image: url("Resources/paperclip.png");
+    -webkit-transform: translate(-1px);
+    -moz-transform: translate(-1px);
+    right: -13px;
+}
+
+.issue-left-border-placeholder {
+    position: absolute;
+    left: 4.2em;
+    top: 2em;
+    bottom: 2em;
+    width: 1px;
+    background-color: rgb(235, 235, 235);
+}
+
+.issue-body {
+    background-image: url("Resources/textgrid.png");
+    background-repeat: repeat-x repeat-y;
+    padding: 3px 1em 3em 55px;
+    min-height: 200px;
+}
+
+.issue-body ul, .issue-body li {
+	padding-top: 0;
+	margin-top: 0;
+}
+
+.comment {
+    margin: 2em 4em 1em 4em;
+}
+
+.comment-body {
+    float: left;
+    width: 75%;
+}
+
+.comment-body-wrapper {
+    font-size: 12px;
+    background-color: rgb(246, 248, 222);
+    border-radius: 8px;
+    -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+    padding: 0.5em 2em 0.5em 2em;
+    -webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.3);
+    -moz-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.3);
+    box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.3);
+    position: relative;
+    min-height: 44px;
+}
+
+.comment-accessory {
+    width: 0px;
+    height: 1px;
+    position: absolute;
+    right: -10px;
+    top: 20px;
+    border-left: 10px solid rgb(246, 248, 222);
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-right: none;
+}
+
+.comment-accessory-shadow {
+    width: 0px;
+    height: 1px;
+    position: absolute;
+    right: -10px;
+    top: 21px;
+    border-left: 10px solid rgba(0, 0, 0, 0.2);
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-right: none;
+}
+
+.comment-meta {
+    float: left;
+    width: 25%;
+}
+
+.comment-meta-wrapper {
+    padding: 1em 1em 1em 3em;
+}
+
+.comment:after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+}
+
+.comment-author-image {
+    float: left;
+    margin-top: 4px;
+    height: 28px;
+    width: 28px;
+    padding: 2px;
+    background-color: white;
+    border: 1px solid rgb(222, 222, 222);
+    -webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.3);    
+    -moz-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.3);    
+    box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.3);    
+}
+
+.comment-meta-meta {
+    margin-left: 40px;
+}
+
+.comment-author {
+    font-weight: bold;
+    line-height: 10px;
+    padding-top: 8px;
+}
+
+.comment-date {
+    color: rgb(104, 104, 104);
+}
+        </style>
+    </head>
+    <body>
+        <div id="wrapper">
+            <div id="first-issue" class="issue">
+                <div class="issue-wrapper">
+
+                    <div class="issue-closed-placeholder"></div>
+                    <div class="issue-left-border-placeholder"></div>
+
+                    <div class="issue-content">
+                        <div class="issue-content-wrapper">
+                            <h1 class="issue-title">{{title}}</h1>
+                            <div class="issue-body">
+                                {{{body_html}}}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="issue-meta">
+                        <div class="issue-meta-wrapper">
+                            {{#has_user_image}}
+                            <div class="issue-image-area">
+                                <img class="issue-author-image" src="http://www.gravatar.com/avatar/{{user_email_hash}}.png?s=68&d=identicon" alt="{{user_email}}" />
+                                <div class="issue-image-paperclip-placeholder"></div>
+                            </div>
+                            {{/has_user_image}}
+                            <div class="issue-meta-box first-box">
+                                <h3 class="issue-meta-title">Submitter</h3>
+                                <span class="issue-meta-content">{{user}}</span>
+                            </div>
+                            <div class="issue-meta-box first-box">
+                                <h3 class="issue-meta-title">Issue Number</h3>
+                                <span class="issue-meta-content">#{{number}}</span>
+                            </div>
+                            <div class="issue-meta-box first-box">
+                                <h3 class="issue-meta-title">Created</h3>
+                                <span class="issue-meta-content">{{human_readable_created_date}}</span>
+                            </div>
+                            <div class="issue-meta-box first-box">
+                                <h3 class="issue-meta-title">Last Updated</h3>
+                                <span class="issue-meta-content">{{human_readable_updated_date}}</span>
+                            </div>
+                            <div class="issue-meta-box last-box">
+                                <h3 class="issue-meta-title">Tags</h3>
+                                <span class="issue-meta-content">{{comma_separated_tags}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="comments">
+			{{#all_comments}}
+                <div class="comment">
+                    <div class="comment-body">
+                        <div class="comment-body-wrapper">
+                            <div class="comment-accessory-shadow"></div>
+                            <div class="comment-accessory"></div>
+                            {{{.body_html}}}
+                        </div>
+                    </div>
+                    <div class="comment-meta">
+                        <div class="comment-meta-wrapper">
+                            <div class="comment-author-image"><img src="http://www.gravatar.com/avatar/{{.user_email_hash}}.png?s=28&d=identicon" alt="{{.user}}" /></div>
+                            <div class="comment-meta-meta">
+                                <div class="comment-author">{{.user}}</div>
+                                <div class="comment-date">{{.human_readable_date}}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+			{{/all_comments}}
+            </div>
+
+        </div>
+    </body>
+</html>
