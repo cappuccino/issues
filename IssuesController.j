@@ -218,7 +218,7 @@ var IssuesHTMLTemplate = nil;
 		item = nil;
 
 	if (row >= 0)
-        item = [(filteredIssues || repo[displayedIssuesKey]) objectAtIndex:row],
+        item = [(filteredIssues || repo[displayedIssuesKey]) objectAtIndex:row];
 
 	if (item)
 	{

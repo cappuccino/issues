@@ -27,7 +27,7 @@
     if (aState === CPThemeStateSelected)
 	{
         [nameField setTextColor:[CPColor whiteColor]];
-		[nameField setTextShadowColor:[CPColor blackColor]];
+		[nameField setTextShadowColor:[CPColor colorWithCalibratedRed: 0 green: 0 blue: 0 alpha:0.45]];
 		[nameField setTextShadowOffset:CGSizeMake(0.0, -1.0)];
 	}
 }

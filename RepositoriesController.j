@@ -46,6 +46,11 @@
     [sourcesListView setColumnAutoresizingStyle:CPTableViewUniformColumnAutoresizingStyle];
     [sourcesListView setRowHeight:28.0];
     [sourcesListView setSelectionHighlightStyle:CPTableViewSelectionHighlightStyleSourceList];
+    sourcesListView._sourceListActiveGradient = CGGradientCreateWithColorComponents(CGColorSpaceCreateDeviceRGB(), [161.0/255.0, 192.0/255.0, 210.0/255.0,1.0, 99.0/255.0, 150.0/255.0, 180.180/255.0, 1.0], [0,1], 2);
+    sourcesListView._sourceListActiveTopLineColor = [CPColor colorWithCalibratedRed:(106.0/255.0) green:(154.0/255.0) blue:(182.0/255.0) alpha:1.0];
+    sourcesListView._sourceListActiveBottomLineColor = [CPColor colorWithCalibratedRed:(87.0/255.0) green:(127.0/255.0) blue:(151.0/255.0) alpha:1.0];
+
+    [repositoryView setBackgroundColor:[CPColor colorWithHexString:@"eef2f8"]];
 
 	[self showNoReposView];
 }
