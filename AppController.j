@@ -85,6 +85,8 @@
             [toolbarItem setView:userView];
             [toolbarItem setMinSize:CGSizeMake(180, 32)];
             [toolbarItem setMaxSize:CGSizeMake(180, 32)];
+            [toolbarItem setTarget:[GithubAPIController sharedController]];
+            [toolbarItem setAction:@selector(promptForAuthentication:)];
         break;
         
         case @"newissue":
