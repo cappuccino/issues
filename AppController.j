@@ -101,6 +101,7 @@
             
             [toolbarItem setMinSize:CGSizeMake(32, 32)];
             [toolbarItem setMaxSize:CGSizeMake(32, 32)];
+            [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityLow];
         break;
 
         case @"openissue":
@@ -117,6 +118,7 @@
             
             [toolbarItem setMinSize:CGSizeMake(32, 32)];
             [toolbarItem setMaxSize:CGSizeMake(32, 32)];
+            [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityLow];
         break;
 
         case @"closeissue":
@@ -134,6 +136,7 @@
             
             [toolbarItem setMinSize:CGSizeMake(32, 32)];
             [toolbarItem setMaxSize:CGSizeMake(32, 32)];
+            [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityLow];
         break;
 
         case @"commentissue":
@@ -150,6 +153,7 @@
             
             [toolbarItem setMinSize:CGSizeMake(32, 32)];
             [toolbarItem setMaxSize:CGSizeMake(32, 32)];
+            [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityLow];
         break;
 
         case @"searchfield":
@@ -161,6 +165,7 @@
             [toolbarItem setView:searchField];
             [toolbarItem setLabel:"Search Issues"];
             [toolbarItem setTag:@"SearchIssues"];
+            [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityHigh];
             
             [toolbarItem setMinSize:CGSizeMake(200, 30)];
             [toolbarItem setMaxSize:CGSizeMake(200, 30)];
