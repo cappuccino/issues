@@ -160,7 +160,7 @@ this.makeHtml = function(text) {
     var left = RegExp.leftContext
     var right = RegExp.rightContext
     if (left.match(/<[^>]+$/) && right.match(/^[^>]*>/)) {return wholeMatch}
-    return "<a href='" + wholeMatch + "'>" + wholeMatch + "</a>";
+    return "<a target=\"_blank\" href='" + wholeMatch + "'>" + wholeMatch + "</a>";
   });
   text = text.replace(/[a-z0-9_\-+=.]+@[a-z0-9\-]+(\.[a-z0-9-]+)+/ig, function(wholeMatch){return "<a href='mailto:" + wholeMatch + "'>" + wholeMatch + "</a>";});
 
@@ -170,7 +170,7 @@ this.makeHtml = function(text) {
     var left = RegExp.leftContext
     var right = RegExp.rightContext
     if (left.match(/@$/) || (left.match(/<[^>]+$/) && right.match(/^[^>]*>/))) {return wholeMatch;}
-    return "<a href='http://github.com/" + GitHub.nameWithOwner + "/commit/" + wholeMatch + "'>" + wholeMatch.substring(0,7) + "</a>";
+    return "<a target=\"_blank\" href='http://github.com/" + GitHub.nameWithOwner + "/commit/" + wholeMatch + "'>" + wholeMatch.substring(0,7) + "</a>";
   });
 
   // ** GFM ** Auto-link user@sha1 if GitHub.nameWithOwner is defined
@@ -180,12 +180,12 @@ this.makeHtml = function(text) {
     var left = RegExp.leftContext
     var right = RegExp.rightContext
     if (left.match(/\/$/) || (left.match(/<[^>]+$/) && right.match(/^[^>]*>/))) {return wholeMatch;}
-    return "<a href='http://github.com/" + username + "/" + GitHub.repoName + "/commit/" + sha + "'>" + username + "@" + sha.substring(0,7) + "</a>";
+    return "<a target=\"_blank\" href='http://github.com/" + username + "/" + GitHub.repoName + "/commit/" + sha + "'>" + username + "@" + sha.substring(0,7) + "</a>";
   });
 
   // ** GFM ** Auto-link user/repo@sha1
   text = text.replace(/([a-z0-9_\-+=.]+\/[a-z0-9_\-+=.]+)@([a-f0-9]{40})/ig, function(wholeMatch,repo,sha){
-    return "<a href='http://github.com/" + repo + "/commit/" + sha + "'>" + repo + "@" + sha.substring(0,7) + "</a>";
+    return "<a target=\"_blank\" href='http://github.com/" + repo + "/commit/" + sha + "'>" + repo + "@" + sha.substring(0,7) + "</a>";
   });
 
   // ** GFM ** Auto-link #issue if GitHub.nameWithOwner is defined
@@ -194,7 +194,7 @@ this.makeHtml = function(text) {
     var left = RegExp.leftContext
     var right = RegExp.rightContext
     if (left == "" || left.match(/[a-z0-9_\-+=.]$/) || (left.match(/<[^>]+$/) && right.match(/^[^>]*>/))) {return wholeMatch;}
-    return "<a href='http://github.com/" + GitHub.nameWithOwner + "/issues/#issue/" + issue + "'>" + wholeMatch + "</a>";
+    return "<a target=\"_blank\" href='http://github.com/" + GitHub.nameWithOwner + "/issues/#issue/" + issue + "'>" + wholeMatch + "</a>";
   });
 
   // ** GFM ** Auto-link user#issue if GitHub.nameWithOwner is defined
@@ -204,12 +204,12 @@ this.makeHtml = function(text) {
     var left = RegExp.leftContext
     var right = RegExp.rightContext
     if (left.match(/\/$/) || (left.match(/<[^>]+$/) && right.match(/^[^>]*>/))) {return wholeMatch;}
-    return "<a href='http://github.com/" + username + "/" + GitHub.repoName + "/issues/#issue/" + issue + "'>" + wholeMatch + "</a>";
+    return "<a target=\"_blank\" href='http://github.com/" + username + "/" + GitHub.repoName + "/issues/#issue/" + issue + "'>" + wholeMatch + "</a>";
   });
 
   // ** GFM ** Auto-link user/repo#issue
   text = text.replace(/([a-z0-9_\-+=.]+\/[a-z0-9_\-+=.]+)#([0-9]+)/ig, function(wholeMatch,repo,issue){
-    return "<a href='http://github.com/" + repo + "/issues/#issue/" + issue + "'>" + wholeMatch + "</a>";
+    return "<a target=\"_blank\" href='http://github.com/" + repo + "/issues/#issue/" + issue + "'>" + wholeMatch + "</a>";
   });
 
 	return text;
@@ -602,7 +602,7 @@ var writeAnchorTag = function(wholeMatch,m1,m2,m3,m4,m5,m6,m7) {
 	}
 
 	url = escapeCharacters(url,"*_");
-	var result = "<a href=\"" + url + "\"";
+	var result = "<a target=\"_blank\" href=\"" + url + "\"";
 
 	if (title != "") {
 		title = title.replace(/"/g,"&quot;");
@@ -1195,7 +1195,7 @@ var _EncodeBackslashEscapes = function(text) {
 
 var _DoAutoLinks = function(text) {
 
-	text = text.replace(/<((https?|ftp|dict):[^'">\s]+)>/gi,"<a href=\"$1\">$1</a>");
+	text = text.replace(/<((https?|ftp|dict):[^'">\s]+)>/gi,"<a target=\"_blank\" href=\"$1\">$1</a>");
 
 	// Email addresses: <address@domain.foo>
 
