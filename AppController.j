@@ -46,7 +46,7 @@
 
 -(CPArray)toolbarDefaultItemIdentifiers:(CPToolbar)toolbar
 {
-    return ["loginStatus", CPToolbarSpaceItemIdentifier, "switchViewStatus", CPToolbarFlexibleSpaceItemIdentifier, "newissue", CPToolbarSpaceItemIdentifier, @"commentissue", CPToolbarSpaceItemIdentifier, "openissue", "closeissue", CPToolbarFlexibleSpaceItemIdentifier, @"searchfield"];
+    return ["loginStatus", CPToolbarSpaceItemIdentifier, "switchViewStatus", CPToolbarFlexibleSpaceItemIdentifier, "newissue", @"commentissue", "openissue", "closeissue", CPToolbarFlexibleSpaceItemIdentifier, @"searchfield"];
 }
 
 - (CPToolbarItem)toolbar:(CPToolbar)toolbar itemForItemIdentifier:(CPString)itemIdentifier willBeInsertedIntoToolbar:(BOOL)flag
@@ -131,7 +131,12 @@
         break;
 
         case @"searchfield":
-            //[toolbarItem setView:searchField];
+            var searchField = [[CPSearchField alloc] initWithFrame:CGRectMake(0,0, 140, 30)];
+            [searchField setTarget:issuesController];
+            [searchField setAction:@selector(searchFieldDidChange:)];
+            [searchField setSendsSearchStringImmediately:YES];
+
+            [toolbarItem setView:searchField];
             [toolbarItem setLabel:"Search Issues"];
             [toolbarItem setTag:@"SearchIssues"];
             

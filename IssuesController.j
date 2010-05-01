@@ -1,6 +1,7 @@
 
 @import <Foundation/CPObject.j>
 @import "CPDate+Additions.j"
+@import "FilterBar.j"
 @import "Markdown.js"
 @import "Mustache.js"
 
@@ -8,18 +9,23 @@ var IssuesHTMLTemplate = nil;
 
 @implementation IssuesController : CPObject
 {
-    Repository repo @accessors;
+    Repository  repo @accessors;
 
 	@outlet CPView      detailParentView;
     @outlet CPView      noIssuesView;
 	@outlet CPView      noRepoView;
 	@outlet CPView		loadingIssuesView;
 			CPView		displayedView;
+			FilterBar   filterBar;
 
     @outlet CPTableView issuesTableView @accessors;
     @outlet CPWebView   issueWebView @accessors;
 
-    CPString displayedIssuesKey;
+    CPString    displayedIssuesKey;
+
+    CPArray     filteredIssues;
+    CPString    searchString;
+    unsigned    searchFilter;
 }
 
 + (void)initialize
@@ -98,6 +104,11 @@ var IssuesHTMLTemplate = nil;
 
     [issuesTableView setUsesAlternatingRowBackgroundColors:YES];
     [issuesTableView setColumnAutoresizingStyle:CPTableViewLastColumnOnlyAutoresizingStyle];
+
+    filterBar = [[FilterBar alloc] initWithFrame:CGRectMake(0, 0, 400, 32)];
+    [filterBar setAutoresizingMask:CPViewWidthSizable];
+    [filterBar setDelegate:self];
+    searchFilter = 0;
 }
 
 - (id)init
@@ -114,6 +125,7 @@ var IssuesHTMLTemplate = nil;
 {
     displayedIssuesKey = [sender selectedTag];
     [issuesTableView reloadData];
+    [self searchFieldDidChange:nil];
 }
 
 - (@action)closeIssue:(id)sender
@@ -253,7 +265,7 @@ var IssuesHTMLTemplate = nil;
 - (id)tableView:(CPTableView)aTableView objectValueForTableColumn:(int)aColumn row:(int)aRow
 {
     var columnIdentifier = [aColumn identifier],
-        issue  = [repo[displayedIssuesKey] objectAtIndex:aRow],
+        issue = [(filteredIssues || repo[displayedIssuesKey]) objectAtIndex:aRow],
         value = [issue objectForKey:columnIdentifier];
 
     //special cases
@@ -265,7 +277,9 @@ var IssuesHTMLTemplate = nil;
 
 - (int)numberOfRowsInTableView:(CPTableView)aTableView
 {
-    if (repo && repo[displayedIssuesKey])
+    if (filteredIssues)
+        return filteredIssues.length;
+    else if (repo && repo[displayedIssuesKey])
         return repo[displayedIssuesKey].length;
     else
         return 0;
@@ -274,7 +288,7 @@ var IssuesHTMLTemplate = nil;
 - (void)tableView:(CPTableView)aTableView sortDescriptorsDidChange:(CPArray)oldDescriptors
 {   
     var newDescriptors = [aTableView sortDescriptors],
-		issues = repo[displayedIssuesKey],
+		issues = filteredIssues || repo[displayedIssuesKey],
 		currentIssue = issues[[aTableView selectedRow]];
 
     [issues sortUsingDescriptors:newDescriptors];
@@ -283,6 +297,91 @@ var IssuesHTMLTemplate = nil;
 	var newIndex = [issues indexOfObject:currentIssue];
     if (newIndex >= 0)
         [aTableView selectRowIndexes:[CPIndexSet indexSetWithIndex:newIndex] byExtendingSelection:NO];
+}
+
+- (void)searchFieldDidChange:(id)sender
+{
+    if (sender)
+        searchString = [sender stringValue];
+
+    if (searchString)
+    {
+        [self showFilterBar];
+        filteredIssues = [];
+
+        var theIssues = repo[displayedIssuesKey];
+        for (var i = 0, count = [theIssues count]; i < count; i++)
+        {
+            var item = [theIssues objectAtIndex:i];
+
+            if ((searchFilter === IssuesFilterAll || searchFilter === IssuesFilterTitle) && 
+                [[item valueForKey:@"title"] lowercaseString].match(searchString))
+            {
+                [filteredIssues addObject:[theIssues objectAtIndex:i]];
+                continue;
+            }
+
+            if ((searchFilter === IssuesFilterAll || searchFilter === IssuesFilterBody) && 
+                [[item valueForKey:@"body"] lowercaseString].match(searchString))
+            {
+                [filteredIssues addObject:[theIssues objectAtIndex:i]];
+                continue;
+            }
+
+            var tags = [[item objectForKey:@"labels"] componentsJoinedByString:@" "];
+            if ((searchFilter === IssuesFilterAll || searchFilter === IssuesFilterLabels) && 
+                [tags lowercaseString].match(searchString))
+            {
+                [filteredIssues addObject:[theIssues objectAtIndex:i]];
+            }
+        }
+
+        [issuesTableView reloadData];
+    }
+    else
+    {
+        [self hideFilterBar];
+        filteredIssues = nil;
+
+        [issuesTableView reloadData];
+    }
+}
+
+- (void)filterBarSelectionDidChange:(id)aFilterBar
+{
+    searchFilter = [aFilterBar selectedFilter];
+    [self searchFieldDidChange:nil];
+}
+
+- (void)showFilterBar
+{
+    if ([filterBar superview])
+        return;
+
+    [filterBar setFrame:CGRectMake(0, 0, CGRectGetWidth([detailParentView frame]), 32)];
+    [detailParentView addSubview:filterBar];
+
+    var scrollView = [issuesTableView enclosingScrollView],
+        frame = [scrollView frame];
+
+    frame.origin.y = 32;
+    frame.size.height -= 32;
+    [scrollView setFrame:frame];
+}
+
+- (void)hideFilterBar
+{
+    if (![filterBar superview])
+        return;
+
+    [filterBar removeFromSuperview];
+
+    var scrollView = [issuesTableView enclosingScrollView],
+        frame = [scrollView frame];
+
+    frame.origin.y = 0;
+    frame.size.height += 32;
+    [scrollView setFrame:frame];
 }
 
 @end
