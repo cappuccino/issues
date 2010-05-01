@@ -205,8 +205,8 @@ var SharedController = nil,
         if (closedRequest.success())
         {
             try {
-                var issues = JSON.parse(closedRequest.responseText()).issues;
-                aRepo.closedIssues = issues;
+                var issues = [CPDictionary dictionaryWithJSObject:JSON.parse(closedRequest.responseText()) recursively:YES];
+                aRepo.closedIssues = [issues objectForKey:"issues"];
             }
             catch (e) {
                 console.error("Unable to load repositority with identifier: "+anIdentifier+" -- "+e);

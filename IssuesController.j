@@ -112,7 +112,8 @@ var IssuesHTMLTemplate = nil;
 
 - (@action)takeIssueTypeFrom:(id)sender
 {
-
+    displayedIssuesKey = [sender selectedTag];
+    [issuesTableView reloadData];
 }
 
 - (@action)closeIssue:(id)sender
