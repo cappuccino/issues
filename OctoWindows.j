@@ -56,6 +56,13 @@ var SharedLoginWindow = nil;
     [super awakeFromCib];
 }
 
+- (@action)orderFront:(id)sender
+{
+    [super orderFront:sender];
+    [usernameField setStringValue:""];
+    [apiTokenField setStringValue:""];
+}
+
 - (@action)login:(id)sender
 {
     var githubController = [GithubAPIController sharedController];
@@ -99,6 +106,12 @@ var SharedRepoWindow = nil;
     SharedRepoWindow = self;
     [super awakeFromCib];
     [identifierField setValue:[CPColor grayColor] forThemeAttribute:"text-color" inState:CPTextFieldStatePlaceholder];
+}
+
+- (@action)orderFront:(id)sender
+{
+    [super orderFront:sender];
+    [identifierField setStringValue:""];
 }
 
 - (@action)addRepository:(id)sender

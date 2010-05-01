@@ -2,7 +2,7 @@
 @import <AppKit/CPView.j>
 
 
-@implementation UserView : CPView
+@implementation UserView : CPControl
 {
     @outlet CPImageView imageView;
     @outlet CPImageView imageFrame;
@@ -59,6 +59,7 @@
     emailField = [aCoder decodeObjectForKey:"emailField"];
 
     [self registerForNotifications];
+    [self loginStatusDidChange:nil];
     
     return self;
 }
