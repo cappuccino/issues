@@ -79,7 +79,7 @@ var SharedController = nil,
             var gravatarURL = GravatarBaseURL+emailAddressHashed;
             userImage = [[CPImage alloc] initWithContentsOfFile:gravatarURL+"?s=68&d=identicon"
                                                            size:CGSizeMake(68, 68)];
-            userThumbnailImage = [[CPImage alloc] initWithContentsOfFile:gravatarURL+"?s=24&d=identicon"
+            userThumbnailImage = [[CPImage alloc] initWithContentsOfFile:gravatarURL+"?s=22&d=identicon"
                                                                     size:CGSizeMake(24, 24)];
 
             [[CPUserSessionManager defaultManager] setStatus:CPUserSessionLoggedInStatus];
