@@ -9,7 +9,7 @@
 @import <Foundation/CPObject.j>
 @import "RepositoriesController.j"
 @import "IssuesController.j"
-@import "LoginView.j"
+@import "OctoWindows.j"
 @import "DetailScreen.j"
 @import "RepositoryView.j"
 @import "UserView.j"

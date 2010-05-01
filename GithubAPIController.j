@@ -10,6 +10,13 @@
 var SharedController = nil,
     GravatarBaseURL = "http://www.gravatar.com/avatar/";
 
+CFHTTPRequest.AuthenticationDelegate = function(aRequest)
+{
+    var sharedController = [GithubAPIController sharedController];
+    sharedController.requestWaitingOnAuthentication = aRequest;
+    [sharedController promptForAuthentication:nil];
+}
+
 @implementation GithubAPIController : CPObject
 {
     CPString        username @accessors;
@@ -23,9 +30,7 @@ var SharedController = nil,
     
     CPDictionary    repositoriesByIdentifier @accessors(readonly);
 
-    CPURLConnection connectionWaitingOnAuthentication;
-
-    @outlet CPView  loginView @accessors;
+    CFHTTPRequest   requestWaitingOnAuthentication;
 }
 
 + (id)sharedController
@@ -62,10 +67,10 @@ var SharedController = nil,
         return "";
 }
 
-- (@action)authenticate:(id)sender
+- (void)authenticateWithCallback:(Function)aCallback
 {
     var request = new CFHTTPRequest();
-    request.open("GET", BASE_URL+"user/show"+[self _credentialsString], true);
+    request.open("GET", BASE_URL+"user/show?login="+encodeURIComponent(username)+"&token="+encodeURIComponent(authenticationToken), true);
 
     request.oncomplete = function()
     {
@@ -83,6 +88,12 @@ var SharedController = nil,
                                                                     size:CGSizeMake(24, 24)];
 
             [[CPUserSessionManager defaultManager] setStatus:CPUserSessionLoggedInStatus];
+
+            if (requestWaitingOnAuthentication)
+            {
+                requestWaitingOnAuthentication.abort();
+                requestWaitingOnAuthentication.send();
+            }
         }
         else
         {
@@ -93,14 +104,9 @@ var SharedController = nil,
 
             [[CPUserSessionManager defaultManager] setStatus:CPUserSessionLoggedOutStatus];
         }
-
-        if (connectionWaitingOnAuthentication)
-        {
-            [connectionWaitingOnAuthentication cancel];
-            [connectionWaitingOnAuthentication start];
-        }
-
-        connectionWaitingOnAuthentication = nil;
+        
+        if (aCallback)
+            aCallback(request.success());
 
         [[CPRunLoop currentRunLoop] performSelectors];
     }
@@ -108,23 +114,16 @@ var SharedController = nil,
     request.send("");
 }
 
-- (@action)promptForAuthentication:(id)sender
+- (void)promptForAuthentication:(id)sender
 {
-    var contentView = [[[CPApp delegate] mainWindow] contentView];
-    [loginView setFrame:[contentView bounds]];
-    [contentView addSubview:loginView];
+    var loginWindow = [LoginWindow sharedLoginWindow];
+    [loginWindow setDelegate:self];
+    [loginWindow makeKeyAndOrderFront:self];
 }
 
-- (@action)dismissAuthenticationView:(id)sender
+- (void)windowWillClose:(id)sender
 {
-    connectionWaitingOnAuthentication = nil;
-    [loginView removeFromSuperview];
-}
-
-- (void)connectionDidReceiveAuthenticationChallenge:(CPURLConnection)aConnection
-{
-    connectionWaitingOnAuthentication = aConnection;
-    [self promptForAuthentication:nil];
+    requestWaitingOnAuthentication = nil;
 }
 
 - (CPDictionary)repositoryForIdentifier:(CPString)anIdentifier
@@ -138,7 +137,7 @@ var SharedController = nil,
     request.open("GET", BASE_URL+"repos/show/"+anIdentifier+[self _credentialsString], true);
 
     request.oncomplete = function()
-    {
+    {console.log("request completed: "+request.status()+" text: "+request.responseText());
         var repo = nil;
         if (request.success())
         {
