@@ -9,7 +9,7 @@
     @outlet CPTableView sourcesListView @accessors;
     @outlet CPButtonBar sourcesListButtonBar @accessors;
 
-            CPArray     sortedRepos;
+            CPArray     sortedRepos @accessors;
 	@outlet IssuesController issuesController;
 }
 
@@ -26,7 +26,7 @@
         minusButton = [CPButtonBar minusButton];
 
     [plusButton setTarget:self];
-    [plusButton setAction:@selector(addRepository:)];
+    [plusButton setAction:@selector(promptForNewRepository:)];
     [minusButton setTarget:self];
     [minusButton setAction:@selector(removeRepository:)];
 
@@ -76,38 +76,29 @@
 	[noReposView removeFromSuperview];
 }
 
-- (@action)addRepository:(id)sender
+- (void)windowWillClose:(id)sender
 {
-    var repoIdentifier = prompt("Enter the user/repo to add (e.g. 280north/cappuccino)");
+    //do something
+}
 
-    if (!repoIdentifier)
+- (void)addRepository:(id)aRepo
+{
+    if (!aRepo)
         return;
 
-    var count = sortedRepos.length,
-        index = 0;
-
-    for (; index < count; index++)
-    {
-        if (sortedRepos[index].identifier === repoIdentifier)
-        {
-            [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:existingIndex] byExtendingSelection:NO];
-            [self tableViewSelectionDidChange:nil];
-            return;
-        }
-    }
-
-    [[GithubAPIController sharedController] loadRepositoryWithIdentifier:repoIdentifier callback:function(repo)
-    {
-        if (!repo)
-            return;
-
-        sortedRepos.unshift(repo);
-        [sourcesListView reloadData];
-        [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
-        [self tableViewSelectionDidChange:nil];
-    }];
+    sortedRepos.unshift(aRepo);
+    [sourcesListView reloadData];
+    [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
+    [self tableViewSelectionDidChange:nil];
 
 	[self hideNoReposView];
+}
+
+- (@action)promptForNewRepository:(id)sender
+{
+    var newRepoWindow = [NewRepoWindow sharedNewRepoWindow];
+    [newRepoWindow setDelegate:self];
+    [newRepoWindow makeKeyAndOrderFront:self];
 }
 
 - (@action)removeRepository:(id)sender

@@ -86,6 +86,7 @@ var SharedRepoWindow = nil;
 @implementation NewRepoWindow : OctoWindow
 {
     @outlet CPTextField identifierField @accessors;
+    @outlet RepositoriesController repoController;
 }
 
 + (id)sharedNewRepoWindow
@@ -98,6 +99,47 @@ var SharedRepoWindow = nil;
     SharedRepoWindow = self;
     [super awakeFromCib];
     [identifierField setValue:[CPColor grayColor] forThemeAttribute:"text-color" inState:CPTextFieldStatePlaceholder];
+}
+
+- (@action)addRepository:(id)sender
+{
+    var repoIdentifier = [identifierField stringValue];
+
+    if (!repoIdentifier)
+        return;
+
+    var sortedRepos = [repoController sortedRepos],
+        count = sortedRepos.length,
+        index = 0;
+
+    for (; index < count; index++)
+    {
+        if (sortedRepos[index].identifier === repoIdentifier)
+        {
+            [[repoController sourcesListView] selectRowIndexes:[CPIndexSet indexSetWithIndex:existingIndex] byExtendingSelection:NO];
+            [repoController tableViewSelectionDidChange:nil];
+            [self orderOut:self];
+        }
+    }
+
+    [[GithubAPIController sharedController] loadRepositoryWithIdentifier:repoIdentifier callback:function(repo)
+    {
+        [progressIndicator setHidden:YES];
+        [errorMessageField setHidden:!!repo];
+        [defaultButton setEnabled:YES];
+        [cancelButton setEnabled:YES];
+
+        if (repo)
+        {
+            [repoController addRepository:repo];
+            [self orderOut:self];
+        }
+    }];    
+
+    [errorMessageField setHidden:YES];
+    [progressIndicator setHidden:NO];
+    [defaultButton setEnabled:NO];
+    [cancelButton setEnabled:NO];
 }
 
 @end
