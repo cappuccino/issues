@@ -27,11 +27,7 @@
 
 - (void)applicationDidFinishLaunching:(CPNotification)aNotification
 {
-    // This is called when the application is done loading.
-    //var argv = [CPApp arguments];
-    //alert(argv[0]);
-    //if (argv.length < 1)
-      //  return;
+    // parse the url arguments here. i.e. load a repo/issue on startup.
     var args = [CPApp namedArguments];
     if ([args containsKey:@"repo"])
     {
@@ -41,10 +37,7 @@
             if (!repo)
                 return;
 
-            reposController.sortedRepos.unshift(repo);
-            [reposController.sourcesListView reloadData];
-            [reposController.sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
-            [reposController tableViewSelectionDidChange:nil];
+            [reposController addRepository:repo];
         }];
 
     	[reposController hideNoReposView];
