@@ -31,8 +31,8 @@
     [minusButton setAction:@selector(removeRepository:)];
 
     [sourcesListButtonBar setButtons:[plusButton, minusButton]];
-    //[sourcesListView setHeaderView:nil];
-    //[sourcesListView setCornerView:nil];
+    [sourcesListView setHeaderView:nil];
+    [sourcesListView setCornerView:nil];
 
     var column = [[CPTableColumn alloc] initWithIdentifier:"sourcelist"];
     [[column headerView] setStringValue:"Projects"];
@@ -62,7 +62,12 @@
 
 - (void)hideNoReposView
 {
-	[[[CPApp delegate] mainWindow] setToolbar:[[CPToolbar alloc] initWithIdentifier:"mainToolbar"]];
+    var toolbar = [[CPToolbar alloc] initWithIdentifier:"mainToolbar"],
+        delegate = [CPApp delegate];
+
+    [toolbar setDelegate:delegate];
+	[[delegate mainWindow] setToolbar:toolbar];
+
 	[noReposView removeFromSuperview];
 }
 

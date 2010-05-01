@@ -210,6 +210,7 @@ var IssuesHTMLTemplate = nil;
 	if (item)
 	{
 		//load comments
+        [issueWebView loadHTMLString:""];
 
 		if (![item objectForKey:"body_html"])
 		{
@@ -219,7 +220,7 @@ var IssuesHTMLTemplate = nil;
 		    [item setObject:([item objectForKey:"labels"] || []).join(", ") forKey:"comma_separated_tags"];
 		    //[item setObject:Markdown.makeHtml([item objectForKey:body]) forKey:"user_email_hash"];
 		    //[item setObject:Markdown.makeHtml([item objectForKey:body]) forKey:"user_email"];
-		    [item setObject:NO forKey:"has_user_image"];
+		    [item setObject:YES forKey:"has_user_image"];
 		    
 		    [[GithubAPIController sharedController] loadCommentsForIssue:item repository:repo callback:function()
 		    {

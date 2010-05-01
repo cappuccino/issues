@@ -20,6 +20,7 @@
     @outlet CPWindow    mainWindow @accessors;
     @outlet CPSplitView topLevelSplitView;
     @outlet CPSplitView detailLevelSplitView;
+    @outlet CPView      userView;
     @outlet RepositoriesController reposController @accessors;
     @outlet IssuesController issuesController @accessors;
 }
@@ -55,9 +56,15 @@
 
     [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityHigh];
     [toolbarItem setEnabled:NO];
-/*
+
     switch(itemIdentifier)
     {
+        case @"loginStatus":
+            [toolbarItem setView:userView];
+            [toolbarItem setMinSize:CGSizeMake(180, 32)];
+            [toolbarItem setMaxSize:CGSizeMake(180, 32)];
+        break;
+        
         case @"newissue":
             var image = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"newissue.png"] size:CPSizeMake(32, 32)],
                 highlighted = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"newissue.png"] size:CPSizeMake(32, 32)];
@@ -66,7 +73,7 @@
             [toolbarItem setAlternateImage:highlighted];
 
             [toolbarItem setTarget:issuesController];
-            [toolbarItem setAction:@selector(showNewIssueWindow:)];
+            [toolbarItem setAction:@selector(newIssue:)];
             [toolbarItem setLabel:"New Issue"];
             [toolbarItem setTag:@"NewIssue"];
             
@@ -82,7 +89,7 @@
             [toolbarItem setAlternateImage:highlighted];
             
             [toolbarItem setTarget:issuesController];
-            [toolbarItem setAction:@selector(reopenActiveIssue:)];
+            [toolbarItem setAction:@selector(reopenIssue:)];
             [toolbarItem setLabel:"Re-open Issue"];
             [toolbarItem setTag:@"Open"];
             
@@ -98,7 +105,7 @@
             [toolbarItem setAlternateImage:highlighted];
             
             [toolbarItem setTarget:issuesController];
-            [toolbarItem setAction:@selector(promptUserToCloseIssue:)];
+            [toolbarItem setAction:@selector(closeIssue:)];
             [toolbarItem setLabel:"Close Issue"];
             [toolbarItem setTag:@"Close"];
             [toolbarItem setEnabled:NO];
@@ -115,7 +122,7 @@
             [toolbarItem setAlternateImage:highlighted];
             
             [toolbarItem setTarget:issuesController];
-            [toolbarItem setAction:@selector(commentOnSelectedIssue:)];
+            [toolbarItem setAction:@selector(comment:)];
             [toolbarItem setLabel:"Add Comment"];
             [toolbarItem setTag:@"Comment"];
             
@@ -124,7 +131,7 @@
         break;
 
         case @"searchfield":
-            [toolbarItem setView:searchField];
+            //[toolbarItem setView:searchField];
             [toolbarItem setLabel:"Search Issues"];
             [toolbarItem setTag:@"SearchIssues"];
             
@@ -136,12 +143,12 @@
             var aSwitch = [[CPSegmentedControl alloc] initWithFrame:CGRectMake(0,0,0,0)];
             [aSwitch setTrackingMode:CPSegmentSwitchTrackingSelectOne];
             [aSwitch setTarget:issuesController];
-            [aSwitch setAction:@selector(changeVisibleIssuesStatus:)];
+            [aSwitch setAction:@selector(takeIssueTypeFrom:)];
             [aSwitch setSegmentCount:2];
             [aSwitch setWidth:75 forSegment:0];
             [aSwitch setWidth:75 forSegment:1];
-            [aSwitch setTag:@"Open" forSegment:0];
-            [aSwitch setTag:@"Closed" forSegment:1];
+            [aSwitch setTag:@"openIssues" forSegment:0];
+            [aSwitch setTag:@"closedIssues" forSegment:1];
             [aSwitch setLabel:@"Open" forSegment:0];
             [aSwitch setLabel:@"Closed" forSegment:1];
             [aSwitch setSelectedSegment:0];
@@ -154,7 +161,7 @@
             [toolbarItem setMaxSize:CGSizeMake(150, 24)];
         break;
     }
-*/
+
     return toolbarItem;
 }
 
