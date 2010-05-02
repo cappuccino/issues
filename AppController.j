@@ -310,3 +310,10 @@
 }
 
 @end
+
+window.GithubIssuesToggleVertical = function()
+{
+    var splitView = [CPApp delegate].detailLevelSplitView;
+    [splitView setVertical:![splitView isVertical]];
+    [splitView setNeedsDisplay:YES];
+}
