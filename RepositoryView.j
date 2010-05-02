@@ -5,10 +5,15 @@
 {
     @outlet CPImageView lockView;
     @outlet CPTextField nameField;
+            CPColor     backgroundColor;
 }
 
 - (void)awakeFromCib
 {
+    var path = [[CPBundle mainBundle] pathForResource:"sourceListSelectionBackground.png"],
+        image = [[CPImage alloc] initWithContentsOfFile:path size:CGSizeMake(1, 26)];
+
+    backgroundColor = [CPColor colorWithPatternImage:image];
     [nameField setLineBreakMode:CPLineBreakByTruncatingTail];
     [nameField setFont:[CPFont systemFontOfSize:13.0]];
 	[nameField setVerticalAlignment:CPCenterVerticalTextAlignment];
@@ -26,6 +31,7 @@
     [super setThemeState:aState];
     if (aState === CPThemeStateSelected)
 	{
+	    [self setBackgroundColor:backgroundColor];
         [nameField setTextColor:[CPColor whiteColor]];
 		[nameField setTextShadowColor:[CPColor colorWithCalibratedRed: 0 green: 0 blue: 0 alpha:0.45]];
 		[nameField setTextShadowOffset:CGSizeMake(0.0, -1.0)];
@@ -37,6 +43,7 @@
     [super unsetThemeState:aState];
     if (aState === CPThemeStateSelected)
 	{
+	    [self setBackgroundColor:nil];
         [nameField setTextColor:[CPColor blackColor]];
 		[nameField setTextShadowColor:[CPColor whiteColor]];
 		[nameField setTextShadowOffset:CGSizeMake(0.0, 1.0)];
@@ -48,6 +55,7 @@
     self = [super initWithCoder:aCoder];
     lockView = [aCoder decodeObjectForKey:"lockView"];
     nameField = [aCoder decodeObjectForKey:"nameField"];
+    backgroundColor = [aCoder decodeObjectForKey:"backgroundColor"];
     return self;
 }
 
@@ -56,6 +64,7 @@
     [super encodeWithCoder:aCoder];
     [aCoder encodeObject:lockView forKey:"lockView"];
     [aCoder encodeObject:nameField forKey:"nameField"];
+    [aCoder encodeObject:backgroundColor forKey:"backgroundColor"];
 }
 
 @end

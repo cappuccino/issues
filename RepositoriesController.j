@@ -2,6 +2,8 @@
 @import <Foundation/CPObject.j>
 @import "IssuesController.j"
 
+var ToolbarColor = nil;
+
 @implementation RepositoriesController : CPObject
 {
     @outlet CPView      repositoryView;
@@ -11,6 +13,12 @@
 
             CPArray     sortedRepos @accessors;
 	@outlet IssuesController issuesController;
+}
+
++ (void)initialize
+{
+    // FIXME this needs to be themeable
+    ToolbarColor = [CPColor colorWithPatternImage:[[CPImage alloc] initWithContentsOfFile:[[CPBundle mainBundle] pathForResource:"toolbarBackgroundColor.png"] size:CGSizeMake(1, 59)]];
 }
 
 - (id)init
@@ -23,7 +31,16 @@
 - (void)awakeFromCib
 {
     var plusButton = [CPButtonBar plusButton],
-        minusButton = [CPButtonBar minusButton];
+        minusButton = [CPButtonBar minusButton],
+        bezelColor = [CPColor colorWithPatternImage:[[CPImage alloc] initWithContentsOfFile:[[CPBundle mainBundle] pathForResource:"buttonBarBackground.png"] size:CGSizeMake(1, 27)]],
+        leftBezel = [[CPImage alloc] initWithContentsOfFile:[[CPBundle mainBundle] pathForResource:"buttonBarLeftBezel.png"] size:CGSizeMake(2, 26)],
+        centerBezel = [[CPImage alloc] initWithContentsOfFile:[[CPBundle mainBundle] pathForResource:"buttonBarCenterBezel.png"] size:CGSizeMake(1, 26)],
+        rightBezel = [[CPImage alloc] initWithContentsOfFile:[[CPBundle mainBundle] pathForResource:"buttonBarRightBezel.png"] size:CGSizeMake(2, 26)],
+        buttonBezel = [CPColor colorWithPatternImage:[[CPThreePartImage alloc] initWithImageSlices:[leftBezel, centerBezel, rightBezel] isVertical:NO]],
+        leftBezelHighlighted = [[CPImage alloc] initWithContentsOfFile:[[CPBundle mainBundle] pathForResource:"buttonBarLeftBezelHighlighted.png"] size:CGSizeMake(2, 26)],
+        centerBezelHighlighted = [[CPImage alloc] initWithContentsOfFile:[[CPBundle mainBundle] pathForResource:"buttonBarCenterBezelHighlighted.png"] size:CGSizeMake(1, 26)],
+        rightBezelHighlighted = [[CPImage alloc] initWithContentsOfFile:[[CPBundle mainBundle] pathForResource:"buttonBarRightBezelHighlighted.png"] size:CGSizeMake(2, 26)],
+        buttonBezelHighlighted = [CPColor colorWithPatternImage:[[CPThreePartImage alloc] initWithImageSlices:[leftBezelHighlighted, centerBezelHighlighted, rightBezelHighlighted] isVertical:NO]];
 
     [plusButton setTarget:self];
     [plusButton setAction:@selector(promptForNewRepository:)];
@@ -31,6 +48,10 @@
     [minusButton setAction:@selector(removeRepository:)];
 
     [sourcesListButtonBar setButtons:[plusButton, minusButton]];
+    [sourcesListButtonBar setValue:bezelColor forThemeAttribute:"bezel-color"];
+    [sourcesListButtonBar setValue:buttonBezel forThemeAttribute:"button-bezel-color"];
+    [sourcesListButtonBar setValue:buttonBezelHighlighted forThemeAttribute:"button-bezel-color" inState:CPThemeStateHighlighted];
+
     [sourcesListView setHeaderView:nil];
     [sourcesListView setCornerView:nil];
 
@@ -44,13 +65,10 @@
     
     [sourcesListView addTableColumn:column];
     [sourcesListView setColumnAutoresizingStyle:CPTableViewUniformColumnAutoresizingStyle];
-    [sourcesListView setRowHeight:28.0];
-    [sourcesListView setSelectionHighlightStyle:CPTableViewSelectionHighlightStyleSourceList];
-    sourcesListView._sourceListActiveGradient = CGGradientCreateWithColorComponents(CGColorSpaceCreateDeviceRGB(), [161.0/255.0, 192.0/255.0, 210.0/255.0,1.0, 99.0/255.0, 150.0/255.0, 180.180/255.0, 1.0], [0,1], 2);
-    sourcesListView._sourceListActiveTopLineColor = [CPColor colorWithCalibratedRed:(106.0/255.0) green:(154.0/255.0) blue:(182.0/255.0) alpha:1.0];
-    sourcesListView._sourceListActiveBottomLineColor = [CPColor colorWithCalibratedRed:(87.0/255.0) green:(127.0/255.0) blue:(151.0/255.0) alpha:1.0];
+    [sourcesListView setRowHeight:26.0];
+    [sourcesListView setSelectionHighlightStyle:CPTableViewSelectionHighlightStyleNone];
 
-    [repositoryView setBackgroundColor:[CPColor colorWithHexString:@"eef2f8"]];
+    [sourcesListView setBackgroundColor:[CPColor colorWithHexString:@"eef2f8"]];
 
 	[self showNoReposView];
 }
@@ -72,6 +90,7 @@
 
     [toolbar setDelegate:delegate];
 	[[delegate mainWindow] setToolbar:toolbar];
+    [[toolbar _toolbarView] setBackgroundColor:ToolbarColor];
 
 	[noReposView removeFromSuperview];
 }
