@@ -131,6 +131,7 @@ var IssuesHTMLTemplate = nil;
     displayedIssuesKey = aKey;
     [issuesTableView reloadData];
     [self searchFieldDidChange:nil];
+    [self tableView:issuesTableView sortDescriptorsDidChange:nil];
 }
 
 - (void)selectIssueAtIndex:(unsigned)index
