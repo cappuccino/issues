@@ -44,3 +44,9 @@
 }
 
 @end
+
+@implementation LoadFromURLView : DetailScreen
+{    
+}
+
+@end

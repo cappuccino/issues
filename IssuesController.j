@@ -123,9 +123,20 @@ var IssuesHTMLTemplate = nil;
 
 - (@action)takeIssueTypeFrom:(id)sender
 {
-    displayedIssuesKey = [sender selectedTag];
+    [self setDisplayedIssuesKey:[sender selectedTag]];
+}
+
+- (void)setDisplayedIssuesKey:(CPString)aKey
+{
+    displayedIssuesKey = aKey;
     [issuesTableView reloadData];
     [self searchFieldDidChange:nil];
+}
+
+- (void)selectIssueAtIndex:(unsigned)index
+{
+    [issuesTableView selectRowIndexes:[CPIndexSet indexSetWithIndex:index] byExtendingSelection:NO];
+    [self tableViewSelectionDidChange:nil];
 }
 
 - (@action)closeIssue:(id)sender

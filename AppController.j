@@ -21,6 +21,7 @@
     @outlet CPSplitView topLevelSplitView;
     @outlet CPSplitView detailLevelSplitView;
     @outlet CPView      userView;
+    @outlet CPView      initialLoadingView;
     @outlet RepositoriesController reposController @accessors;
     @outlet IssuesController issuesController @accessors;
 }
@@ -31,14 +32,59 @@
     var args = [CPApp namedArguments];
     if ([args containsKey:@"repo"])
     {
+        var contentView = [mainWindow contentView],
+            frame = [contentView bounds];
+
+        [initialLoadingView setFrame:frame];
+        [contentView addSubview:initialLoadingView];
+
         var repo = [args valueForKey:@"repo"];
         [[GithubAPIController sharedController] loadRepositoryWithIdentifier:repo callback:function(repo)
         {
             if (repo)
-                [reposController addRepository:repo];
-        }];
+            {
+                if ([args containsKey:"issue"])
+                {
+                    [[GithubAPIController sharedController] loadIssuesForRepository:repo callback:function(){
 
-    	[reposController hideNoReposView];
+                        [reposController addRepository:repo];
+                        [initialLoadingView removeFromSuperview];
+
+                        var issueNumber = parseInt([args valueForKey:@"issue"], 10),
+                            openIssues = repo.openIssues,
+                            count = openIssues.length;
+
+                        for (var i = 0; i < count; i++)
+                        {
+                            if ([openIssues[i] objectForKey:"number"] === issueNumber)
+                            {
+                                [issuesController selectIssueAtIndex:i];
+                                return;
+                            }
+                        }
+
+                        var closedIssues = repo.closedIssues,
+                            count = closedIssues.length;
+
+                        for (var i = 0; i < count; i++)
+                        {
+                            if ([closedIssues[i] objectForKey:"number"] === issueNumber)
+                            {
+                                [issuesController setDisplayedIssuesKey:"closedIssues"];
+                                [issuesController selectIssueAtIndex:i];
+                                return;
+                            }
+                        }
+
+                    }];
+                }
+                else
+                {
+                    [reposController addRepository:repo];
+                    [initialLoadingView removeFromSuperview];
+                }
+            }
+        }];
     }
 
 }
