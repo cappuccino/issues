@@ -77,15 +77,19 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
         if (request.success())
         {
             var response = JSON.parse(request.responseText()).user;
-            emailAddress = response.email;
-            emailAddressHashed = hex_md5(emailAddress);
-            website = response.blog;
 
-            var gravatarURL = GravatarBaseURL+emailAddressHashed;
-            userImage = [[CPImage alloc] initWithContentsOfFile:gravatarURL+"?s=68&d=identicon"
-                                                           size:CGSizeMake(68, 68)];
-            userThumbnailImage = [[CPImage alloc] initWithContentsOfFile:gravatarURL+"?s=22&d=identicon"
-                                                                    size:CGSizeMake(24, 24)];
+            if (response.email)
+            {
+                emailAddress = response.email;
+                emailAddressHashed = hex_md5(emailAddress);
+                website = response.blog;
+                
+                var gravatarURL = GravatarBaseURL+emailAddressHashed;
+                userImage = [[CPImage alloc] initWithContentsOfFile:gravatarURL+"?s=68&d=identicon"
+                                                               size:CGSizeMake(68, 68)];
+                userThumbnailImage = [[CPImage alloc] initWithContentsOfFile:gravatarURL+"?s=22&d=identicon"
+                                                                        size:CGSizeMake(24, 24)];
+            }
 
             [[CPUserSessionManager defaultManager] setStatus:CPUserSessionLoggedInStatus];
 
