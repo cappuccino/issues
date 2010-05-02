@@ -70,6 +70,29 @@
                 {
                     [[GithubAPIController sharedController] loadIssuesForRepository:repo callback:function(){
 
+                        var issueNumber = parseInt(args[2], 10),
+                            openIssues = repo.openIssues,
+                            count = openIssues.length,
+                            issueIndex = -1;
+
+                        for (var i = 0; i < count && issueIndex < 0; i++)
+                        {
+                            if ([openIssues[i] objectForKey:"number"] === issueNumber)
+                                issueIndex = i;
+                        }
+
+                        var closedIssues = repo.closedIssues,
+                            count = closedIssues.length;
+
+                        for (var i = 0; i < count && issueIndex < 0; i++)
+                        {
+                            if ([closedIssues[i] objectForKey:"number"] === issueNumber)
+                            {
+                                [issuesController setDisplayedIssuesKey:"closedIssues"];
+                                issueIndex = i;
+                            }
+                        }
+
                         [reposController addRepository:repo];
                         [initialLoadingView removeFromSuperview];
 
@@ -79,31 +102,8 @@
                                 [reposController addRepository:cookieRepos[i] select:NO];
                         }
 
-                        var issueNumber = parseInt(args[2], 10),
-                            openIssues = repo.openIssues,
-                            count = openIssues.length;
-
-                        for (var i = 0; i < count; i++)
-                        {
-                            if ([openIssues[i] objectForKey:"number"] === issueNumber)
-                            {
-                                [issuesController selectIssueAtIndex:i];
-                                return;
-                            }
-                        }
-
-                        var closedIssues = repo.closedIssues,
-                            count = closedIssues.length;
-
-                        for (var i = 0; i < count; i++)
-                        {
-                            if ([closedIssues[i] objectForKey:"number"] === issueNumber)
-                            {
-                                [issuesController setDisplayedIssuesKey:"closedIssues"];
-                                [issuesController selectIssueAtIndex:i];
-                                return;
-                            }
-                        }
+                        if (issueIndex >= 0)
+                            [issuesController selectIssueAtIndex:issueIndex];
                     }];
                 }
                 else
@@ -289,7 +289,7 @@
             [aSwitch setTag:@"closedIssues" forSegment:1];
             [aSwitch setLabel:@"Open" forSegment:0];
             [aSwitch setLabel:@"Closed" forSegment:1];
-            [aSwitch setSelectedSegment:0];
+            [aSwitch selectSegmentWithTag:[issuesController displayedIssuesKey]];
 
             [toolbarItem setView:aSwitch];
             [toolbarItem setTag:@"changeViewStatus"];

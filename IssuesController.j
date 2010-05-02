@@ -21,7 +21,7 @@ var IssuesHTMLTemplate = nil;
     @outlet CPTableView issuesTableView @accessors;
     @outlet CPWebView   issueWebView @accessors;
 
-    CPString    displayedIssuesKey;
+    CPString    displayedIssuesKey @accessors;
 
     CPArray     filteredIssues;
     CPString    searchString;
@@ -45,6 +45,8 @@ var IssuesHTMLTemplate = nil;
 
 - (void)awakeFromCib
 {
+    displayedIssuesKey = "openIssues";
+
 	[self showView:noRepoView];
 
     var desc = [CPSortDescriptor sortDescriptorWithKey:@"number" ascending:YES],
@@ -134,9 +136,13 @@ var IssuesHTMLTemplate = nil;
 - (void)setDisplayedIssuesKey:(CPString)aKey
 {
     displayedIssuesKey = aKey;
+    if (!repo)
+        return;
+
     [issuesTableView reloadData];
     [self searchFieldDidChange:nil];
     [self tableView:issuesTableView sortDescriptorsDidChange:nil];
+    [self tableViewSelectionDidChange:nil];
 }
 
 - (void)selectIssueAtIndex:(unsigned)index
