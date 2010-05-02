@@ -29,6 +29,13 @@
     return self;
 }
 
+- (@action)orderFront:(id)sender
+{
+    [super orderFront:sender];
+    [errorMessageField setHidden:YES];
+    [progressIndicator setHidden:YES];
+}
+
 - (void)setDefaultButton:(CPButton)aButton
 {
     [super setDefaultButton:aButton];
