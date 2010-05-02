@@ -183,11 +183,11 @@ var IssuesHTMLTemplate = nil;
 	if (repo.openIssues && repo.closedIssues)
 		return;
 
-	[[GithubAPIController sharedController] loadIssuesForRepository:repo callback:function()
+	[[GithubAPIController sharedController] loadIssuesForRepository:repo callback:function(success)
 	{
 		[issuesTableView reloadData];
 
-		if (repo[displayedIssuesKey].length)
+		if (success && repo[displayedIssuesKey].length)
 			[self showView:nil];
 		else
 			[self showView:noIssuesView];

@@ -84,7 +84,10 @@ var SharedLoginWindow = nil;
         [cancelButton setEnabled:YES];
 
         if (success)
+        {
+            [[[NewRepoWindow sharedNewRepoWindow] errorMessageField] setHidden:YES];
             [self orderOut:self];
+        }
     }];
     
     [errorMessageField setHidden:YES];

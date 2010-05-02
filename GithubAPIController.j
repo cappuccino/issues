@@ -13,8 +13,9 @@ var SharedController = nil,
 CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 {
     var sharedController = [GithubAPIController sharedController];
-    sharedController.requestWaitingOnAuthentication = aRequest;
-    [sharedController promptForAuthentication:nil];
+
+    if (![sharedController isAuthenticated])
+        [sharedController promptForAuthentication:nil];
 }
 
 @implementation GithubAPIController : CPObject
@@ -29,8 +30,6 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
     CPImage         userThumbnailImage @accessors;
     
     CPDictionary    repositoriesByIdentifier @accessors(readonly);
-
-    CFHTTPRequest   requestWaitingOnAuthentication;
 }
 
 + (id)sharedController
@@ -107,12 +106,6 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
             }
 
             [[CPUserSessionManager defaultManager] setStatus:CPUserSessionLoggedInStatus];
-
-            if (requestWaitingOnAuthentication)
-            {
-                requestWaitingOnAuthentication.abort();
-                requestWaitingOnAuthentication.send();
-            }
         }
         else
         {
@@ -136,13 +129,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 - (void)promptForAuthentication:(id)sender
 {
     var loginWindow = [LoginWindow sharedLoginWindow];
-    [loginWindow setDelegate:self];
     [loginWindow makeKeyAndOrderFront:self];
-}
-
-- (void)windowWillClose:(id)sender
-{
-    requestWaitingOnAuthentication = nil;
 }
 
 - (CPDictionary)repositoryForIdentifier:(CPString)anIdentifier
@@ -190,7 +177,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
                 return;
 
             if (aCallback)
-                aCallback(aRepo, openRequest, closedRequest);
+                aCallback(openRequest.success() && closedRequest.success(), aRepo, openRequest, closedRequest);
 
             [[CPRunLoop currentRunLoop] performSelectors];
         };

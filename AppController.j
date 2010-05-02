@@ -131,7 +131,7 @@
 
 - (void)applicationWillTerminate:(CPNotification)aNote
 {
-    [[[CPCookie alloc] initWithName:@"github.repos"] setValue:JSON.stringify([reposController sortedRepos], ["name", "owner", "identifier", "open_issues", "description"]) 
+    [[[CPCookie alloc] initWithName:@"github.repos"] setValue:JSON.stringify([reposController sortedRepos], ["name", "owner", "identifier", "open_issues", "description", "private"]) 
                                                       expires:[CPDate dateWithTimeIntervalSinceNow:31536000]
                                                        domain:nil];
 
