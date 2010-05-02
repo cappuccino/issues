@@ -7,7 +7,7 @@
 	<key>Main cib file base name</key>
 	<string>MainMenu.cib</string>
 	<key>CPBundleName</key>
-	<string>AtlasIssues</string>
+	<string>GithubIssues</string>
 	<key>CPPrincipalClass</key>
 	<string>CPApplication</string>
 </dict>

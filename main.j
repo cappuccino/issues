@@ -1,9 +1,9 @@
 /*
  * AppController.j
- * AtlasIssues
+ * GithubIssues
  *
  * Created by Ross Boucher on April 28, 2010.
- * Copyright 2010, Your Company All rights reserved.
+ * Copyright 2010, 280 North All rights reserved.
  */
 
 @import <Foundation/Foundation.j>
