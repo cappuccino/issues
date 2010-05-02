@@ -55,6 +55,7 @@ var IssuesHTMLTemplate = nil;
     [ID setMinWidth:50.0];
     [ID setEditable:YES];
     [ID setSortDescriptorPrototype:desc];
+    [ID setResizingMask:CPTableColumnUserResizingMask];
 
     [issuesTableView addTableColumn:ID];
 
@@ -66,6 +67,7 @@ var IssuesHTMLTemplate = nil;
     [title setMinWidth:50.0];
     [title setEditable:YES];
     [title setSortDescriptorPrototype:desc];
+    [title setResizingMask:CPTableColumnAutoresizingMask|CPTableColumnUserResizingMask];
 
     [issuesTableView addTableColumn:title];
 
@@ -77,6 +79,7 @@ var IssuesHTMLTemplate = nil;
     [votes setMinWidth:50.0];
     [votes setEditable:YES];
     [votes setSortDescriptorPrototype:desc];
+    [votes setResizingMask:CPTableColumnUserResizingMask];
 
     [issuesTableView addTableColumn:votes];
 
@@ -88,6 +91,7 @@ var IssuesHTMLTemplate = nil;
     [date setMinWidth:50.0];
     [date setEditable:YES];
     [date setSortDescriptorPrototype:desc];
+    [date setResizingMask:CPTableColumnUserResizingMask];
 
     [issuesTableView addTableColumn:date];
 
@@ -99,11 +103,12 @@ var IssuesHTMLTemplate = nil;
     [updated setMinWidth:50.0];
     [updated setEditable:YES];
     [updated setSortDescriptorPrototype:desc];
+    [updated setResizingMask:CPTableColumnUserResizingMask];
 
     [issuesTableView addTableColumn:updated];
 
     [issuesTableView setUsesAlternatingRowBackgroundColors:YES];
-    [issuesTableView setColumnAutoresizingStyle:CPTableViewLastColumnOnlyAutoresizingStyle];
+    [issuesTableView setColumnAutoresizingStyle:CPTableViewUniformColumnAutoresizingStyle];
 
     filterBar = [[FilterBar alloc] initWithFrame:CGRectMake(0, 0, 400, 32)];
     [filterBar setAutoresizingMask:CPViewWidthSizable];
