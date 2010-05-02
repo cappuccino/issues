@@ -139,17 +139,17 @@
     }
 
     [[[CPCookie alloc] initWithName:@"github.repos"] setValue:JSON.stringify(repos) 
-                                                      expires:[CPDate distantFuture] 
+                                                      expires:[CPDate dateWithTimeIntervalSinceNow:31536000]
                                                        domain:nil];
 
     var githubController = [GithubAPIController sharedController];
 
     [[[CPCookie alloc] initWithName:@"github.username"] setValue:[githubController username] || ""
-                                                         expires:[CPDate distantFuture] 
+                                                         expires:[CPDate dateWithTimeIntervalSinceNow:31536000]
                                                           domain:nil];
 
     [[[CPCookie alloc] initWithName:@"github.apiToken"] setValue:[githubController authenticationToken] || ""
-                                                         expires:[CPDate distantFuture] 
+                                                         expires:[CPDate dateWithTimeIntervalSinceNow:31536000]
                                                           domain:nil];
 }
 
