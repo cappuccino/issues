@@ -213,7 +213,11 @@ var IssuesHTMLTemplate = nil;
 		if (repo.openIssues && repo.closedIssues)
 		{
 			if (repo[displayedIssuesKey].length)
+			{
+			    [issuesTableView selectRowIndexes:[CPIndexSet indexSet] byExtendingSelection:NO];
 				[self showView:nil];
+			    [self tableViewSelectionDidChange:nil];
+			}
 			else
 				[self showView:noIssuesView];
 		}
@@ -237,11 +241,10 @@ var IssuesHTMLTemplate = nil;
 	if (row >= 0)
         item = [(filteredIssues || repo[displayedIssuesKey]) objectAtIndex:row];
 
+    [issueWebView loadHTMLString:""];
+
 	if (item)
 	{
-		//load comments
-        [issueWebView loadHTMLString:""];
-
 		if (![item objectForKey:"body_html"])
 		{
 		    [item setObject:Markdown.makeHtml([item objectForKey:"body"]) forKey:"body_html"];
@@ -276,6 +279,9 @@ var IssuesHTMLTemplate = nil;
 
     		[issueWebView loadHTMLString:html];
 		}
+
+		//update the location hash
+		[CPApp setArguments:[repo.owner, repo.name, [item objectForKey:"number"]]];
 	}
 }
 

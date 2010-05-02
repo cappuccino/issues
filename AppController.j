@@ -46,12 +46,14 @@
         cookieRepos = JSON.parse([reposCookie value]);
     }
     catch (e) {
-        CPLog.info("unable to load repos from cookie: "+e);
+        CPLog.info("unable to load repos from cookie: "+e+" "+[reposCookie value]);
     }
 
     // parse the url arguments here. i.e. load a repo/issue on startup.
-    var args = [CPApp namedArguments];
-    if ([args containsKey:@"repo"])
+    var args = [CPApp arguments],
+        argCount = [args count];
+
+    if (argCount >= 2)
     {
         var contentView = [mainWindow contentView],
             frame = [contentView bounds];
@@ -59,12 +61,12 @@
         [initialLoadingView setFrame:frame];
         [contentView addSubview:initialLoadingView];
 
-        var repo = [args valueForKey:@"repo"];
-        [[GithubAPIController sharedController] loadRepositoryWithIdentifier:repo callback:function(repo)
+        var identifier = args[0] + "/" + args[1];
+        [[GithubAPIController sharedController] loadRepositoryWithIdentifier:identifier callback:function(repo)
         {
             if (repo)
             {
-                if ([args containsKey:"issue"])
+                if (argCount >= 3)
                 {
                     [[GithubAPIController sharedController] loadIssuesForRepository:repo callback:function(){
 
@@ -77,7 +79,7 @@
                                 [reposController addRepository:cookieRepos[i] select:NO];
                         }
 
-                        var issueNumber = parseInt([args valueForKey:@"issue"], 10),
+                        var issueNumber = parseInt(args[2], 10),
                             openIssues = repo.openIssues,
                             count = openIssues.length;
 
@@ -129,16 +131,7 @@
 
 - (void)applicationWillTerminate:(CPNotification)aNote
 {
-    var repos = [reposController sortedRepos],
-        count = repos.length;
-
-    for (var i = 0; i < count; i++)
-    {
-        delete repos[i].openIssues;
-        delete repos[i].closedIssues;
-    }
-
-    [[[CPCookie alloc] initWithName:@"github.repos"] setValue:JSON.stringify(repos) 
+    [[[CPCookie alloc] initWithName:@"github.repos"] setValue:JSON.stringify([reposController sortedRepos], ["name", "owner", "identifier", "open_issues", "description"]) 
                                                       expires:[CPDate dateWithTimeIntervalSinceNow:31536000]
                                                        domain:nil];
 

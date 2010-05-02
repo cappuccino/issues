@@ -130,7 +130,7 @@ var SharedRepoWindow = nil;
     var existingRepo = [[GithubAPIController sharedController] repositoryForIdentifier:repoIdentifier];
     if (existingRepo)
     {
-        [repoController addRepository:repo];
+        [repoController addRepository:existingRepo];
         [self orderOut:self];
         return;
     }

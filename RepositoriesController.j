@@ -181,9 +181,16 @@ var ToolbarColor = nil;
 {
 	var selectedRow = [sourcesListView selectedRow];
 	if (selectedRow === -1)
+	{
+		[CPApp setArguments:[]];
 		[issuesController setRepo:nil];
+	}
 	else
-		[issuesController setRepo:sortedRepos[selectedRow]];
+	{
+	    var repo = sortedRepos[selectedRow];
+	    [CPApp setArguments:[repo.owner, repo.name]];
+		[issuesController setRepo:repo];
+	}
 }
 
 - (id)tableView:(CPTableView)aTableView objectValueForTableColumn:(int)aColumn row:(int)aRow
