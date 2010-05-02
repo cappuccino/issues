@@ -28,6 +28,17 @@
 
 - (void)applicationDidFinishLaunching:(CPNotification)aNotification
 {
+    var usernameCookie = [[CPCookie alloc] initWithName:@"github.username"],
+        apiTokenCookie = [[CPCookie alloc] initWithName:@"github.apiToken"];
+
+    if ([usernameCookie value] && [apiTokenCookie value])
+    {
+        var controller = [GithubAPIController sharedController];
+        [controller setUsername:[usernameCookie value]];
+        [controller setAuthenticationToken:[apiTokenCookie value]];
+        [controller authenticateWithCallback:nil];
+    }
+
     var reposCookie = [[CPCookie alloc] initWithName:@"github.repos"],
         cookieRepos = nil;
 
@@ -130,11 +141,31 @@
     [[[CPCookie alloc] initWithName:@"github.repos"] setValue:JSON.stringify(repos) 
                                                       expires:[CPDate distantFuture] 
                                                        domain:nil];
+
+    var githubController = [GithubAPIController sharedController];
+
+    [[[CPCookie alloc] initWithName:@"github.username"] setValue:[githubController username] || ""
+                                                         expires:[CPDate distantFuture] 
+                                                          domain:nil];
+
+    [[[CPCookie alloc] initWithName:@"github.apiToken"] setValue:[githubController authenticationToken] || ""
+                                                         expires:[CPDate distantFuture] 
+                                                          domain:nil];
 }
 
 - (void)awakeFromCib
 {
     [topLevelSplitView setIsPaneSplitter:YES];
+}
+
+- (CGFloat)splitView:(CPSplitView)splitView constrainMinCoordinate:(float)proposedMin ofSubviewAt:(int)dividerIndex
+{
+    return 140;
+}
+
+- (CGFloat)splitView:(CPSplitView)splitView constrainMaxCoordinate:(float)proposedMax ofSubviewAt:(int)dividerIndex
+{
+    return 500;
 }
 
 @end
@@ -166,7 +197,7 @@
             [toolbarItem setMinSize:CGSizeMake(180, 32)];
             [toolbarItem setMaxSize:CGSizeMake(180, 32)];
             [toolbarItem setTarget:[GithubAPIController sharedController]];
-            [toolbarItem setAction:@selector(promptForAuthentication:)];
+            [toolbarItem setAction:@selector(toggleAuthentication:)];
         break;
         
         case @"newissue":

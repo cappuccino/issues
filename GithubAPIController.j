@@ -59,6 +59,21 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
     return [[CPUserSessionManager defaultManager] status] === CPUserSessionLoggedInStatus;
 }
 
+- (void)toggleAuthentication:(id)sender
+{
+    if ([self isAuthenticated])
+        [self logout:sender];
+    else
+        [self promptForAuthentication:sender];
+}
+
+- (void)logout:(id)sender
+{
+    username = nil;
+    authenticationToken = nil;
+    [[CPUserSessionManager defaultManager] setStatus:CPUserSessionLoggedOutStatus];
+}
+
 - (CPString)_credentialsString
 {
     if ([self isAuthenticated])
