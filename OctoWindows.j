@@ -124,22 +124,15 @@ var SharedRepoWindow = nil;
 - (@action)addRepository:(id)sender
 {
     var repoIdentifier = [identifierField stringValue];
-
     if (!repoIdentifier)
         return;
 
-    var sortedRepos = [repoController sortedRepos],
-        count = sortedRepos.length,
-        index = 0;
-
-    for (; index < count; index++)
+    var existingRepo = [[GithubAPIController sharedController] repositoryForIdentifier:repoIdentifier];
+    if (existingRepo)
     {
-        if (sortedRepos[index].identifier === repoIdentifier)
-        {
-            [[repoController sourcesListView] selectRowIndexes:[CPIndexSet indexSetWithIndex:existingIndex] byExtendingSelection:NO];
-            [repoController tableViewSelectionDidChange:nil];
-            [self orderOut:self];
-        }
+        [repoController addRepository:repo];
+        [self orderOut:self];
+        return;
     }
 
     [[GithubAPIController sharedController] loadRepositoryWithIdentifier:repoIdentifier callback:function(repo)

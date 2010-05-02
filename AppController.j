@@ -28,6 +28,16 @@
 
 - (void)applicationDidFinishLaunching:(CPNotification)aNotification
 {
+    var reposCookie = [[CPCookie alloc] initWithName:@"github.repos"],
+        cookieRepos = nil;
+
+    try {
+        cookieRepos = JSON.parse([reposCookie value]);
+    }
+    catch (e) {
+        CPLog.info("unable to load repos from cookie: "+e);
+    }
+
     // parse the url arguments here. i.e. load a repo/issue on startup.
     var args = [CPApp namedArguments];
     if ([args containsKey:@"repo"])
@@ -49,6 +59,12 @@
 
                         [reposController addRepository:repo];
                         [initialLoadingView removeFromSuperview];
+
+                        if (cookieRepos)
+                        {
+                            for (var i = 0, count = cookieRepos.length; i < count; i++)
+                                [reposController addRepository:cookieRepos[i] select:NO];
+                        }
 
                         var issueNumber = parseInt([args valueForKey:@"issue"], 10),
                             openIssues = repo.openIssues,
@@ -75,18 +91,45 @@
                                 return;
                             }
                         }
-
                     }];
                 }
                 else
                 {
                     [reposController addRepository:repo];
                     [initialLoadingView removeFromSuperview];
+
+                    if (cookieRepos)
+                    {
+                        for (var i = 0, count = cookieRepos.length; i < count; i++)
+                            [reposController addRepository:cookieRepos[i] select:NO];
+                    }
                 }
+            }
+            else if (cookieRepos)
+            {
+                for (var i = 0, count = cookieRepos.length; i < count; i++)
+                    [reposController addRepository:cookieRepos[i] select:NO];
             }
         }];
     }
+    else if (cookieRepos)
+        [reposController setSortedRepos:cookieRepos];
+}
 
+- (void)applicationWillTerminate:(CPNotification)aNote
+{
+    var repos = [reposController sortedRepos],
+        count = repos.length;
+
+    for (var i = 0; i < count; i++)
+    {
+        delete repos[i].openIssues;
+        delete repos[i].closedIssues;
+    }
+
+    [[[CPCookie alloc] initWithName:@"github.repos"] setValue:JSON.stringify(repos) 
+                                                      expires:[CPDate distantFuture] 
+                                                       domain:nil];
 }
 
 - (void)awakeFromCib
@@ -237,7 +280,3 @@
 }
 
 @end
-
-// Create a console object if none exists
-if (typeof window.console === "undefined")
-    window.console = {log:function(){}, info:function(){}, error:function(){}, warn:function(){}}

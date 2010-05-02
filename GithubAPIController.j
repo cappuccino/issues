@@ -141,7 +141,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
     request.open("GET", BASE_URL+"repos/show/"+anIdentifier+[self _credentialsString], true);
 
     request.oncomplete = function()
-    {console.log("request completed: "+request.status()+" text: "+request.responseText());
+    {
         var repo = nil;
         if (request.success())
         {
@@ -152,7 +152,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
                 [repositoriesByIdentifier setObject:repo forKey:anIdentifier];
             }
             catch (e) {
-                console.error("Unable to load repositority with identifier: "+anIdentifier+" -- "+e);
+                CPLog.error("Unable to load repositority with identifier: "+anIdentifier+" -- "+e);
             }
         }
 
@@ -192,7 +192,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
                 aRepo.openIssues = [issues objectForKey:"issues"];
             }
             catch (e) {
-                console.error("Unable to load issues for repo: "+aRepo+" -- "+e);
+                CPLog.error("Unable to load issues for repo: "+aRepo+" -- "+e);
             }
         }
 
@@ -212,7 +212,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
                 aRepo.closedIssues = [issues objectForKey:"issues"];
             }
             catch (e) {
-                console.error("Unable to load repositority with identifier: "+anIdentifier+" -- "+e);
+                CPLog.error("Unable to load repositority with identifier: "+anIdentifier+" -- "+e);
             }
         }
 
@@ -238,7 +238,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
                 comments = JSON.parse(request.responseText()).comments || [];
             }
             catch (e) {
-                console.error("Unable to load comments for issue: "+anIssue+" -- "+e);
+                CPLog.error("Unable to load comments for issue: "+anIssue+" -- "+e);
             }
         }
 

@@ -83,10 +83,49 @@
 
 - (void)addRepository:(id)aRepo
 {
+    [self addRepository:aRepo select:YES];
+}
+
+- (void)addRepository:(id)aRepo select:(BOOL)shouldSelect
+{
     if (!aRepo)
         return;
 
-    sortedRepos.unshift(aRepo);
+    var count = sortedRepos.length,
+        repoIdentifier = aRepo.identifier;
+
+    for (var index = 0; index < count; index++)
+    {
+        if (sortedRepos[index].identifier === repoIdentifier)
+        {
+            [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:index] byExtendingSelection:NO];
+            [self tableViewSelectionDidChange:nil];
+            return;
+        }
+    }
+
+    if (shouldSelect)
+    {
+        sortedRepos.unshift(aRepo);
+        [sourcesListView reloadData];
+        [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
+        [self tableViewSelectionDidChange:nil];
+    }
+    else
+    {
+        sortedRepos.push(aRepo);
+        [sourcesListView reloadData];
+    }
+
+	[self hideNoReposView];
+}
+
+- (void)setSortedRepos:(CPArray)repos
+{
+    if (!repos || !repos.length)
+        return;
+
+    sortedRepos = repos;
     [sourcesListView reloadData];
     [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
     [self tableViewSelectionDidChange:nil];
