@@ -34,10 +34,8 @@
         var repo = [args valueForKey:@"repo"];
         [[GithubAPIController sharedController] loadRepositoryWithIdentifier:repo callback:function(repo)
         {
-            if (!repo)
-                return;
-
-            [reposController addRepository:repo];
+            if (repo)
+                [reposController addRepository:repo];
         }];
 
     	[reposController hideNoReposView];
