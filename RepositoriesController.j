@@ -64,7 +64,7 @@ var ToolbarColor = nil;
     [column setDataView:repositoryView];
     
     [sourcesListView addTableColumn:column];
-    [sourcesListView setColumnAutoresizingStyle:CPTableViewUniformColumnAutoresizingStyle];
+    [sourcesListView setColumnAutoresizingStyle:CPTableViewLastColumnOnlyAutoresizingStyle];
     [sourcesListView setRowHeight:26.0];
     [sourcesListView setSelectionHighlightStyle:CPTableViewSelectionHighlightStyleNone];
 
