@@ -197,3 +197,12 @@ var ToolbarColor = nil;
 }
 
 @end
+
+@implementation CPColor (selectionOverride)
+
++ (CPColor)selectionColor
+{
+    return [CPColor colorWithHexString:@"8d9196"];
+}
+
+@end
