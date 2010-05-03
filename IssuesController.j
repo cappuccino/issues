@@ -147,6 +147,7 @@ var IssuesHTMLTemplate = nil;
 
 - (void)selectIssueAtIndex:(unsigned)index
 {
+    [issuesTableView scrollRowToVisible:index];
     [issuesTableView selectRowIndexes:[CPIndexSet indexSetWithIndex:index] byExtendingSelection:NO];
     [self tableViewSelectionDidChange:nil];
 }
