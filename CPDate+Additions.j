@@ -63,7 +63,12 @@
     aDate = [aDate stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
     aDate = [[CPDate alloc] initWithString:aDate];
 
-    return aDate.getDate() + " " + [aDate monthByName] + ", " + aDate.getFullYear();
+    return [aDate simpleDate];
+}
+
+- (CPString)simpleDate
+{
+    return self.getDate() + " " + [self monthByName] + ", " + self.getFullYear();
 }
 
 @end

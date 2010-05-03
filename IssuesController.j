@@ -245,8 +245,11 @@ var IssuesHTMLTemplate = nil;
     if (!issue)
         return;
 
-    var commentWindow = [CommentWindow sharedCommentWindow];
-    [commentWindow makeKeyAndOrderFront:self];
+    var webFrame = [issueWebView._frameView frame];
+    [issueWebView._frameView scrollPoint:CGPointMake(0, CGRectGetMaxY(webFrame))];
+
+    var scriptObject = [issueWebView windowScriptObject];
+    [scriptObject callWebScriptMethod:"showCommentForm" withArguments:nil];
 }
 
 - (@action)newIssue:(id)sender
@@ -330,6 +333,12 @@ var IssuesHTMLTemplate = nil;
 
 - (void)loadIssue:(id)item inWebView:(CPWebView)aWebView
 {
+    [aWebView setFrameLoadDelegate:self];
+    
+    //FIXME shouldn't do it this way
+    aWebView.ISSUE = item;
+    aWebView.REPO = repo;
+
 	if (![item objectForKey:"body_html"])
 	{
 	    [item setObject:Markdown.makeHtml([item objectForKey:"body"]) forKey:"body_html"];
@@ -361,6 +370,16 @@ var IssuesHTMLTemplate = nil;
 
 		[aWebView loadHTMLString:html];
 	}    
+}
+
+- (void)webView:(CPWebView)aWebView didFinishLoadForFrame:(id)aFrame
+{
+    // add in references so that commenting will work.
+    var domWindow = [aWebView DOMWindow];
+
+    domWindow.REPO = aWebView.REPO;
+    domWindow.ISSUE = aWebView.ISSUE;
+    domWindow.GitHubAPI = window.GitHubAPI;
 }
 
 - (void)tableViewSelectionDidChange:(CPNotification)aNotification

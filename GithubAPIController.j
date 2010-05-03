@@ -3,9 +3,19 @@
 @import <AppKit/CPImage.j>
 @import "md5-min.js"
 
-//BASE_URL = "/";
-//if(window.location && window.location.protocol === "file:")
-    BASE_URL = "https://github.com/api/v2/json/";
+BASE_URL = "/github/";
+if(window.location && window.location.protocol === "file:")
+    BASE_URL = "http://github.com/api/v2/json/";
+
+GitHubAPI = {
+    addComment: function(aRepo, anIssue, commentBody, callback)
+    {
+        [SharedController addComment:commentBody 
+                             onIssue:anIssue 
+                        inRepository:aRepo
+                            callback:callback];
+    }
+}
 
 var SharedController = nil,
     GravatarBaseURL = "http://www.gravatar.com/avatar/";
@@ -293,5 +303,40 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 
     request.send("");
 }
+
+- (void)addComment:(CPString)commentBody onIssue:(id)anIssue inRepository:(id)aRepo callback:(Function)aCallback
+{
+    var request = new CFHTTPRequest();
+    request.open("POST", BASE_URL+"issues/comment/"+aRepo.identifier+"/"+
+                [anIssue objectForKey:"number"]+[self _credentialsString]+
+                "&comment="+encodeURIComponent(commentBody), true);
+
+    request.oncomplete = function()
+    {console.log("request finished with state: "+request.status()+" "+request.responseText())
+        var comment = nil;
+        if (request.success())
+        {
+            try {
+                comment = JSON.parse(request.responseText()).comment;
+            }
+            catch (e) {
+                CPLog.error("Unable to load comments for issue: "+anIssue+" -- "+e);
+            }
+
+            var comments = [anIssue objectForKey:"all_comments"];
+
+            comment.body_html = Markdown.makeHtml(comment.body);
+            comment.human_readable_date = [CPDate simpleDate:comment.created_at];
+
+            comments.push(comment);
+        }
+
+        if (aCallback)
+            aCallback(comment, request);
+    }
+
+    request.send("");
+}
+
 
 @end

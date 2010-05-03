@@ -238,7 +238,131 @@ img.issue-author-image {
 .comment-date {
     color: rgb(104, 104, 104);
 }
-        </style>
+
+#add-comment-button-wrapper {
+	text-align: right;
+}
+
+#add-comment-button-wrapper a {
+}
+
+.comment-form-wrapper {
+	text-align: right;
+	margin-top: 2em;
+}
+
+.fakebutton {
+    font-size: 12px;
+    background-color: rgb(246, 248, 222);
+    border-radius: 8px;
+    -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+    padding: 0.5em 1em 0.5em 1em;
+	color: black;
+	text-decoration: none;
+	border: 1px solid rgb(200, 200, 200);	
+}
+
+.fakebutton:active {
+    background-color: rgb(236, 238, 212);
+}
+
+#add-comment-textarea-wrapper-wrapper {
+	padding: 0;
+	margin-right: 0;
+}
+
+#add-comment-textarea {
+	width: 100%;
+	margin: 0;
+	margin-right: 2em;
+	height: 80px;
+	display: block;
+	border: 1px solid transparent;
+    border-radius: 8px;
+    -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+    padding: 0.5em 1em 0.5em 1em;
+}
+
+#add-comment-textarea:focus {
+	outline: none;
+	border: 1px solid gray;
+    -webkit-box-shadow: 0px 0px 6px yellow;
+    -moz-box-shadow: 0px 0px 6px yellow;
+    box-shadow: 0px 0px 6px yellow;
+}
+
+#add-comment-textarea-wrapper {
+	margin-right: 0;
+}
+#comment-form-error-message {
+	display: none;
+}
+
+.error-message {
+	color: red;
+}
+		</style>
+
+		<script type="text/javascript">
+function showCommentForm() {
+	var textarea = document.getElementById("add-comment-textarea");
+	textarea.focus();
+}
+
+function hideCommentForm() {
+	var textarea = document.getElementById("add-comment-textarea");
+	textarea.value = "";
+	textarea.blur();
+}
+
+function submitCommentForm() {
+	var errorMessageField = document.getElementById("comment-form-error-message"),
+		textarea = document.getElementById("add-comment-textarea");
+
+	GitHubAPI.addComment(REPO, ISSUE, textarea.value, function(comment) {
+		if (comment)
+		{
+			hideCommentForm();
+			addComment(comment);
+			errorMessageField.style.display = "none";
+		}
+		else
+		{
+			errorMessageField.style.display = "inline";
+		}
+	});
+}
+
+function addComment(comment) {
+	var allComments = document.getElementById("comments"),
+		newComment = document.createElement("div");
+		commentHTML = ''+
+        '<div class="comment-body">'+
+         	'<div class="comment-body-wrapper">'+
+		            '<div class="comment-accessory-shadow"></div>'+
+		            '<div class="comment-accessory"></div>'+
+		            comment.body_html+
+		        '</div>'+
+		    '</div>'+
+		    '<div class="comment-meta">'+
+		        '<div class="comment-meta-wrapper">'+
+		            '<div class="comment-author-image"><img src="http://www.gravatar.com/avatar/'+comment.gravatar_id+
+					'.png?s=28&d=identicon" alt="'+comment.user+'" /></div>'+
+		            '<div class="comment-meta-meta">'+
+		                '<div class="comment-author">'+comment.user+'</div>'+
+		                '<div class="comment-date">'+comment.human_readable_date+'</div>'+
+		            '</div>'+
+		        '</div>'+
+		    '</div>';
+
+	newComment.className = "comment";
+	newComment.innerHTML = commentHTML;
+	allComments.appendChild(newComment);
+}
+		</script>
+
     </head>
     <body>
         <div id="wrapper">
@@ -291,7 +415,7 @@ img.issue-author-image {
                 </div>
             </div>
 
-            <div class="comments">
+            <div id="comments" class="comments">
 			{{#all_comments}}
                 <div class="comment">
                     <div class="comment-body">
@@ -313,6 +437,17 @@ img.issue-author-image {
                 </div>
 			{{/all_comments}}
             </div>
+
+			<div id="add-comment-area" class="comment">
+				<div id="add-comment-textarea-wrapper" class="comment-body">
+					<textarea id="add-comment-textarea" class="comment-body-wrapper"></textarea>
+					<div class="comment-form-wrapper">
+						<span id="comment-form-error-message" class="error-message">Something went wrong. Try again.</span>
+						<a class="fakebutton" href="javascript:hideCommentForm();">Clear</a>
+						<a class="fakebutton" href="javascript:submitCommentForm();">Comment</a>
+					</div>
+				</div>
+			</div>
 
         </div>
     </body>
