@@ -312,7 +312,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
                 "&comment="+encodeURIComponent(commentBody), true);
 
     request.oncomplete = function()
-    {console.log("request finished with state: "+request.status()+" "+request.responseText())
+    {
         var comment = nil;
         if (request.success())
         {
