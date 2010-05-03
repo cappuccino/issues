@@ -67,6 +67,9 @@ var ToolbarColor = nil;
     [sourcesListView setColumnAutoresizingStyle:CPTableViewLastColumnOnlyAutoresizingStyle];
     [sourcesListView setRowHeight:26.0];
     [sourcesListView setSelectionHighlightStyle:CPTableViewSelectionHighlightStyleNone];
+    [sourcesListView setVerticalMotionCanBeginDrag:YES];
+    [sourcesListView setDraggingDestinationFeedbackStyle:CPTableViewDropAbove];
+    [sourcesListView registerForDraggedTypes:[@"GitHubIssuesRepoSourceListDragType"]];
 
     [sourcesListView setBackgroundColor:[CPColor colorWithHexString:@"eef2f8"]];
 
@@ -212,4 +215,77 @@ var ToolbarColor = nil;
     return [CPColor colorWithHexString:@"8d9196"];
 }
 
+@end
+@implementation RepositoriesController (tableViewDragDrop)
+- (BOOL)tableView:(CPTableView)aTableView writeRowsWithIndexes:(CPIndexSet)rowIndexes toPasteboard:(CPPasteboard)pboard
+{
+
+    
+    if(aTableView === sourcesListView)
+    {
+        // encode the index(es)being dragged
+        var encodedData = [CPKeyedArchiver archivedDataWithRootObject:rowIndexes];
+        [pboard declareTypes:[CPArray arrayWithObject:@"GitHubIssuesRepoSourceListDragType"] owner:self];
+        [pboard setData:encodedData forType:@"GitHubIssuesRepoSourceListDragType"];
+    
+        return YES;
+    }
+
+
+    return NO;
+}
+
+- (CPDragOperation)tableView:(CPTableView)aTableView 
+                   validateDrop:(id)info 
+                   proposedRow:(CPInteger)row 
+                   proposedDropOperation:(CPTableViewDropOperation)operation
+{
+ //   console.log([aTableView rectOfRow:0]);
+    if(aTableView === sourcesListView)
+    {
+        if([info draggingSource] !== sourcesListView && row >= [sortedRepos count] || row < 0)
+            row = [sortedRepos count] - 1;
+
+        if([info draggingSource] === sourcesListView)
+        {
+            [aTableView setDropRow:row dropOperation:CPTableViewDropAbove];
+            return CPDragOperationMove;
+        }
+    }
+    return CPDragOperationNone;
+}
+
+- (BOOL)tableView:(CPTableView)aTableView acceptDrop:(id)info row:(int)row dropOperation:(CPTableViewDropOperation)operation
+{
+    //remember to check the operation/info
+    if(aTableView === sourcesListView)
+    {
+        if([info draggingSource] === sourcesListView)
+        {
+            
+            var pboard = [info draggingPasteboard],
+                rowData = [pboard dataForType:@"GitHubIssuesRepoSourceListDragType"];    
+    
+            rowData = [CPKeyedUnarchiver unarchiveObjectWithData:rowData];
+
+            //row data contains an index set
+            //move the object at the first index to the row...
+            if([rowData firstIndex] < row)
+                var dropRow = row - 1;
+            else
+                var dropRow = row;
+
+            var movedObject = [sortedRepos objectAtIndex:[rowData firstIndex]];
+            [sortedRepos removeObjectAtIndex:[rowData firstIndex]];
+            [sortedRepos insertObject:movedObject atIndex:dropRow];
+            [sourcesListView reloadData];
+            [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:dropRow] byExtendingSelection:NO];
+
+            [aTableView _noteSelectionDidChange];
+            return YES;
+         }
+    }
+    
+    return NO;
+}
 @end
