@@ -1,6 +1,6 @@
 /*
  * AppController.j
- * GithubIssues
+ * GitHubIssues
  *
  * Created by Ross Boucher on April 28, 2010.
  * Copyright 2010, 280 North All rights reserved.
@@ -313,7 +313,7 @@
 
 @end
 
-window.GithubIssuesToggleVertical = function()
+window.GitHubIssuesToggleVertical = function()
 {
     var splitView = [CPApp delegate].detailLevelSplitView;
     [splitView setVertical:![splitView isVertical]];
