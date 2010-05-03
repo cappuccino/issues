@@ -259,12 +259,12 @@ img.issue-author-image {
                     
                     <div class="issue-meta">
                         <div class="issue-meta-wrapper">
-                            {{#has_user_image}}
+                            {{#gravatar_id}}
                             <div class="issue-image-area">
-                                <img class="issue-author-image" src="http://www.gravatar.com/avatar/{{user_email_hash}}.png?s=68&d=identicon" alt="{{user_email}}" />
+                                <img class="issue-author-image" src="http://www.gravatar.com/avatar/{{gravatar_id}}.png?s=68&d=identicon" alt="{{user_email}}" />
                                 <div class="issue-image-paperclip-placeholder"></div>
                             </div>
-                            {{/has_user_image}}
+                            {{/gravatar_id}}
                             <div class="issue-meta-box first-box">
                                 <h3 class="issue-meta-title">Submitter</h3>
                                 <span class="issue-meta-content">{{user}}</span>
@@ -303,7 +303,7 @@ img.issue-author-image {
                     </div>
                     <div class="comment-meta">
                         <div class="comment-meta-wrapper">
-                            <div class="comment-author-image"><img src="http://www.gravatar.com/avatar/{{.user_email_hash}}.png?s=28&d=identicon" alt="{{.user}}" /></div>
+                            <div class="comment-author-image"><img src="http://www.gravatar.com/avatar/{{.gravatar_id}}.png?s=28&d=identicon" alt="{{.user}}" /></div>
                             <div class="comment-meta-meta">
                                 <div class="comment-author">{{.user}}</div>
                                 <div class="comment-date">{{.human_readable_date}}</div>

@@ -109,6 +109,8 @@ var IssuesHTMLTemplate = nil;
 
     [issuesTableView addTableColumn:updated];
 
+    [issuesTableView setTarget:self];
+    [issuesTableView setDoubleAction:@selector(openIssueInNewWindow:)];
     [issuesTableView setUsesAlternatingRowBackgroundColors:YES];
     [issuesTableView setColumnAutoresizingStyle:CPTableViewUniformColumnAutoresizingStyle];
 
@@ -176,6 +178,29 @@ var IssuesHTMLTemplate = nil;
         return hasSelection;
     else 
         return !!repo;
+}
+
+- (@action)openIssueInNewWindow:(id)sender
+{
+    var issue = [self selectedIssue];
+    if (issue === nil)
+        return;
+
+    var platformWindow = [[CPPlatformWindow alloc] initWithContentRect:CGRectMake(100, 100, 800, 600)],
+        newWindow = [[CPWindow alloc] initWithContentRect:CGRectMake(0, 0, 800, 600) styleMask:0];
+
+    [newWindow setPlatformWindow:platformWindow];
+    [newWindow setFullBridge:YES];
+
+    var contentView = [newWindow contentView],
+        webView = [[CPWebView alloc] initWithFrame:[contentView bounds]];
+
+    [webView setAutoresizingMask:CPViewWidthSizable|CPViewHeightSizable];
+    [contentView addSubview:webView];
+
+    [newWindow orderFront:self];
+
+    [self loadIssue:issue inWebView:webView];
 }
 
 - (@action)closeIssue:(id)sender
@@ -303,6 +328,41 @@ var IssuesHTMLTemplate = nil;
     [[[[CPApp delegate] mainWindow] toolbar] validateVisibleToolbarItems];
 }
 
+- (void)loadIssue:(id)item inWebView:(CPWebView)aWebView
+{
+	if (![item objectForKey:"body_html"])
+	{
+	    [item setObject:Markdown.makeHtml([item objectForKey:"body"]) forKey:"body_html"];
+	    [item setObject:[CPDate simpleDate:[item objectForKey:"created_at"]] forKey:"human_readable_created_date"];
+	    [item setObject:[CPDate simpleDate:[item objectForKey:"updated_at"]] forKey:"human_readable_updated_date"];
+	    [item setObject:([item objectForKey:"labels"] || []).join(", ") forKey:"comma_separated_tags"];
+	    
+	    [[GithubAPIController sharedController] loadCommentsForIssue:item repository:repo callback:function()
+	    {
+	        var comments = [item objectForKey:"all_comments"];
+	        for (var i = 0, count = comments.length; i < count; i++)
+	        {
+	            var comment = comments[i];
+	            comment.body_html = Markdown.makeHtml(comment.body);
+	            comment.human_readable_date = [CPDate simpleDate:comment.created_at];
+	            //comment.user_email_hash
+	        }
+
+		    var jsItem = [item toJSObject],
+    			html = Mustache.to_html(IssuesHTMLTemplate, jsItem);
+
+    		[aWebView loadHTMLString:html];
+	    }]		    
+	}
+    else
+    {
+	    var jsItem = [item toJSObject],
+			html = Mustache.to_html(IssuesHTMLTemplate, jsItem);
+
+		[aWebView loadHTMLString:html];
+	}    
+}
+
 - (void)tableViewSelectionDidChange:(CPNotification)aNotification
 {
     var item = [self selectedIssue];
@@ -311,42 +371,7 @@ var IssuesHTMLTemplate = nil;
 
 	if (item)
 	{
-		if (![item objectForKey:"body_html"])
-		{
-		    [item setObject:Markdown.makeHtml([item objectForKey:"body"]) forKey:"body_html"];
-		    [item setObject:[CPDate simpleDate:[item objectForKey:"created_at"]] forKey:"human_readable_created_date"];
-		    [item setObject:[CPDate simpleDate:[item objectForKey:"updated_at"]] forKey:"human_readable_updated_date"];
-		    [item setObject:([item objectForKey:"labels"] || []).join(", ") forKey:"comma_separated_tags"];
-		    //[item setObject:Markdown.makeHtml([item objectForKey:body]) forKey:"user_email_hash"];
-		    //[item setObject:Markdown.makeHtml([item objectForKey:body]) forKey:"user_email"];
-		    [item setObject:YES forKey:"has_user_image"];
-		    
-		    [[GithubAPIController sharedController] loadCommentsForIssue:item repository:repo callback:function()
-		    {
-		        var comments = [item objectForKey:"all_comments"];
-		        for (var i = 0, count = comments.length; i < count; i++)
-		        {
-		            var comment = comments[i];
-		            comment.body_html = Markdown.makeHtml(comment.body);
-		            comment.human_readable_date = [CPDate simpleDate:comment.created_at];
-		            //comment.user_email_hash
-		        }
-
-    		    var jsItem = [item toJSObject],
-        			html = Mustache.to_html(IssuesHTMLTemplate, jsItem);
-
-        		[issueWebView loadHTMLString:html];
-		    }]		    
-		}
-        else
-        {
-		    var jsItem = [item toJSObject],
-    			html = Mustache.to_html(IssuesHTMLTemplate, jsItem);
-
-    		[issueWebView loadHTMLString:html];
-		}
-
-		//update the location hash
+        [self loadIssue:item inWebView:issueWebView];
 		[CPApp setArguments:[repo.owner, repo.name, [item objectForKey:"number"]]];
 	}
 
