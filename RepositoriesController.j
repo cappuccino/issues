@@ -95,11 +95,6 @@ var ToolbarColor = nil;
 	[noReposView removeFromSuperview];
 }
 
-- (void)windowWillClose:(id)sender
-{
-    //do something
-}
-
 - (void)addRepository:(id)aRepo
 {
     [self addRepository:aRepo select:YES];
@@ -155,7 +150,6 @@ var ToolbarColor = nil;
 - (@action)promptForNewRepository:(id)sender
 {
     var newRepoWindow = [NewRepoWindow sharedNewRepoWindow];
-    [newRepoWindow setDelegate:self];
     [newRepoWindow makeKeyAndOrderFront:self];
 }
 
@@ -191,6 +185,8 @@ var ToolbarColor = nil;
 	    [CPApp setArguments:[repo.owner, repo.name]];
 		[issuesController setRepo:repo];
 	}
+
+    [[[[CPApp delegate] mainWindow] toolbar] validateVisibleToolbarItems];
 }
 
 - (id)tableView:(CPTableView)aTableView objectValueForTableColumn:(int)aColumn row:(int)aRow

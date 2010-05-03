@@ -253,4 +253,45 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
     request.send("");
 }
 
+- (void)closeIssue:(id)anIssue repository:(id)aRepo callback:(Function)aCallback
+{
+    var request = new CFHTTPRequest();
+    request.open("POST", BASE_URL+"issues/close/"+aRepo.identifier+"/"+[anIssue objectForKey:"number"]+[self _credentialsString], true);
+
+    request.oncomplete = function()
+    {
+        if (request.success())
+        {
+            [anIssue setObject:"closed" forKey:"state"];
+            [aRepo.openIssues removeObject:anIssue];
+            aRepo.closedIssues.unshift(anIssue);
+        }
+        if (aCallback)
+            aCallback(request.success(), anIssue, aRepo, request);
+    }
+    
+    request.send("");
+}
+
+- (void)reopenIssue:(id)anIssue repository:(id)aRepo callback:(Function)aCallback
+{
+    var request = new CFHTTPRequest();
+    request.open("POST", BASE_URL+"issues/reopen/"+aRepo.identifier+"/"+[anIssue objectForKey:"number"]+[self _credentialsString], true);
+
+    request.oncomplete = function()
+    {
+        if (request.success())
+        {
+            [anIssue setObject:"open" forKey:"state"];
+            [aRepo.closedIssues removeObject:anIssue];
+            aRepo.openIssues.unshift(anIssue);
+        }
+
+        if (aCallback)
+            aCallback(request.success(), anIssue, aRepo, request);
+    }
+
+    request.send("");
+}
+
 @end

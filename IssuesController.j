@@ -151,24 +151,86 @@ var IssuesHTMLTemplate = nil;
     [self tableViewSelectionDidChange:nil];
 }
 
+- (id)selectedIssue
+{
+    var row = [issuesTableView selectedRow],
+		item = nil;
+
+	if (row >= 0 && repo)
+        item = [(filteredIssues || repo[displayedIssuesKey]) objectAtIndex:row];
+
+	return item;
+}
+
+- (void)validateToolbarItem:(CPToolbarItem)anItem
+{
+    var hasSelection = [self selectedIssue] !== nil,
+        identifier = [anItem itemIdentifier];
+
+    if (identifier === "openissue")
+        return displayedIssuesKey === "closedIssues" && hasSelection;
+    else if (identifier === "closeissue")
+        return displayedIssuesKey === "openIssues" && hasSelection;
+    else if (identifier === "commentissue")
+        return hasSelection;
+    else 
+        return !!repo;
+}
+
 - (@action)closeIssue:(id)sender
 {
-
+    var issue = [self selectedIssue];
+    if (issue && [issue objectForKey:"state"] === "open")
+    {
+        [[GithubAPIController sharedController] closeIssue:issue repository:repo callback:function(success)
+        {
+            if (success)
+            {
+                [issuesTableView reloadData];
+                [self searchFieldDidChange:nil];
+                [self tableView:issuesTableView sortDescriptorsDidChange:nil];
+                [self tableViewSelectionDidChange:nil];
+            }
+        }];
+    }
 }
 
 - (@action)reopenIssue:(id)sender
 {
-
+    var issue = [self selectedIssue];
+    if (issue && [issue objectForKey:"state"] === "closed")
+    {
+        [[GithubAPIController sharedController] reopenIssue:issue repository:repo callback:function(success)
+        {
+            if (success)
+            {
+                [issuesTableView reloadData];
+                [self searchFieldDidChange:nil];
+                [self tableView:issuesTableView sortDescriptorsDidChange:nil];
+                [self tableViewSelectionDidChange:nil];
+            }
+        }];
+    }
 }
 
 - (@action)comment:(id)sender
 {
+    var issue = [self selectedIssue];
+    if (!issue)
+        return;
 
+    var commentWindow = [CommentWindow sharedCommentWindow];
+    [commentWindow makeKeyAndOrderFront:self];
 }
 
 - (@action)newIssue:(id)sender
 {
+    var issue = [self selectedIssue];
+    if (!issue)
+        return;
 
+    var newIssueWindow = [NewIssueWindow sharedNewIssueWindow];
+    [newIssueWindow makeKeyAndOrderFront:self];
 }
 
 - (@action)reload:(id)sender
@@ -237,16 +299,13 @@ var IssuesHTMLTemplate = nil;
 		[self showView:noRepoView];
 
 	[issuesTableView reloadData];
+    [[[[CPApp delegate] mainWindow] toolbar] validateVisibleToolbarItems];
 }
 
 - (void)tableViewSelectionDidChange:(CPNotification)aNotification
 {
-	var row = [issuesTableView selectedRow],
-		item = nil;
-
-	if (row >= 0)
-        item = [(filteredIssues || repo[displayedIssuesKey]) objectAtIndex:row];
-
+    var item = [self selectedIssue];
+    
     [issueWebView loadHTMLString:""];
 
 	if (item)
@@ -289,6 +348,8 @@ var IssuesHTMLTemplate = nil;
 		//update the location hash
 		[CPApp setArguments:[repo.owner, repo.name, [item objectForKey:"number"]]];
 	}
+
+    [[[[CPApp delegate] mainWindow] toolbar] validateVisibleToolbarItems];
 }
 
 - (id)tableView:(CPTableView)aTableView objectValueForTableColumn:(int)aColumn row:(int)aRow

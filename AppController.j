@@ -14,6 +14,7 @@
 @import "RepositoryView.j"
 @import "UserView.j"
 @import "GithubAPIController.j"
+@import "LPMultiLineTextField.j"
 
 @implementation AppController : CPObject
 {
@@ -28,27 +29,6 @@
 
 - (void)applicationDidFinishLaunching:(CPNotification)aNotification
 {
-    var usernameCookie = [[CPCookie alloc] initWithName:@"github.username"],
-        apiTokenCookie = [[CPCookie alloc] initWithName:@"github.apiToken"];
-
-    if ([usernameCookie value] && [apiTokenCookie value])
-    {
-        var controller = [GithubAPIController sharedController];
-        [controller setUsername:[usernameCookie value]];
-        [controller setAuthenticationToken:[apiTokenCookie value]];
-        [controller authenticateWithCallback:nil];
-    }
-
-    var reposCookie = [[CPCookie alloc] initWithName:@"github.repos"],
-        cookieRepos = nil;
-
-    try {
-        cookieRepos = JSON.parse([reposCookie value]);
-    }
-    catch (e) {
-        CPLog.info("unable to load repos from cookie: "+e+" "+[reposCookie value]);
-    }
-
     // parse the url arguments here. i.e. load a repo/issue on startup.
     var args = [CPApp arguments],
         argCount = [args count];
@@ -60,39 +40,68 @@
 
         [initialLoadingView setFrame:frame];
         [contentView addSubview:initialLoadingView];
+    }
 
-        var identifier = args[0] + "/" + args[1];
-        [[GithubAPIController sharedController] loadRepositoryWithIdentifier:identifier callback:function(repo)
+    var initializationFunction = function(){
+        var reposCookie = [[CPCookie alloc] initWithName:@"github.repos"],
+            cookieRepos = nil;
+
+        try {
+            cookieRepos = JSON.parse([reposCookie value]);
+        }
+        catch (e) {
+            CPLog.info("unable to load repos from cookie: "+e+" "+[reposCookie value]);
+        }
+
+        if (argCount >= 2)
         {
-            if (repo)
+            var identifier = args[0] + "/" + args[1];
+            [[GithubAPIController sharedController] loadRepositoryWithIdentifier:identifier callback:function(repo)
             {
-                if (argCount >= 3)
+                if (repo)
                 {
-                    [[GithubAPIController sharedController] loadIssuesForRepository:repo callback:function(){
+                    if (argCount >= 3)
+                    {
+                        [[GithubAPIController sharedController] loadIssuesForRepository:repo callback:function(){
 
-                        var issueNumber = parseInt(args[2], 10),
-                            openIssues = repo.openIssues,
-                            count = openIssues.length,
-                            issueIndex = -1;
+                            var issueNumber = parseInt(args[2], 10),
+                                openIssues = repo.openIssues,
+                                count = openIssues.length,
+                                issueIndex = -1;
 
-                        for (var i = 0; i < count && issueIndex < 0; i++)
-                        {
-                            if ([openIssues[i] objectForKey:"number"] === issueNumber)
-                                issueIndex = i;
-                        }
-
-                        var closedIssues = repo.closedIssues,
-                            count = closedIssues.length;
-
-                        for (var i = 0; i < count && issueIndex < 0; i++)
-                        {
-                            if ([closedIssues[i] objectForKey:"number"] === issueNumber)
+                            for (var i = 0; i < count && issueIndex < 0; i++)
                             {
-                                [issuesController setDisplayedIssuesKey:"closedIssues"];
-                                issueIndex = i;
+                                if ([openIssues[i] objectForKey:"number"] === issueNumber)
+                                    issueIndex = i;
                             }
-                        }
 
+                            var closedIssues = repo.closedIssues,
+                                count = closedIssues.length;
+
+                            for (var i = 0; i < count && issueIndex < 0; i++)
+                            {
+                                if ([closedIssues[i] objectForKey:"number"] === issueNumber)
+                                {
+                                    [issuesController setDisplayedIssuesKey:"closedIssues"];
+                                    issueIndex = i;
+                                }
+                            }
+
+                            [reposController addRepository:repo];
+                            [initialLoadingView removeFromSuperview];
+
+                            if (cookieRepos)
+                            {
+                                for (var i = 0, count = cookieRepos.length; i < count; i++)
+                                    [reposController addRepository:cookieRepos[i] select:NO];
+                            }
+
+                            if (issueIndex >= 0)
+                                [issuesController selectIssueAtIndex:issueIndex];
+                        }];
+                    }
+                    else
+                    {
                         [reposController addRepository:repo];
                         [initialLoadingView removeFromSuperview];
 
@@ -101,32 +110,32 @@
                             for (var i = 0, count = cookieRepos.length; i < count; i++)
                                 [reposController addRepository:cookieRepos[i] select:NO];
                         }
-
-                        if (issueIndex >= 0)
-                            [issuesController selectIssueAtIndex:issueIndex];
-                    }];
-                }
-                else
-                {
-                    [reposController addRepository:repo];
-                    [initialLoadingView removeFromSuperview];
-
-                    if (cookieRepos)
-                    {
-                        for (var i = 0, count = cookieRepos.length; i < count; i++)
-                            [reposController addRepository:cookieRepos[i] select:NO];
                     }
                 }
-            }
-            else if (cookieRepos)
-            {
-                for (var i = 0, count = cookieRepos.length; i < count; i++)
-                    [reposController addRepository:cookieRepos[i] select:NO];
-            }
-        }];
+                else if (cookieRepos)
+                {
+                    for (var i = 0, count = cookieRepos.length; i < count; i++)
+                        [reposController addRepository:cookieRepos[i] select:NO];
+                }
+            }];
+        }
+        else if (cookieRepos)
+            [reposController setSortedRepos:cookieRepos];
     }
-    else if (cookieRepos)
-        [reposController setSortedRepos:cookieRepos];
+
+    var usernameCookie = [[CPCookie alloc] initWithName:@"github.username"],
+        apiTokenCookie = [[CPCookie alloc] initWithName:@"github.apiToken"];
+
+    if ([usernameCookie value] && [apiTokenCookie value])
+    {
+        var controller = [GithubAPIController sharedController];
+        [controller setUsername:[usernameCookie value]];
+        [controller setAuthenticationToken:[apiTokenCookie value]];
+        [controller authenticateWithCallback:initializationFunction];
+    }
+    else
+        initializationFunction();
+
 }
 
 - (void)applicationWillTerminate:(CPNotification)aNote
