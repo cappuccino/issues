@@ -148,6 +148,18 @@ img.issue-author-image {
     margin-bottom: 0;
 }
 
+.issue-closed-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 86px;
+    height: 44px;
+}
+
+.stamp-closed {
+    background-image: url("Resources/closedStamp.png");
+}
+
 .comment {
     margin: 2em 4em 1em 4em;
 }
@@ -372,7 +384,7 @@ function addComment(comment) {
             <div id="first-issue" class="issue">
                 <div class="issue-wrapper">
 
-                    <div class="issue-closed-placeholder"></div>
+                    <div class="issue-closed-placeholder stamp-{{state}}"></div>
                     <div class="issue-left-border-placeholder"></div>
 
                     <div class="issue-content">
