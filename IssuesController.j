@@ -2,8 +2,8 @@
 @import <Foundation/CPObject.j>
 @import "CPDate+Additions.j"
 @import "FilterBar.j"
-@import "Markdown.js"
-@import "Mustache.js"
+@import "markdown.js"
+@import "mustache.js"
 
 var IssuesHTMLTemplate = nil;
 
@@ -32,7 +32,7 @@ var IssuesHTMLTemplate = nil;
 {
 	//load template
 	var request = new CFHTTPRequest();
-	request.open("GET", "Issue.html", true);
+	request.open("GET", "Resources/Issue.html", true);
 
 	request.oncomplete = function()
 	{
