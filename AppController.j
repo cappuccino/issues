@@ -181,7 +181,7 @@
 
 -(CPArray)toolbarDefaultItemIdentifiers:(CPToolbar)toolbar
 {
-    return ["loginStatus", CPToolbarSpaceItemIdentifier, "switchViewStatus", CPToolbarFlexibleSpaceItemIdentifier, "newissue", @"commentissue", "openissue", "closeissue", CPToolbarFlexibleSpaceItemIdentifier, @"searchfield"];
+    return ["loginStatus", "switchViewStatus", CPToolbarFlexibleSpaceItemIdentifier, "newissue", @"commentissue", "openissue", "closeissue", CPToolbarFlexibleSpaceItemIdentifier, @"searchfield"];
 }
 
 - (CPToolbarItem)toolbar:(CPToolbar)toolbar itemForItemIdentifier:(CPString)itemIdentifier willBeInsertedIntoToolbar:(BOOL)flag
@@ -196,8 +196,8 @@
     {
         case @"loginStatus":
             [toolbarItem setView:userView];
-            [toolbarItem setMinSize:CGSizeMake(180, 32)];
-            [toolbarItem setMaxSize:CGSizeMake(180, 32)];
+            [toolbarItem setMinSize:CGSizeMake(200, 32)];
+            [toolbarItem setMaxSize:CGSizeMake(200, 32)];
             [toolbarItem setTarget:[GithubAPIController sharedController]];
             [toolbarItem setAction:@selector(toggleAuthentication:)];
         break;

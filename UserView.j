@@ -13,9 +13,11 @@
 - (void)awakeFromCib
 {
     [self loginStatusDidChange:nil];
+    [usernameField setLineBreakMode:CPLineBreakByTruncatingTail];
     [usernameField setFont:[CPFont systemFontOfSize:11.0]];
     [usernameField setTextShadowColor:[CPColor colorWithWhite:0.9 alpha:1.0]];
     [usernameField setTextShadowOffset:CGSizeMake(0, 1)];
+    [emailField setLineBreakMode:CPLineBreakByTruncatingTail];
     [emailField setFont:[CPFont systemFontOfSize:11.0]];
     [emailField setTextColor:[CPColor colorWithWhite:0.4 alpha:1.0]];
     [emailField setTextShadowColor:[CPColor colorWithWhite:0.9 alpha:1.0]];
