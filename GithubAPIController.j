@@ -5,17 +5,7 @@
 
 BASE_URL = "/github/";
 if(window.location && window.location.protocol === "file:")
-    BASE_URL = "http://github.com/api/v2/json/";
-
-GitHubAPI = {
-    addComment: function(aRepo, anIssue, commentBody, callback)
-    {
-        [SharedController addComment:commentBody 
-                             onIssue:anIssue 
-                        inRepository:aRepo
-                            callback:callback];
-    }
-}
+    BASE_URL = "https://github.com/api/v2/json/";
 
 var SharedController = nil,
     GravatarBaseURL = "http://www.gravatar.com/avatar/";
@@ -340,3 +330,14 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 
 
 @end
+
+// expose root level interface, for accessing from the iframes
+GitHubAPI = {
+    addComment: function(aRepo, anIssue, commentBody, callback)
+    {
+        [SharedController addComment:commentBody 
+                             onIssue:anIssue 
+                        inRepository:aRepo
+                            callback:callback];
+    }
+}
