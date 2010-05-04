@@ -47,7 +47,7 @@
             cookieRepos = nil;
 
         try {
-            cookieRepos = JSON.parse([reposCookie value]);
+            cookieRepos = JSON.parse(decodeURIComponent([reposCookie value]));
         }
         catch (e) {
             CPLog.info("unable to load repos from cookie: "+e+" "+[reposCookie value]);
@@ -140,7 +140,7 @@
 
 - (void)applicationWillTerminate:(CPNotification)aNote
 {
-    [[[CPCookie alloc] initWithName:@"github.repos"] setValue:JSON.stringify([reposController sortedRepos], ["name", "owner", "identifier", "open_issues", "description", "private"]) 
+    [[[CPCookie alloc] initWithName:@"github.repos"] setValue:encodeURIComponent(JSON.stringify([reposController sortedRepos], ["name", "owner", "identifier", "open_issues", "description", "private"]))
                                                       expires:[CPDate dateWithTimeIntervalSinceNow:31536000]
                                                        domain:nil];
 
