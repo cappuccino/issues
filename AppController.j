@@ -203,8 +203,8 @@
         break;
         
         case @"newissue":
-            var image = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"newissue.png"] size:CPSizeMake(32, 32)],
-                highlighted = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"newissue.png"] size:CPSizeMake(32, 32)];
+            var image = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"newIssueIcon.png"] size:CPSizeMake(26, 27)],
+                highlighted = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"newIssueIconHighlighted.png"] size:CPSizeMake(26, 27)];
                 
             [toolbarItem setImage:image];
             [toolbarItem setAlternateImage:highlighted];
@@ -220,8 +220,8 @@
         break;
 
         case @"openissue":
-            var image = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"reopen.png"] size:CPSizeMake(32, 32)],
-                highlighted = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"reopen.png"] size:CPSizeMake(32, 32)];
+            var image = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"reopenIcon.png"] size:CPSizeMake(27, 27)],
+                highlighted = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"reopenIconHighlighted.png"] size:CPSizeMake(27, 27)];
                 
             [toolbarItem setImage:image];
             [toolbarItem setAlternateImage:highlighted];
@@ -237,8 +237,8 @@
         break;
 
         case @"closeissue":
-            var image = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"close.png"] size:CPSizeMake(32, 32)],
-                highlighted = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"close.png"] size:CPSizeMake(32, 32)];
+            var image = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"closeIcon.png"] size:CPSizeMake(28, 27)],
+                highlighted = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"closeIconHighlighted.png"] size:CPSizeMake(28, 27)];
                 
             [toolbarItem setImage:image];
             [toolbarItem setAlternateImage:highlighted];
@@ -255,8 +255,8 @@
         break;
 
         case @"commentissue":
-            var image = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"comment.png"] size:CPSizeMake(32, 32)],
-                highlighted = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"comment.png"] size:CPSizeMake(32, 32)];
+            var image = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"commentIcon.png"] size:CPSizeMake(27, 26)],
+                highlighted = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"commentIconHighlighted.png"] size:CPSizeMake(27, 26)];
                 
             [toolbarItem setImage:image];
             [toolbarItem setAlternateImage:highlighted];
