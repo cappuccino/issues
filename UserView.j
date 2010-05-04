@@ -14,8 +14,12 @@
 {
     [self loginStatusDidChange:nil];
     [usernameField setFont:[CPFont systemFontOfSize:11.0]];
+    [usernameField setTextShadowColor:[CPColor colorWithWhite:0.9 alpha:1.0]];
+    [usernameField setTextShadowOffset:CGSizeMake(0, 1)];
     [emailField setFont:[CPFont systemFontOfSize:11.0]];
-    [emailField setTextColor:[CPColor grayColor]];    
+    [emailField setTextColor:[CPColor colorWithWhite:0.4 alpha:1.0]];
+    [emailField setTextShadowColor:[CPColor colorWithWhite:0.9 alpha:1.0]];
+    [emailField setTextShadowOffset:CGSizeMake(0, 1)];
 }
 
 - (void)registerForNotifications

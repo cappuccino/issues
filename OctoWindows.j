@@ -50,6 +50,7 @@ var SharedLoginWindow = nil;
 {
     @outlet CPTextField usernameField @accessors;
     @outlet CPTextField apiTokenField @accessors;
+    @outlet CPButton    apiTokenHelpButton @accessors;
 }
 
 + (id)sharedLoginWindow
@@ -61,6 +62,13 @@ var SharedLoginWindow = nil;
 {
     SharedLoginWindow = self;
     [super awakeFromCib];
+    
+    [apiTokenHelpButton setBordered:NO];
+}
+
+- (@action)openAPIKeyPage:(id)sender
+{
+    window.open("https://github.com/account");
 }
 
 - (@action)orderFront:(id)sender

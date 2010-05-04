@@ -70,6 +70,8 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 {
     username = nil;
     authenticationToken = nil;
+    userImage = nil;
+    userThumbnailImage = nil;
     [[CPUserSessionManager defaultManager] setStatus:CPUserSessionLoggedOutStatus];
 }
 
@@ -92,12 +94,12 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
         {
             var response = JSON.parse(request.responseText()).user;
 
-            if (response.email)
+            emailAddress = response.email;
+            emailAddressHashed = response.gravatar_id || (response.email ? hex_md5(emailAddress) : "");
+            website = response.blog;
+
+            if (emailAddressHashed)
             {
-                emailAddress = response.email;
-                emailAddressHashed = hex_md5(emailAddress);
-                website = response.blog;
-                
                 var gravatarURL = GravatarBaseURL+emailAddressHashed;
                 userImage = [[CPImage alloc] initWithContentsOfFile:gravatarURL+"?s=68&d=identicon"
                                                                size:CGSizeMake(68, 68)];
