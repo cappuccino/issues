@@ -93,7 +93,9 @@ var ToolbarColor = nil;
 
     [toolbar setDelegate:delegate];
 	[[delegate mainWindow] setToolbar:toolbar];
-    [[toolbar _toolbarView] setBackgroundColor:ToolbarColor];
+
+    if ([CPPlatform isBrowser])
+        [[toolbar _toolbarView] setBackgroundColor:ToolbarColor];
 
 	[noReposView removeFromSuperview];
 }

@@ -187,7 +187,7 @@ var IssuesHTMLTemplate = nil;
         return;
 
     var platformWindow = [[CPPlatformWindow alloc] initWithContentRect:CGRectMake(100, 100, 800, 600)],
-        newWindow = [[CPWindow alloc] initWithContentRect:CGRectMake(0, 0, 800, 600) styleMask:0];
+        newWindow = [[CPWindow alloc] initWithContentRect:CGRectMake(0, 0, 800, 600) styleMask:CPTitledWindowMask|CPClosableWindowMask|CPMiniaturizableWindowMask];
 
     [newWindow setPlatformWindow:platformWindow];
     [newWindow setFullBridge:YES];
@@ -197,6 +197,7 @@ var IssuesHTMLTemplate = nil;
 
     [webView setAutoresizingMask:CPViewWidthSizable|CPViewHeightSizable];
     [contentView addSubview:webView];
+    [newWindow setTitle:[issue objectForKey:"title"]];
 
     [newWindow orderFront:self];
 

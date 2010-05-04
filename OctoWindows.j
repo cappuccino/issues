@@ -160,25 +160,6 @@ var SharedRepoWindow = nil;
 
 @end
 
-var SharedCommentWindow;
-
-@implementation CommentWindow : OctoWindow
-{
-    
-}
-
-- (void)awakeFromCib
-{
-    SharedCommentWindow = self;
-    [super awakeFromCib];
-}
-
-+ (id)sharedCommentWindow
-{
-    return SharedCommentWindow;
-}
-
-@end
 
 var SharedNewIssueWindow;
 
