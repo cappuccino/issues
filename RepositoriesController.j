@@ -12,7 +12,7 @@ var ToolbarColor = nil;
     @outlet CPButtonBar sourcesListButtonBar @accessors;
 
             CPArray     sortedRepos @accessors;
-	@outlet IssuesController issuesController;
+    @outlet IssuesController issuesController;
 }
 
 + (void)initialize
@@ -73,17 +73,17 @@ var ToolbarColor = nil;
 
     [sourcesListView setBackgroundColor:[CPColor colorWithHexString:@"eef2f8"]];
 
-	[self showNoReposView];
+    [self showNoReposView];
 }
 
 - (void)showNoReposView
 {
-	var theWindow = [[CPApp delegate] mainWindow],
-		contentView = [theWindow contentView];
+    var theWindow = [[CPApp delegate] mainWindow],
+        contentView = [theWindow contentView];
 
-	[theWindow setToolbar:nil];
-	[noReposView setFrame:[contentView bounds]];
-	[contentView addSubview:noReposView];
+    [theWindow setToolbar:nil];
+    [noReposView setFrame:[contentView bounds]];
+    [contentView addSubview:noReposView];
 }
 
 - (void)hideNoReposView
@@ -92,12 +92,12 @@ var ToolbarColor = nil;
         delegate = [CPApp delegate];
 
     [toolbar setDelegate:delegate];
-	[[delegate mainWindow] setToolbar:toolbar];
+    [[delegate mainWindow] setToolbar:toolbar];
 
     if ([CPPlatform isBrowser])
         [[toolbar _toolbarView] setBackgroundColor:ToolbarColor];
 
-	[noReposView removeFromSuperview];
+    [noReposView removeFromSuperview];
 }
 
 - (void)addRepository:(id)aRepo
@@ -136,7 +136,7 @@ var ToolbarColor = nil;
         [sourcesListView reloadData];
     }
 
-	[self hideNoReposView];
+    [self hideNoReposView];
 }
 
 - (void)setSortedRepos:(CPArray)repos
@@ -149,7 +149,7 @@ var ToolbarColor = nil;
     [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
     [self tableViewSelectionDidChange:nil];
 
-	[self hideNoReposView];
+    [self hideNoReposView];
 }
 
 - (@action)promptForNewRepository:(id)sender
@@ -167,29 +167,29 @@ var ToolbarColor = nil;
     sortedRepos.splice(selectedRow, 1);
     [sourcesListView reloadData];
 
-	if (sortedRepos.length === 0)
-		[self showNoReposView];
-	else
-	{
+    if (sortedRepos.length === 0)
+        [self showNoReposView];
+    else
+    {
         [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:MAX(MIN(selectedRow, sortedRepos.length - 1), 0)] byExtendingSelection:NO];
         [self tableViewSelectionDidChange:nil];
-	}
+    }
 }
 
 - (void)tableViewSelectionDidChange:(CPNotification)aNotification
 {
-	var selectedRow = [sourcesListView selectedRow];
-	if (selectedRow === -1)
-	{
-		[CPApp setArguments:[]];
-		[issuesController setRepo:nil];
-	}
-	else
-	{
-	    var repo = sortedRepos[selectedRow];
-	    [CPApp setArguments:[repo.owner, repo.name]];
-		[issuesController setRepo:repo];
-	}
+    var selectedRow = [sourcesListView selectedRow];
+    if (selectedRow === -1)
+    {
+        [CPApp setArguments:[]];
+        [issuesController setRepo:nil];
+    }
+    else
+    {
+        var repo = sortedRepos[selectedRow];
+        [CPApp setArguments:[repo.owner, repo.name]];
+        [issuesController setRepo:repo];
+    }
 
     [[[[CPApp delegate] mainWindow] toolbar] validateVisibleToolbarItems];
 }
@@ -206,19 +206,10 @@ var ToolbarColor = nil;
 
 @end
 
-@implementation CPColor (selectionOverride)
-
-+ (CPColor)selectionColor
-{
-    return [CPColor colorWithHexString:@"8d9196"];
-}
-
-@end
 @implementation RepositoriesController (tableViewDragDrop)
+
 - (BOOL)tableView:(CPTableView)aTableView writeRowsWithIndexes:(CPIndexSet)rowIndexes toPasteboard:(CPPasteboard)pboard
 {
-
-    
     if(aTableView === sourcesListView)
     {
         // encode the index(es)being dragged
@@ -229,7 +220,6 @@ var ToolbarColor = nil;
         return YES;
     }
 
-
     return NO;
 }
 
@@ -238,7 +228,6 @@ var ToolbarColor = nil;
                    proposedRow:(CPInteger)row 
                    proposedDropOperation:(CPTableViewDropOperation)operation
 {
- //   console.log([aTableView rectOfRow:0]);
     if(aTableView === sourcesListView)
     {
         if([info draggingSource] !== sourcesListView && row >= [sortedRepos count] || row < 0)
@@ -260,10 +249,9 @@ var ToolbarColor = nil;
     {
         if([info draggingSource] === sourcesListView)
         {
-            
             var pboard = [info draggingPasteboard],
                 rowData = [pboard dataForType:@"GitHubIssuesRepoSourceListDragType"];    
-    
+
             rowData = [CPKeyedUnarchiver unarchiveObjectWithData:rowData];
 
             //row data contains an index set
@@ -283,7 +271,7 @@ var ToolbarColor = nil;
             return YES;
          }
     }
-    
+
     return NO;
 }
 @end

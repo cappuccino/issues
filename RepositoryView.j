@@ -16,8 +16,8 @@
     backgroundColor = [CPColor colorWithPatternImage:image];
     [nameField setLineBreakMode:CPLineBreakByTruncatingTail];
     [nameField setFont:[CPFont systemFontOfSize:13.0]];
-	[nameField setVerticalAlignment:CPCenterVerticalTextAlignment];
-	[self unsetThemeState:CPThemeStateSelected];
+    [nameField setVerticalAlignment:CPCenterVerticalTextAlignment];
+    [self unsetThemeState:CPThemeStateSelected];
 }
 
 - (void)setObjectValue:(Object)anObject
@@ -30,24 +30,24 @@
 {
     [super setThemeState:aState];
     if (aState === CPThemeStateSelected)
-	{
-	    [self setBackgroundColor:backgroundColor];
+    {
+        [self setBackgroundColor:backgroundColor];
         [nameField setTextColor:[CPColor whiteColor]];
-		[nameField setTextShadowColor:[CPColor colorWithCalibratedRed: 0 green: 0 blue: 0 alpha:0.45]];
-		[nameField setTextShadowOffset:CGSizeMake(0.0, -1.0)];
-	}
+        [nameField setTextShadowColor:[CPColor colorWithCalibratedRed: 0 green: 0 blue: 0 alpha:0.45]];
+        [nameField setTextShadowOffset:CGSizeMake(0.0, -1.0)];
+    }
 }
 
 - (void)unsetThemeState:(CPThemeState)aState
 {
     [super unsetThemeState:aState];
     if (aState === CPThemeStateSelected)
-	{
-	    [self setBackgroundColor:nil];
+    {
+        [self setBackgroundColor:nil];
         [nameField setTextColor:[CPColor blackColor]];
-		[nameField setTextShadowColor:[CPColor whiteColor]];
-		[nameField setTextShadowOffset:CGSizeMake(0.0, 1.0)];
-	}
+        [nameField setTextShadowColor:[CPColor whiteColor]];
+        [nameField setTextShadowOffset:CGSizeMake(0.0, 1.0)];
+    }
 }
 
 - (id)initWithCoder:(CPCoder)aCoder

@@ -11,12 +11,12 @@ var IssuesHTMLTemplate = nil;
 {
     Repository  repo @accessors;
 
-	@outlet CPView      detailParentView;
+    @outlet CPView      detailParentView;
     @outlet CPView      noIssuesView;
-	@outlet CPView      noRepoView;
-	@outlet CPView		loadingIssuesView;
-			CPView		displayedView;
-			FilterBar   filterBar;
+    @outlet CPView      noRepoView;
+    @outlet CPView      loadingIssuesView;
+            CPView      displayedView;
+            FilterBar   filterBar;
 
     @outlet CPTableView issuesTableView @accessors;
     @outlet CPWebView   issueWebView @accessors;
@@ -30,24 +30,24 @@ var IssuesHTMLTemplate = nil;
 
 + (void)initialize
 {
-	//load template
-	var request = new CFHTTPRequest();
-	request.open("GET", "Resources/Issue.html", true);
+        //load template
+    var request = new CFHTTPRequest();
+    request.open("GET", "Resources/Issue.html", true);
 
-	request.oncomplete = function()
-	{
-		if (request.success())
-			IssuesHTMLTemplate = request.responseText();
-	}
+    request.oncomplete = function()
+    {
+        if (request.success())
+            IssuesHTMLTemplate = request.responseText();
+    }
 
-	request.send("");
+    request.send("");
 }
 
 - (void)awakeFromCib
 {
     displayedIssuesKey = "openIssues";
 
-	[self showView:noRepoView];
+    [self showView:noRepoView];
 
     var desc = [CPSortDescriptor sortDescriptorWithKey:@"number" ascending:YES],
         ID = [[CPTableColumn alloc] initWithIdentifier:"number"];
@@ -157,12 +157,12 @@ var IssuesHTMLTemplate = nil;
 - (id)selectedIssue
 {
     var row = [issuesTableView selectedRow],
-		item = nil;
+        item = nil;
 
-	if (row >= 0 && repo)
+    if (row >= 0 && repo)
         item = [(filteredIssues || repo[displayedIssuesKey]) objectAtIndex:row];
 
-	return item;
+    return item;
 }
 
 - (void)validateToolbarItem:(CPToolbarItem)anItem
@@ -265,70 +265,70 @@ var IssuesHTMLTemplate = nil;
 
 - (@action)reload:(id)sender
 {
-	delete repo.openIssues;
-	delete repo.closedIssues;
-	[self loadIssues];
+    delete repo.openIssues;
+    delete repo.closedIssues;
+    [self loadIssues];
 }
 
 - (void)loadIssues
 {
-	if (repo.openIssues && repo.closedIssues)
-		return;
+    if (repo.openIssues && repo.closedIssues)
+        return;
 
-	[[GithubAPIController sharedController] loadIssuesForRepository:repo callback:function(success)
-	{
-		[issuesTableView reloadData];
+    [[GithubAPIController sharedController] loadIssuesForRepository:repo callback:function(success)
+    {
+        [issuesTableView reloadData];
 
-		if (success && repo[displayedIssuesKey].length)
-			[self showView:nil];
-		else
-			[self showView:noIssuesView];
-	}];
+        if (success && repo[displayedIssuesKey].length)
+            [self showView:nil];
+        else
+            [self showView:noIssuesView];
+    }];
 }
 
 - (void)showView:(CPView)aView
 {
-	[displayedView removeFromSuperview];
-	
-	if (aView)
-	{
-		[aView setFrame:[detailParentView bounds]];
-		[detailParentView addSubview:aView];
-	}
+    [displayedView removeFromSuperview];
 
-	displayedView = aView;
+    if (aView)
+    {
+        [aView setFrame:[detailParentView bounds]];
+        [detailParentView addSubview:aView];
+    }
+
+    displayedView = aView;
 }
 
 - (void)setRepo:(id)aRepo
 {
-	if (repo === aRepo)
-		return;
+    if (repo === aRepo)
+        return;
 
-	repo = aRepo;
+    repo = aRepo;
 
-	if (repo)
-	{		
-		if (repo.openIssues && repo.closedIssues)
-		{
-			if (repo[displayedIssuesKey].length)
-			{
-			    [issuesTableView selectRowIndexes:[CPIndexSet indexSet] byExtendingSelection:NO];
-				[self showView:nil];
-			    [self tableViewSelectionDidChange:nil];
-			}
-			else
-				[self showView:noIssuesView];
-		}
-		else
-		{
-			[self showView:loadingIssuesView];
-			[self loadIssues];
-		}
-	}
-	else
-		[self showView:noRepoView];
+    if (repo)
+    {
+        if (repo.openIssues && repo.closedIssues)
+        {
+            if (repo[displayedIssuesKey].length)
+            {
+                [issuesTableView selectRowIndexes:[CPIndexSet indexSet] byExtendingSelection:NO];
+                [self showView:nil];
+                [self tableViewSelectionDidChange:nil];
+            }
+            else
+                [self showView:noIssuesView];
+        }
+        else
+        {
+            [self showView:loadingIssuesView];
+            [self loadIssues];
+        }
+    }
+    else
+        [self showView:noRepoView];
 
-	[issuesTableView reloadData];
+    [issuesTableView reloadData];
     [[[[CPApp delegate] mainWindow] toolbar] validateVisibleToolbarItems];
 }
 
@@ -340,37 +340,36 @@ var IssuesHTMLTemplate = nil;
     aWebView.ISSUE = item;
     aWebView.REPO = repo;
 
-	if (![item objectForKey:"body_html"])
-	{
-	    [item setObject:Markdown.makeHtml([item objectForKey:"body"]) forKey:"body_html"];
-	    [item setObject:[CPDate simpleDate:[item objectForKey:"created_at"]] forKey:"human_readable_created_date"];
-	    [item setObject:[CPDate simpleDate:[item objectForKey:"updated_at"]] forKey:"human_readable_updated_date"];
-	    [item setObject:([item objectForKey:"labels"] || []).join(", ") forKey:"comma_separated_tags"];
-	    
-	    [[GithubAPIController sharedController] loadCommentsForIssue:item repository:repo callback:function()
-	    {
-	        var comments = [item objectForKey:"all_comments"];
-	        for (var i = 0, count = comments.length; i < count; i++)
-	        {
-	            var comment = comments[i];
-	            comment.body_html = Markdown.makeHtml(comment.body);
-	            comment.human_readable_date = [CPDate simpleDate:comment.created_at];
-	            //comment.user_email_hash
-	        }
+    if (![item objectForKey:"body_html"])
+    {
+        [item setObject:Markdown.makeHtml([item objectForKey:"body"]) forKey:"body_html"];
+        [item setObject:[CPDate simpleDate:[item objectForKey:"created_at"]] forKey:"human_readable_created_date"];
+        [item setObject:[CPDate simpleDate:[item objectForKey:"updated_at"]] forKey:"human_readable_updated_date"];
+        [item setObject:([item objectForKey:"labels"] || []).join(", ") forKey:"comma_separated_tags"];
 
-		    var jsItem = [item toJSObject],
-    			html = Mustache.to_html(IssuesHTMLTemplate, jsItem);
+        [[GithubAPIController sharedController] loadCommentsForIssue:item repository:repo callback:function()
+        {
+            var comments = [item objectForKey:"all_comments"];
+            for (var i = 0, count = comments.length; i < count; i++)
+            {
+                var comment = comments[i];
+                comment.body_html = Markdown.makeHtml(comment.body);
+                comment.human_readable_date = [CPDate simpleDate:comment.created_at];
+            }
 
-    		[aWebView loadHTMLString:html];
-	    }]		    
-	}
+            var jsItem = [item toJSObject],
+                html = Mustache.to_html(IssuesHTMLTemplate, jsItem);
+
+            [aWebView loadHTMLString:html];
+        }];
+    }
     else
     {
-	    var jsItem = [item toJSObject],
-			html = Mustache.to_html(IssuesHTMLTemplate, jsItem);
+        var jsItem = [item toJSObject],
+            html = Mustache.to_html(IssuesHTMLTemplate, jsItem);
 
-		[aWebView loadHTMLString:html];
-	}    
+        [aWebView loadHTMLString:html];
+    }
 }
 
 - (void)webView:(CPWebView)aWebView didFinishLoadForFrame:(id)aFrame
@@ -386,14 +385,14 @@ var IssuesHTMLTemplate = nil;
 - (void)tableViewSelectionDidChange:(CPNotification)aNotification
 {
     var item = [self selectedIssue];
-    
+
     [issueWebView loadHTMLString:""];
 
-	if (item)
-	{
+    if (item)
+    {
         [self loadIssue:item inWebView:issueWebView];
-		[CPApp setArguments:[repo.owner, repo.name, [item objectForKey:"number"]]];
-	}
+        [CPApp setArguments:[repo.owner, repo.name, [item objectForKey:"number"]]];
+    }
 
     [[[[CPApp delegate] mainWindow] toolbar] validateVisibleToolbarItems];
 }
@@ -424,13 +423,13 @@ var IssuesHTMLTemplate = nil;
 - (void)tableView:(CPTableView)aTableView sortDescriptorsDidChange:(CPArray)oldDescriptors
 {   
     var newDescriptors = [aTableView sortDescriptors],
-		issues = filteredIssues || repo[displayedIssuesKey],
-		currentIssue = issues[[aTableView selectedRow]];
+        issues = filteredIssues || repo[displayedIssuesKey],
+        currentIssue = issues[[aTableView selectedRow]];
 
     [issues sortUsingDescriptors:newDescriptors];
-	[aTableView reloadData];
+    [aTableView reloadData];
 
-	var newIndex = [issues indexOfObject:currentIssue];
+    var newIndex = [issues indexOfObject:currentIssue];
     if (newIndex >= 0)
         [aTableView selectRowIndexes:[CPIndexSet indexSetWithIndex:newIndex] byExtendingSelection:NO];
 }
@@ -526,14 +525,14 @@ var IssuesHTMLTemplate = nil;
 
 - (Object)toJSObject
 {
-	var object = {},
-		keyEnumerator = [self keyEnumerator],
-		key = nil;
+    var object = {},
+        keyEnumerator = [self keyEnumerator],
+        key = nil;
 
-	while((key = [keyEnumerator nextObject]) !== nil)
-		object[key] = [self objectForKey:key];
+    while((key = [keyEnumerator nextObject]) !== nil)
+        object[key] = [self objectForKey:key];
 
-	return object;
+    return object;
 }
 
 @end
