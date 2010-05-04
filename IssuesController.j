@@ -142,15 +142,19 @@ var IssuesHTMLTemplate = nil;
         return;
 
     [issuesTableView reloadData];
+
     [self searchFieldDidChange:nil];
-    [self tableView:issuesTableView sortDescriptorsDidChange:nil];
-    [self tableViewSelectionDidChange:nil];
+    [self selectIssueAtIndex:-1];
 }
 
 - (void)selectIssueAtIndex:(unsigned)index
 {
-    [issuesTableView scrollRowToVisible:index];
-    [issuesTableView selectRowIndexes:[CPIndexSet indexSetWithIndex:index] byExtendingSelection:NO];
+    var indexSet = index < 0 ? [CPIndexSet indexSet] : [CPIndexSet indexSetWithIndex:index];
+
+    if (index >= 0)
+        [issuesTableView scrollRowToVisible:index];
+
+    [issuesTableView selectRowIndexes:indexSet byExtendingSelection:NO];
     [self tableViewSelectionDidChange:nil];
 }
 

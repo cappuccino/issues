@@ -321,6 +321,9 @@ function submitCommentForm() {
 	var errorMessageField = document.getElementById("comment-form-error-message"),
         textarea = document.getElementById("add-comment-textarea");
 
+	if (textarea.value == "")
+		return;
+
     GitHubAPI.addComment(REPO, ISSUE, textarea.value, function(comment) {
     	if (comment)
         {
