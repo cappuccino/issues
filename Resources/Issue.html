@@ -354,6 +354,10 @@ img.issue-author-image {
     display: none;
 }
 
+.view-on-github {
+    color: rgb(155, 155, 155);
+}
+
 .error-message {
     color: red;
 }
@@ -436,6 +440,7 @@ function addComment(comment) {
                             <h1 class="issue-title">{{title}}</h1>
                             <div class="issue-body">
                                 {{{body_html}}}
+                                <p><a class="view-on-github" href="http://github.com/{{repo_identifier}}/issues/{{number}}">View on github</a></p>
                             </div>
                         </div>
                     </div>
