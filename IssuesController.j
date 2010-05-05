@@ -300,7 +300,7 @@
     {
         if (repo.openIssues && repo.closedIssues)
         {
-            if (repo[displayedIssuesKey].length)
+            if (repo.openIssues.length || repo.closedIssues.length)
             {
                 [issuesTableView selectRowIndexes:[CPIndexSet indexSet] byExtendingSelection:NO];
                 [self showView:nil];
