@@ -39,7 +39,8 @@ var IssuesHTMLTemplate = nil;
                                                  name:GitHubAPIIssueDidChangeNotification
                                                object:nil];
 
-    [self setFrameLoadDelegate:self];    
+    [self setFrameLoadDelegate:self];
+    [self setDrawsBackground:YES];
 }
 
 - (id)initWithFrame:(CGRect)aFrame
@@ -101,6 +102,20 @@ var IssuesHTMLTemplate = nil;
         [self loadIssue];
         scrollRect = rect;
     }    
+}
+
+- (void)setDrawsBackground:(BOOL)drawsBackground
+{
+    if (drawsBackground)
+    {
+        _iframe.style.backgroundColor = "rgb(237, 241, 244)";
+        _iframe.style.backgroundImage = "-webkit-gradient(linear, left top, left bottom, from(rgb(222, 226, 229)), to(rgb(237, 241, 244)))";
+    }
+    else
+    {
+        _iframe.style.backgroundColor = "";
+        _iframe.style.backgroundImage = "";
+    }
 }
 
 - (void)webView:(CPWebView)aWebView didFinishLoadForFrame:(id)aFrame
