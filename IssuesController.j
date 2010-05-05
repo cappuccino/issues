@@ -269,7 +269,7 @@
     {
         [issuesTableView reloadData];
 
-        if (success && repo[displayedIssuesKey].length)
+        if (success && (repo.openIssues.length || repo.closedIssues.length))
             [self showView:nil];
         else
             [self showView:noIssuesView];
