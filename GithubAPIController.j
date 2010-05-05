@@ -10,6 +10,10 @@ if(window.location && window.location.protocol === "file:")
 var SharedController = nil,
     GravatarBaseURL = "http://www.gravatar.com/avatar/";
 
+// Sent whenever an issue changes
+GitHubAPIIssueDidChangeNotification = @"GitHubAPIIssueDidChangeNotification";
+
+
 CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 {
     var sharedController = [GithubAPIController sharedController];
@@ -267,7 +271,10 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
             [anIssue setObject:"closed" forKey:"state"];
             [aRepo.openIssues removeObject:anIssue];
             aRepo.closedIssues.unshift(anIssue);
+
+            [self _noteIssueChanged:anIssue];
         }
+
         if (aCallback)
             aCallback(request.success(), anIssue, aRepo, request);
     }
@@ -287,6 +294,8 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
             [anIssue setObject:"open" forKey:"state"];
             [aRepo.closedIssues removeObject:anIssue];
             aRepo.openIssues.unshift(anIssue);
+
+            [self _noteIssueChanged:anIssue];
         }
 
         if (aCallback)
@@ -321,6 +330,8 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
             comment.human_readable_date = [CPDate simpleDate:comment.created_at];
 
             comments.push(comment);
+
+            [self _noteIssueChanged:anIssue];
         }
 
         if (aCallback)
@@ -330,16 +341,35 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
     request.send("");
 }
 
-
+- (void)_noteIssueChanged:(id)anIssue
+{
+    [[CPNotificationCenter defaultCenter] postNotificationName:GitHubAPIIssueDidChangeNotification
+                                                        object:anIssue
+                                                      userInfo:nil];
+}
 @end
 
 // expose root level interface, for accessing from the iframes
 GitHubAPI = {
-    addComment: function(aRepo, anIssue, commentBody, callback)
+    addComment: function(commentBody, anIssue, aRepo, callback)
     {
         [SharedController addComment:commentBody 
                              onIssue:anIssue 
                         inRepository:aRepo
+                            callback:callback];
+    },
+    
+    closeIssue: function(anIssue, aRepo, callback)
+    {
+        [SharedController closeIssue:anIssue 
+                          repository:aRepo
+                            callback:callback];
+    },
+    
+    openIssue: function(anIssue, aRepo, callback)
+    {
+        [SharedController reopenIssue:anIssue 
+                           repository:aRepo
                             callback:callback];
     }
 }

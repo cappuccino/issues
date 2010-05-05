@@ -16,6 +16,7 @@ body {
     line-height: 2em;
     min-width: 500px;
     word-wrap: break-word;
+    text-shadow: 0px 1px 0px white;   
 }
 
 h1 {
@@ -154,12 +155,53 @@ img.issue-author-image {
     left: 0;
     width: 86px;
     height: 44px;
+    background-image: url("Resources/closedStamp.png");
+    display: none;
 }
 
 .stamp-closed {
-    background-image: url("Resources/closedStamp.png");
+    display: block;
 }
 
+.issue-meta-action-wrapper {
+    text-align: center;
+    margin: 1.5em 0;
+}
+
+.action-state-button:hover {
+    -webkit-box-shadow: 0px 0px 4px rgba(155, 155, 155, 0.3);
+    -moz-box-shadow: 0px 0px 4px rgba(155, 155, 155, 0.3);
+    box-shadow: 0px 0px 4px rgba(155, 155, 155, 0.3);
+}
+
+.action-state-button:active {
+    background-image: -webkit-gradient(linear, left bottom, left top, from(rgb(248, 248, 248)), to(rgb(228, 228, 228)));
+}
+
+.action-state-button {
+    background-image: -webkit-gradient(linear, left top, left bottom, from(rgb(248, 248, 248)), to(rgb(228, 228, 228)));
+    font-size: 12px;
+    padding: 0.5em 2em 0.5em 2em;
+    text-decoration: none;
+    color: black;
+    background-color: rgb(228, 228, 228);
+    border: 1px solid rgb(195, 195, 195);
+    border-radius: 8px;
+    -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+
+    -webkit-box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.3);
+    -moz-box-shadow: inset 0px 1px 0px rgba(0, 0, 0, 0.3);
+    box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.3); 
+}
+
+.wantsopen-closed {
+    display: none;
+}
+
+.wantsclosed-open {
+    display: none;
+}
 .comment {
     margin: 2em 4em 1em 4em;
 }
@@ -318,6 +360,14 @@ img.issue-author-image {
                 </style>
 
                 <script type="text/javascript">
+
+function toggleIssueState() {
+    if (STATE === "open")
+        GitHubAPI.closeIssue(ISSUE, REPO);
+    else
+        GitHubAPI.openIssue(ISSUE, REPO);
+}
+
 function showCommentForm() {
     var textarea = document.getElementById("add-comment-textarea");
     textarea.focus();
@@ -333,20 +383,14 @@ function submitCommentForm() {
 	var errorMessageField = document.getElementById("comment-form-error-message"),
         textarea = document.getElementById("add-comment-textarea");
 
+    errorMessageField.style.display = "none";
+
 	if (textarea.value == "")
 		return;
 
-    GitHubAPI.addComment(REPO, ISSUE, textarea.value, function(comment) {
-    	if (comment)
-        {
-        	hideCommentForm();
-            addComment(comment);
-            errorMessageField.style.display = "none";
-        }
-        else
-        {
+    GitHubAPI.addComment(textarea.value, ISSUE, REPO, function(comment) {
+    	if (!comment)
         	errorMessageField.style.display = "inline";
-        }
     });
 }
 
@@ -384,7 +428,7 @@ function addComment(comment) {
             <div id="first-issue" class="issue">
                 <div class="issue-wrapper">
 
-                    <div class="issue-closed-placeholder stamp-{{state}}"></div>
+                    <div id="issue-stamp" class="issue-closed-placeholder stamp-{{state}}"></div>
                     <div class="issue-left-border-placeholder"></div>
 
                     <div class="issue-content">
@@ -424,6 +468,10 @@ function addComment(comment) {
                                 <h3 class="issue-meta-title">Tags</h3>
                                 <span class="issue-meta-content">{{comma_separated_tags}}</span>
                             </div>
+                            <div class="issue-meta-action-wrapper">
+                                <a href="#" id="close-button" onclick="toggleIssueState()" class="action-state-button wantsopen-{{state}}">Close Issue</a>
+                                <a href="#" id="open-button" onclick="toggleIssueState()" class="action-state-button wantsclosed-{{state}}">Re-open Issue</a>
+                            </div>
                         </div>
                     </div>
                     
@@ -431,7 +479,7 @@ function addComment(comment) {
             </div>
 
             <div id="comments" class="comments">
-                        {{#all_comments}}
+                {{#all_comments}}
                 <div class="comment">
                     <div class="comment-body">
                         <div class="comment-body-wrapper">
@@ -450,7 +498,7 @@ function addComment(comment) {
                         </div>
                     </div>
                 </div>
-                        {{/all_comments}}
+                {{/all_comments}}
             </div>
 
             <div id="add-comment-area" class="comment">
@@ -459,8 +507,8 @@ function addComment(comment) {
                     <textarea id="add-comment-textarea" class="comment-body-wrapper"></textarea>
                     <div class="comment-form-wrapper">
                     	<span id="comment-form-error-message" class="error-message">Something went wrong. Try again.</span>
-                        <a class="fakebutton" href="javascript:hideCommentForm();">Clear</a>
-                        <a class="fakebutton" href="javascript:submitCommentForm();">Comment</a>
+                        <a class="fakebutton" href="#" onclick="hideCommentForm();">Clear</a>
+                        <a class="fakebutton" href="#" onclick="submitCommentForm();">Comment</a>
                     </div>
                 </div>
             </div>

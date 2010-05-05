@@ -2,10 +2,7 @@
 @import <Foundation/CPObject.j>
 @import "CPDate+Additions.j"
 @import "FilterBar.j"
-@import "markdown.js"
-@import "mustache.js"
-
-var IssuesHTMLTemplate = nil;
+@import "IssueWebView.j"
 
 @implementation IssuesController : CPObject
 {
@@ -26,21 +23,6 @@ var IssuesHTMLTemplate = nil;
     CPArray     filteredIssues;
     CPString    searchString;
     unsigned    searchFilter;
-}
-
-+ (void)initialize
-{
-        //load template
-    var request = new CFHTTPRequest();
-    request.open("GET", "Resources/Issue.html", true);
-
-    request.oncomplete = function()
-    {
-        if (request.success())
-            IssuesHTMLTemplate = request.responseText();
-    }
-
-    request.send("");
 }
 
 - (void)awakeFromCib
@@ -118,6 +100,11 @@ var IssuesHTMLTemplate = nil;
     [filterBar setAutoresizingMask:CPViewWidthSizable];
     [filterBar setDelegate:self];
     searchFilter = 0;
+
+    [[CPNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(issueChanged:)
+                                                 name:GitHubAPIIssueDidChangeNotification
+                                               object:nil];
 }
 
 - (id)init
@@ -169,6 +156,20 @@ var IssuesHTMLTemplate = nil;
     return item;
 }
 
+- (void)issueChanged:(CPNotification)aNote
+{
+    var issue = [aNote object];
+    if (issue === [issueWebView issue])
+    {
+        [issuesTableView reloadData];
+        [self searchFieldDidChange:nil];
+        [self tableView:issuesTableView sortDescriptorsDidChange:nil];
+
+        var newIndex = [(filteredIssues || repo[displayedIssuesKey]) indexOfObject:issue];
+        [self selectIssueAtIndex:newIndex];        
+    }
+}
+
 - (void)validateToolbarItem:(CPToolbarItem)anItem
 {
     var hasSelection = [self selectedIssue] !== nil,
@@ -197,15 +198,18 @@ var IssuesHTMLTemplate = nil;
     [newWindow setFullBridge:YES];
 
     var contentView = [newWindow contentView],
-        webView = [[CPWebView alloc] initWithFrame:[contentView bounds]];
+        webView = [[IssueWebView alloc] initWithFrame:[contentView bounds]];
 
     [webView setAutoresizingMask:CPViewWidthSizable|CPViewHeightSizable];
     [contentView addSubview:webView];
     [newWindow setTitle:[issue objectForKey:"title"]];
 
     [newWindow orderFront:self];
+    [newWindow setDelegate:webView];
 
-    [self loadIssue:issue inWebView:webView];
+    [webView setIssue:issue];
+    [webView setRepo:repo];
+    [webView loadIssue];
 }
 
 - (@action)closeIssue:(id)sender
@@ -213,16 +217,7 @@ var IssuesHTMLTemplate = nil;
     var issue = [self selectedIssue];
     if (issue && [issue objectForKey:"state"] === "open")
     {
-        [[GithubAPIController sharedController] closeIssue:issue repository:repo callback:function(success)
-        {
-            if (success)
-            {
-                [issuesTableView reloadData];
-                [self searchFieldDidChange:nil];
-                [self tableView:issuesTableView sortDescriptorsDidChange:nil];
-                [self tableViewSelectionDidChange:nil];
-            }
-        }];
+        [[GithubAPIController sharedController] closeIssue:issue repository:repo callback:nil];
     }
 }
 
@@ -231,16 +226,7 @@ var IssuesHTMLTemplate = nil;
     var issue = [self selectedIssue];
     if (issue && [issue objectForKey:"state"] === "closed")
     {
-        [[GithubAPIController sharedController] reopenIssue:issue repository:repo callback:function(success)
-        {
-            if (success)
-            {
-                [issuesTableView reloadData];
-                [self searchFieldDidChange:nil];
-                [self tableView:issuesTableView sortDescriptorsDidChange:nil];
-                [self tableViewSelectionDidChange:nil];
-            }
-        }];
+        [[GithubAPIController sharedController] reopenIssue:issue repository:repo callback:nil];
     }
 }
 
@@ -336,56 +322,6 @@ var IssuesHTMLTemplate = nil;
     [[[[CPApp delegate] mainWindow] toolbar] validateVisibleToolbarItems];
 }
 
-- (void)loadIssue:(id)item inWebView:(CPWebView)aWebView
-{
-    [aWebView setFrameLoadDelegate:self];
-    
-    //FIXME shouldn't do it this way
-    aWebView.ISSUE = item;
-    aWebView.REPO = repo;
-
-    if (![item objectForKey:"body_html"])
-    {
-        [item setObject:Markdown.makeHtml([item objectForKey:"body"]) forKey:"body_html"];
-        [item setObject:[CPDate simpleDate:[item objectForKey:"created_at"]] forKey:"human_readable_created_date"];
-        [item setObject:[CPDate simpleDate:[item objectForKey:"updated_at"]] forKey:"human_readable_updated_date"];
-        [item setObject:([item objectForKey:"labels"] || []).join(", ") forKey:"comma_separated_tags"];
-
-        [[GithubAPIController sharedController] loadCommentsForIssue:item repository:repo callback:function()
-        {
-            var comments = [item objectForKey:"all_comments"];
-            for (var i = 0, count = comments.length; i < count; i++)
-            {
-                var comment = comments[i];
-                comment.body_html = Markdown.makeHtml(comment.body);
-                comment.human_readable_date = [CPDate simpleDate:comment.created_at];
-            }
-
-            var jsItem = [item toJSObject],
-                html = Mustache.to_html(IssuesHTMLTemplate, jsItem);
-
-            [aWebView loadHTMLString:html];
-        }];
-    }
-    else
-    {
-        var jsItem = [item toJSObject],
-            html = Mustache.to_html(IssuesHTMLTemplate, jsItem);
-
-        [aWebView loadHTMLString:html];
-    }
-}
-
-- (void)webView:(CPWebView)aWebView didFinishLoadForFrame:(id)aFrame
-{
-    // add in references so that commenting will work.
-    var domWindow = [aWebView DOMWindow];
-
-    domWindow.REPO = aWebView.REPO;
-    domWindow.ISSUE = aWebView.ISSUE;
-    domWindow.GitHubAPI = window.GitHubAPI;
-}
-
 - (void)tableViewSelectionDidChange:(CPNotification)aNotification
 {
     var item = [self selectedIssue];
@@ -394,7 +330,10 @@ var IssuesHTMLTemplate = nil;
 
     if (item)
     {
-        [self loadIssue:item inWebView:issueWebView];
+        [issueWebView setIssue:item];
+        [issueWebView setRepo:repo];
+        [issueWebView loadIssue];
+
         [CPApp setArguments:[repo.owner, repo.name, [item objectForKey:"number"]]];
     }
 
