@@ -150,7 +150,7 @@
     var row = [issuesTableView selectedRow],
         item = nil;
 
-    if (row >= 0 && repo)
+    if (row >= 0 && repo && ([filteredIssues count] || [repo[displayedIssuesKey] count]))
         item = [(filteredIssues || repo[displayedIssuesKey]) objectAtIndex:row];
 
     return item;
@@ -427,8 +427,11 @@
         // reload the table
         [issuesTableView reloadData];
         //select the index of found data to keep the correct selection
-        var index = [repo[displayedIssuesKey] indexOfObject:item];
-        [issuesTableView selectRowIndexes:[CPIndexSet indexSetWithIndex:index] byExtendingSelection:NO];
+        if (item && [issuesTableView numberOfRows] > 0)
+        {
+            var index = [repo[displayedIssuesKey] indexOfObject:item];
+            [self selectIssueAtIndex:index];
+        }
     }
 }
 
