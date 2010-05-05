@@ -190,9 +190,9 @@ img.issue-author-image {
     -moz-border-radius: 8px;
     -webkit-border-radius: 8px;
 
-    -webkit-box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.3);
-    -moz-box-shadow: inset 0px 1px 0px rgba(0, 0, 0, 0.3);
-    box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.3); 
+    -webkit-box-shadow: 0px 1px 0px rgba(255, 255, 255, 0.3);
+    -moz-box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.3);
+    box-shadow: 0px 1px 0px rgba(255, 255, 255, 0.3); 
 }
 
 .wantsopen-closed {
@@ -469,8 +469,8 @@ function addComment(comment) {
                                 <span class="issue-meta-content">{{comma_separated_tags}}</span>
                             </div>
                             <div class="issue-meta-action-wrapper">
-                                <a href="#" id="close-button" onclick="toggleIssueState()" class="action-state-button wantsopen-{{state}}">Close Issue</a>
-                                <a href="#" id="open-button" onclick="toggleIssueState()" class="action-state-button wantsclosed-{{state}}">Re-open Issue</a>
+                                <a href="javascript:(return false;)" id="close-button" onclick="toggleIssueState()" class="action-state-button wantsopen-{{state}}">Close Issue</a>
+                                <a href="javascript:(return false;)" id="open-button" onclick="toggleIssueState()" class="action-state-button wantsclosed-{{state}}">Re-open Issue</a>
                             </div>
                         </div>
                     </div>
@@ -507,8 +507,8 @@ function addComment(comment) {
                     <textarea id="add-comment-textarea" class="comment-body-wrapper"></textarea>
                     <div class="comment-form-wrapper">
                     	<span id="comment-form-error-message" class="error-message">Something went wrong. Try again.</span>
-                        <a class="fakebutton" href="#" onclick="hideCommentForm();">Clear</a>
-                        <a class="fakebutton" href="#" onclick="submitCommentForm();">Comment</a>
+                        <a class="fakebutton" href="javascript:(return false;)" onclick="hideCommentForm();">Clear</a>
+                        <a class="fakebutton" href="javascript:(return false;)" onclick="submitCommentForm();">Comment</a>
                     </div>
                 </div>
             </div>
