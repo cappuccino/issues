@@ -398,32 +398,6 @@ function submitCommentForm() {
     });
 }
 
-function addComment(comment) {
-    var allComments = document.getElementById("comments"),
-        newComment = document.createElement("div");
-        commentHTML = ''+
-        '<div class="comment-body">'+
-        	'<div class="comment-body-wrapper">'+
-            	'<div class="comment-accessory-shadow"></div>'+
-              	'<div class="comment-accessory"></div>'+
-                 comment.body_html+
-            '</div>'+
-        '</div>'+
-        '<div class="comment-meta">'+
-          	'<div class="comment-meta-wrapper">'+
-                '<div class="comment-author-image"><img src="http://www.gravatar.com/avatar/'+comment.gravatar_id+
-                                                            '.png?s=28&d=identicon" alt="'+comment.user+'" /></div>'+
-                '<div class="comment-meta-meta">'+
-                    '<div class="comment-author">'+comment.user+'</div>'+
-                    '<div class="comment-date">'+comment.human_readable_date+'</div>'+
-                '</div>'+
-            '</div>'+
-        '</div>';
-
-    newComment.className = "comment";
-    newComment.innerHTML = commentHTML;
-    allComments.appendChild(newComment);
-}
                 </script>
 
     </head>
