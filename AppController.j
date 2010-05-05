@@ -158,6 +158,7 @@
 - (void)awakeFromCib
 {
     [topLevelSplitView setIsPaneSplitter:YES];
+    [CPMenu setMenuBarVisible:NO];
 }
 
 - (CGFloat)splitView:(CPSplitView)splitView constrainMinCoordinate:(float)proposedMin ofSubviewAt:(int)dividerIndex
