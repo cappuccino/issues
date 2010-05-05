@@ -479,10 +479,17 @@ var IssuesHTMLTemplate = nil;
     }
     else
     {
+        // get selected item
+        var item = [self selectedIssue];
+
         [self hideFilterBar];
         filteredIssues = nil;
-
+        
+        // reload the table
         [issuesTableView reloadData];
+        //select the index of found data to keep the correct selection
+        var index = [repo[displayedIssuesKey] indexOfObject:item];
+        [issuesTableView selectRowIndexes:[CPIndexSet indexSetWithIndex:index] byExtendingSelection:NO];
     }
 }
 
