@@ -83,7 +83,6 @@
         priorityDataView = [PriorityTableDataView new];
 
     [[priority headerView] setStringValue:"Priority"];
-    [priority setDataView:priorityDataView];
     [priority setWidth:60.0];
     [priority setMinWidth:50.0];
     [priority setEditable:YES];
@@ -381,8 +380,6 @@
         value = [CPDate simpleDate:value];
     else if (columnIdentifier === @"votes" && value === 0)
         value = @"-";
-    else if (columnIdentifier === @"position") // FIX ME: this can probably be done better... 
-        value = (repo[displayedIssuesKey].length - value) / repo[displayedIssuesKey].length;
 
     return value;
 }
