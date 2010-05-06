@@ -3,6 +3,7 @@
 @import "CPDate+Additions.j"
 @import "FilterBar.j"
 @import "IssueWebView.j"
+@import "PriorityTableDataView.j"
 
 @implementation IssuesController : CPObject
 {
@@ -78,9 +79,11 @@
     [issuesTableView addTableColumn:votes];
 
     var desc = [CPSortDescriptor sortDescriptorWithKey:@"position" ascending:YES],
-        priority = [[CPTableColumn alloc] initWithIdentifier:"position"];
+        priority = [[CPTableColumn alloc] initWithIdentifier:"position"],
+        priorityDataView = [PriorityTableDataView new];
 
     [[priority headerView] setStringValue:"Priority"];
+    [priority setDataView:priorityDataView];
     [priority setWidth:60.0];
     [priority setMinWidth:50.0];
     [priority setEditable:YES];
@@ -373,9 +376,10 @@
     //special cases
     if(columnIdentifier === @"created_at" || columnIdentifier === @"updated_at")
         value = [CPDate simpleDate:value];
-
-    if (columnIdentifier === @"votes" && value === 0)
+    else if (columnIdentifier === @"votes" && value === 0)
         value = @"-";
+    else if (columnIdentifier === @"position") // FIX ME: this can probably be done better... 
+        value = (repo[displayedIssuesKey].length - value) / repo[displayedIssuesKey].length;
 
     return value;
 }
