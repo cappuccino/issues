@@ -32,9 +32,19 @@
     [self showView:noRepoView];
 
     var desc = [CPSortDescriptor sortDescriptorWithKey:@"number" ascending:YES],
-        ID = [[CPTableColumn alloc] initWithIdentifier:"number"];
+        ID = [[CPTableColumn alloc] initWithIdentifier:"number"],
+        dataView = [CPTextField new];
+
+    [dataView setAlignment:CPRightTextAlignment];
+    [dataView setLineBreakMode:CPLineBreakByTruncatingTail];
+    [dataView setValue:[CPColor colorWithHexString:@"929496"] forThemeAttribute:@"text-color"];
+    [dataView setValue:[CPColor whiteColor] forThemeAttribute:@"text-color" inState:CPThemeStateSelected];
+    [dataView setValue:[CPFont boldSystemFontOfSize:12] forThemeAttribute:@"font" inState:CPThemeStateSelected];
+    [dataView setValue:CGInsetMake(0,10,0,0) forThemeAttribute:@"content-inset"];
+    [dataView setValue:CPCenterVerticalTextAlignment forThemeAttribute:@"vertical-alignment"];
 
     [[ID headerView] setStringValue:"ID"];
+    [ID setDataView:dataView];
     [ID setWidth:50.0];
     [ID setMinWidth:50.0];
     [ID setEditable:YES];
@@ -66,6 +76,18 @@
     [votes setResizingMask:CPTableColumnUserResizingMask];
 
     [issuesTableView addTableColumn:votes];
+
+    var desc = [CPSortDescriptor sortDescriptorWithKey:@"position" ascending:YES],
+        priority = [[CPTableColumn alloc] initWithIdentifier:"position"];
+
+    [[priority headerView] setStringValue:"Priority"];
+    [priority setWidth:60.0];
+    [priority setMinWidth:50.0];
+    [priority setEditable:YES];
+    [priority setSortDescriptorPrototype:desc];
+    [priority setResizingMask:CPTableColumnUserResizingMask];
+
+    [issuesTableView addTableColumn:priority];
 
     var desc = [CPSortDescriptor sortDescriptorWithKey:@"created_at" ascending:YES],
         date = [[CPTableColumn alloc] initWithIdentifier:"created_at"];
@@ -132,6 +154,8 @@
 
     [self searchFieldDidChange:nil];
     [self selectIssueAtIndex:-1];
+
+    console.log(repo[displayedIssuesKey]);
 }
 
 - (void)selectIssueAtIndex:(unsigned)index
@@ -349,6 +373,9 @@
     //special cases
     if(columnIdentifier === @"created_at" || columnIdentifier === @"updated_at")
         value = [CPDate simpleDate:value];
+
+    if (columnIdentifier === @"votes" && value === 0)
+        value = @"-";
 
     return value;
 }
