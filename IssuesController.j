@@ -218,11 +218,14 @@
     if (issue === nil)
         return;
 
-    var platformWindow = [[CPPlatformWindow alloc] initWithContentRect:CGRectMake(100, 100, 800, 600)],
-        newWindow = [[CPWindow alloc] initWithContentRect:CGRectMake(0, 0, 800, 600) styleMask:CPTitledWindowMask|CPClosableWindowMask|CPMiniaturizableWindowMask];
+    var newWindow = [[CPWindow alloc] initWithContentRect:CGRectMake(100, 100, 800, 600) styleMask:CPTitledWindowMask|CPClosableWindowMask|CPMiniaturizableWindowMask];
 
-    [newWindow setPlatformWindow:platformWindow];
-    [newWindow setFullBridge:YES];
+    if ([CPPlatform isBrowser])
+    {
+        var platformWindow = [[CPPlatformWindow alloc] initWithContentRect:CGRectMake(100, 100, 800, 600)];
+        [newWindow setPlatformWindow:platformWindow];
+        [newWindow setFullBridge:YES];
+    }
 
     var contentView = [newWindow contentView],
         webView = [[IssueWebView alloc] initWithFrame:[contentView bounds]];
