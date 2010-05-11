@@ -273,7 +273,8 @@
         break;
 
         case @"searchfield":
-            var searchField = [[CPSearchField alloc] initWithFrame:CGRectMake(0,0, 140, 30)];
+            var searchField = [[ToolbarSearchField alloc] initWithFrame:CGRectMake(0,0, 140, 30)];
+
             [searchField setTarget:issuesController];
             [searchField setAction:@selector(searchFieldDidChange:)];
             [searchField setSendsSearchStringImmediately:YES];
@@ -285,12 +286,12 @@
             
             [toolbarItem setMinSize:CGSizeMake(200, 30)];
             [toolbarItem setMaxSize:CGSizeMake(200, 30)];
+
+            [self addCustomSearchFieldAttributes:searchField];
         break;
 
         case @"switchViewStatus":
             var aSwitch = [[CPSegmentedControl alloc] initWithFrame:CGRectMake(0,0,0,0)];
-            
-            [self addCustomStyleAttributes:aSwitch];
 
             [aSwitch setTrackingMode:CPSegmentSwitchTrackingSelectOne];
             [aSwitch setTarget:issuesController];
@@ -309,13 +310,15 @@
             
             [toolbarItem setMinSize:CGSizeMake(150, 24)];
             [toolbarItem setMaxSize:CGSizeMake(150, 24)];
+            
+            [self addCustomSegmentedAttributes:aSwitch];
         break;
     }
 
     return toolbarItem;
 }
 
-- (void)addCustomStyleAttributes:(CPSegmentedControl)aControl
+- (void)addCustomSegmentedAttributes:(CPSegmentedControl)aControl
 {
     var dividerColor = [CPColor colorWithPatternImage:[[CPImage alloc] initWithContentsOfFile:[[CPBundle mainBundle] pathForResource:"display-mode-divider.png"] size:CGSizeMake(1, 24)]],
         leftBezel = PatternColor(MainBundleImage("display-mode-left-bezel.png", CGSizeMake(4, 24))),
@@ -362,6 +365,44 @@
     [aControl setValue:[CPColor colorWithCalibratedWhite:1.0 alpha:1.0] forThemeAttribute:@"text-color" inState:CPThemeStateSelected];
     [aControl setValue:[CPColor colorWithCalibratedWhite:0.8 alpha:1.0] forThemeAttribute:@"text-color" inState:CPThemeStateSelected|CPThemeStateDisabled];
     [aControl setValue:[CPColor colorWithCalibratedWhite:0.0/255.0 alpha:1.0] forThemeAttribute:@"text-shadow-color" inState:CPThemeStateSelected];
+}
+
+- (void)addCustomSearchFieldAttributes:(CPSearchField)textfield
+{
+    var bezelColor = PatternColor([[CPThreePartImage alloc] initWithImageSlices:
+            [
+                MainBundleImage("searchfield-left-bezel.png", CGSizeMake(23.0, 24.0)),
+                MainBundleImage("searchfield-center-bezel.png", CGSizeMake(1.0, 24.0)),
+                MainBundleImage("searchfield-right-bezel.png", CGSizeMake(14.0, 24.0))
+            ] isVertical:NO]),
+
+        bezelFocusedColor = PatternColor([[CPThreePartImage alloc] initWithImageSlices:
+            [
+                MainBundleImage("searchfield-left-bezel-selected.png", CGSizeMake(27.0, 30.0)),
+                MainBundleImage("searchfield-center-bezel-selected.png", CGSizeMake(1.0, 30.0)),
+                MainBundleImage("searchfield-right-bezel-selected.png", CGSizeMake(17.0, 30.0))
+            ] isVertical:NO]);
+
+    [textfield setValue:bezelColor forThemeAttribute:@"bezel-color" inState:CPThemeStateBezeled | CPTextFieldStateRounded];
+    [textfield setValue:bezelFocusedColor forThemeAttribute:@"bezel-color" inState:CPThemeStateBezeled | CPTextFieldStateRounded | CPThemeStateEditing];
+
+    [textfield setValue:[CPFont systemFontOfSize:12.0] forThemeAttribute:@"font"];
+    [textfield setValue:CGInsetMake(9.0, 14.0, 6.0, 14.0) forThemeAttribute:@"content-inset" inState:CPThemeStateBezeled | CPTextFieldStateRounded];
+
+    [textfield setValue:CGInsetMake(3.0, 3.0, 3.0, 3.0) forThemeAttribute:@"bezel-inset" inState:CPThemeStateBezeled|CPTextFieldStateRounded];
+    [textfield setValue:CGInsetMake(0.0, 0.0, 0.0, 0.0) forThemeAttribute:@"bezel-inset" inState:CPThemeStateBezeled|CPTextFieldStateRounded|CPThemeStateEditing];
+}
+
+@end
+
+@implementation ToolbarSearchField : CPSearchField
+{
+}
+
+- (void)resetSearchButton
+{
+    [super resetSearchButton];
+    [[self searchButton] setImage:nil];
 }
 
 @end
