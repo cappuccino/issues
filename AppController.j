@@ -289,6 +289,9 @@
 
         case @"switchViewStatus":
             var aSwitch = [[CPSegmentedControl alloc] initWithFrame:CGRectMake(0,0,0,0)];
+            
+            [self addCustomStyleAttributes:aSwitch];
+
             [aSwitch setTrackingMode:CPSegmentSwitchTrackingSelectOne];
             [aSwitch setTarget:issuesController];
             [aSwitch setAction:@selector(takeIssueTypeFrom:)];
@@ -312,7 +315,66 @@
     return toolbarItem;
 }
 
+- (void)addCustomStyleAttributes:(CPSegmentedControl)aControl
+{
+    var dividerColor = [CPColor colorWithPatternImage:[[CPImage alloc] initWithContentsOfFile:[[CPBundle mainBundle] pathForResource:"display-mode-divider.png"] size:CGSizeMake(1, 24)]],
+        leftBezel = PatternColor(MainBundleImage("display-mode-left-bezel.png", CGSizeMake(4, 24))),
+        centerBezel = PatternColor(MainBundleImage("display-mode-center-bezel.png", CGSizeMake(1, 24))),
+        rightBezel = PatternColor(MainBundleImage("display-mode-right-bezel.png", CGSizeMake(4, 24))),
+        leftBezelHighlighted = PatternColor(MainBundleImage("display-mode-left-bezel-highlighted.png", CGSizeMake(4, 24))),
+        centerBezelHighlighted = PatternColor(MainBundleImage("display-mode-center-bezel-highlighted.png", CGSizeMake(1, 24))),
+        rightBezelHighlighted = PatternColor(MainBundleImage("display-mode-right-bezel-highlighted.png", CGSizeMake(4, 24))),
+        leftBezelSelected = PatternColor(MainBundleImage("display-mode-left-bezel-selected.png", CGSizeMake(4, 24))),
+        centerBezelSelected = PatternColor(MainBundleImage("display-mode-center-bezel-selected.png", CGSizeMake(1, 24))),
+        rightBezelSelected = PatternColor(MainBundleImage("display-mode-right-bezel-selected.png", CGSizeMake(4, 24))),
+        leftBezelDisabled = PatternColor(MainBundleImage("display-mode-left-bezel-disabled.png", CGSizeMake(4, 24))),
+        centerBezelDisabled = PatternColor(MainBundleImage("display-mode-center-bezel-disabled.png", CGSizeMake(1, 24))),
+        rightBezelDisabled = PatternColor(MainBundleImage("display-mode-right-bezel-disabled.png", CGSizeMake(4, 24))),
+        leftBezelSelectedDisabled = PatternColor(MainBundleImage("display-mode-left-bezel-selected-disabled.png", CGSizeMake(4, 24))),
+        centerBezelSelectedDisabled = PatternColor(MainBundleImage("display-mode-center-bezel-selected-disabled.png", CGSizeMake(1, 24))),
+        rightBezelSelectedDisabled = PatternColor(MainBundleImage("display-mode-right-bezel-selected-disabled.png", CGSizeMake(4, 24)));
+
+    [aControl setValue:centerBezel forThemeAttribute:"center-segment-bezel-color"];
+    [aControl setValue:centerBezelHighlighted forThemeAttribute:"center-segment-bezel-color" inState:CPThemeStateHighlighted];
+    [aControl setValue:centerBezelSelected forThemeAttribute:"center-segment-bezel-color" inState:CPThemeStateSelected];
+    [aControl setValue:centerBezelDisabled forThemeAttribute:"center-segment-bezel-color" inState:CPThemeStateDisabled];
+    [aControl setValue:centerBezelSelectedDisabled forThemeAttribute:"center-segment-bezel-color" inState:CPThemeStateSelected|CPThemeStateDisabled];
+
+    [aControl setValue:leftBezel forThemeAttribute:"left-segment-bezel-color"];
+    [aControl setValue:leftBezelHighlighted forThemeAttribute:"left-segment-bezel-color" inState:CPThemeStateHighlighted];
+    [aControl setValue:leftBezelSelected forThemeAttribute:"left-segment-bezel-color" inState:CPThemeStateSelected];
+    [aControl setValue:leftBezelDisabled forThemeAttribute:"left-segment-bezel-color" inState:CPThemeStateDisabled];
+    [aControl setValue:leftBezelSelectedDisabled forThemeAttribute:"left-segment-bezel-color" inState:CPThemeStateSelected|CPThemeStateDisabled];
+
+    [aControl setValue:rightBezel forThemeAttribute:"right-segment-bezel-color"];
+    [aControl setValue:rightBezelHighlighted forThemeAttribute:"right-segment-bezel-color" inState:CPThemeStateHighlighted];
+    [aControl setValue:rightBezelSelected forThemeAttribute:"right-segment-bezel-color" inState:CPThemeStateSelected];
+    [aControl setValue:rightBezelDisabled forThemeAttribute:"right-segment-bezel-color" inState:CPThemeStateDisabled];
+    [aControl setValue:rightBezelSelectedDisabled forThemeAttribute:"right-segment-bezel-color" inState:CPThemeStateSelected|CPThemeStateDisabled];
+
+    [aControl setValue:dividerColor forThemeAttribute:@"divider-bezel-color"];
+
+    [aControl setValue:[CPColor colorWithCalibratedWhite:73.0/255.0 alpha:1.0] forThemeAttribute:@"text-color"];
+    [aControl setValue:[CPColor colorWithCalibratedWhite:96.0/255.0 alpha:1.0] forThemeAttribute:@"text-color" inState:CPThemeStateDisabled];
+    [aControl setValue:[CPColor colorWithCalibratedWhite:222.0/255.0 alpha:1.0] forThemeAttribute:@"text-shadow-color"];
+    [aControl setValue:CGSizeMake(0.0, 1.0) forThemeAttribute:@"text-shadow-offset"];
+
+    [aControl setValue:[CPColor colorWithCalibratedWhite:1.0 alpha:1.0] forThemeAttribute:@"text-color" inState:CPThemeStateSelected];
+    [aControl setValue:[CPColor colorWithCalibratedWhite:0.8 alpha:1.0] forThemeAttribute:@"text-color" inState:CPThemeStateSelected|CPThemeStateDisabled];
+    [aControl setValue:[CPColor colorWithCalibratedWhite:0.0/255.0 alpha:1.0] forThemeAttribute:@"text-shadow-color" inState:CPThemeStateSelected];
+}
+
 @end
+
+function PatternColor(anImage)
+{
+    return [CPColor colorWithPatternImage:anImage];
+}
+
+function MainBundleImage(path, size)
+{
+    return [[CPImage alloc] initWithContentsOfFile:[[CPBundle mainBundle] pathForResource:path] size:size];
+}
 
 window.GitHubIssuesToggleVertical = function()
 {
