@@ -278,8 +278,9 @@
             [searchField setTarget:issuesController];
             [searchField setAction:@selector(searchFieldDidChange:)];
             [searchField setSendsSearchStringImmediately:YES];
-            [searchField setPlaceholderString:"Search Issues"];
+            [searchField setPlaceholderString:"title / body / labels"];
 
+            [toolbarItem setLabel:"Search Issues"];
             [toolbarItem setView:searchField];
             [toolbarItem setTag:@"SearchIssues"];
             [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityHigh];
@@ -307,6 +308,7 @@
 
             [toolbarItem setView:aSwitch];
             [toolbarItem setTag:@"changeViewStatus"];
+            [toolbarItem setLabel:"View Issues in State"];
             
             [toolbarItem setMinSize:CGSizeMake(150, 24)];
             [toolbarItem setMaxSize:CGSizeMake(150, 24)];
