@@ -427,10 +427,6 @@
             max = repo[displayedIssuesKey+"Max"];
         value = (max - value)/(max - min);
     }
-
-    if (columnIdentifier === @"PriorityNumber")
-        value = [issue objectForKey:@"position"];
-
     return value;
 }
 
