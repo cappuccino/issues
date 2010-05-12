@@ -23,6 +23,7 @@
     @outlet CPSplitView detailLevelSplitView;
     @outlet CPView      userView;
     @outlet CPView      initialLoadingView;
+    @outlet CPView      logoView;
     @outlet RepositoriesController reposController @accessors;
     @outlet IssuesController issuesController @accessors;
 }
@@ -177,12 +178,12 @@
 
 -(CPArray)toolbarAllowedItemIdentifiers:(CPToolbar)toolbar
 {
-    return [CPToolbarFlexibleSpaceItemIdentifier, CPToolbarSpaceItemIdentifier, @"searchfield", @"newissue", @"switchViewStatus", "commentissue", "openissue", "closeissue", "loginStatus"];
+    return [CPToolbarFlexibleSpaceItemIdentifier, CPToolbarSpaceItemIdentifier, @"searchfield", @"newissue", @"switchViewStatus", "commentissue", "openissue", "closeissue", "logo"];
 }
 
 -(CPArray)toolbarDefaultItemIdentifiers:(CPToolbar)toolbar
 {
-    return ["loginStatus", "switchViewStatus", CPToolbarFlexibleSpaceItemIdentifier, "newissue", @"commentissue", "openissue", "closeissue", CPToolbarFlexibleSpaceItemIdentifier, @"searchfield"];
+    return ["logo", "switchViewStatus", CPToolbarFlexibleSpaceItemIdentifier, "newissue", @"commentissue", "openissue", "closeissue", CPToolbarFlexibleSpaceItemIdentifier, @"searchfield"];
 }
 
 - (CPToolbarItem)toolbar:(CPToolbar)toolbar itemForItemIdentifier:(CPString)itemIdentifier willBeInsertedIntoToolbar:(BOOL)flag
@@ -195,12 +196,23 @@
 
     switch(itemIdentifier)
     {
-        case @"loginStatus":
-            [toolbarItem setView:userView];
+        case @"logo":
+            [toolbarItem setView:logoView];
             [toolbarItem setMinSize:CGSizeMake(200, 32)];
             [toolbarItem setMaxSize:CGSizeMake(200, 32)];
-            [toolbarItem setTarget:[GithubAPIController sharedController]];
-            [toolbarItem setAction:@selector(toggleAuthentication:)];
+            
+            //FIXME this should be possible without this
+            window.setTimeout(function(){
+                var toolbarView = [toolbar _toolbarView],
+                    superview = [[toolbar items][0] view]; //FIXME
+                
+                while (superview && superview !== toolbarView)
+                {
+                    [superview setClipsToBounds:NO];
+                    superview = [superview superview];
+                    console.log(superview);
+                }
+            }, 0);
         break;
         
         case @"newissue":

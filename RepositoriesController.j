@@ -71,7 +71,7 @@ var ToolbarColor = nil;
     [sourcesListView setDraggingDestinationFeedbackStyle:CPTableViewDropAbove];
     [sourcesListView registerForDraggedTypes:[@"GitHubIssuesRepoSourceListDragType"]];
 
-    [sourcesListView setBackgroundColor:[CPColor colorWithHexString:@"eef2f8"]];
+    [[[sourcesListView enclosingScrollView] superview] setBackgroundColor:[CPColor colorWithHexString:@"eef2f8"]];
 
     [self showNoReposView];
 }

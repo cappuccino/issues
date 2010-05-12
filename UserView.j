@@ -8,11 +8,12 @@
     @outlet CPImageView imageFrame;
     @outlet CPTextField usernameField;
     @outlet CPTextField emailField;
+            CPImage     octocatImage;
 }
 
 - (void)awakeFromCib
 {
-    [self loginStatusDidChange:nil];
+    [self setBackgroundColor:[CPColor colorWithWhite:1.0 alpha:0.1]];
     [usernameField setLineBreakMode:CPLineBreakByTruncatingTail];
     [usernameField setFont:[CPFont systemFontOfSize:11.0]];
     [usernameField setTextShadowColor:[CPColor colorWithWhite:0.9 alpha:1.0]];
@@ -22,6 +23,15 @@
     [emailField setTextColor:[CPColor colorWithWhite:0.4 alpha:1.0]];
     [emailField setTextShadowColor:[CPColor colorWithWhite:0.9 alpha:1.0]];
     [emailField setTextShadowOffset:CGSizeMake(0, 1)];
+
+    [self registerForNotifications];
+    [self setTarget:[GithubAPIController sharedController]];
+    [self setAction:@selector(toggleAuthentication:)];
+
+    var path = [[CPBundle mainBundle] pathForResource:"octocat22.png"];
+    octocatImage = [[CPImage alloc] initWithContentsOfFile:path size:CGSizeMake(22, 19)];
+
+    [self loginStatusDidChange:nil];
 }
 
 - (void)registerForNotifications
@@ -42,41 +52,13 @@
         [usernameField setStringValue:[githubController username]];
         [emailField setStringValue:[githubController emailAddress]];
         [imageView setImage:[githubController userThumbnailImage]];
-        [imageView setHidden:NO];
-        [imageFrame setHidden:NO];
     }
     else
     {
         [usernameField setStringValue:"Not logged in"];
         [emailField setStringValue:"Click to login to Github"];
-        [imageView setImage:nil];
-        [imageView setHidden:YES];
-        [imageFrame setHidden:YES];
+        [imageView setImage:octocatImage];
     }
-}
-
-- (void)initWithCoder:(CPCoder)aCoder
-{
-    self = [super initWithCoder:aCoder];
-
-    imageView = [aCoder decodeObjectForKey:"imageView"];
-    imageFrame = [aCoder decodeObjectForKey:"imageFrame"];
-    usernameField = [aCoder decodeObjectForKey:"usernameField"];
-    emailField = [aCoder decodeObjectForKey:"emailField"];
-
-    [self registerForNotifications];
-    [self loginStatusDidChange:nil];
-    
-    return self;
-}
-
-- (void)encodeWithCoder:(CPCoder)aCoder
-{
-    [super encodeWithCoder:aCoder];
-    [aCoder encodeObject:imageFrame forKey:"imageFrame"];
-    [aCoder encodeObject:imageView forKey:"imageView"];
-    [aCoder encodeObject:usernameField forKey:"usernameField"];
-    [aCoder encodeObject:emailField forKey:"emailField"];
 }
 
 @end
