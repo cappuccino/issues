@@ -83,6 +83,7 @@
         priorityDataView = [PriorityTableDataView new];
 
     [[priority headerView] setStringValue:"Priority"];
+    [priority setDataView:priorityDataView];
     [priority setWidth:60.0];
     [priority setMinWidth:50.0];
     [priority setEditable:YES];
@@ -158,8 +159,6 @@
 
     [self searchFieldDidChange:nil];
     [self selectIssueAtIndex:-1];
-
-    console.log(repo[displayedIssuesKey]);
 }
 
 - (void)selectIssueAtIndex:(unsigned)index
@@ -416,6 +415,12 @@
         value = [CPDate simpleDate:value];
     else if (columnIdentifier === @"votes" && value === 0)
         value = @"-";
+    else if (columnIdentifier === @"position") 
+    {
+        var min = repo[displayedIssuesKey+"Min"],
+            max = repo[displayedIssuesKey+"Max"];
+        value = (max - value)/(max - min);
+    }
 
     return value;
 }

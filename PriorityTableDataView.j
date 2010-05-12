@@ -1,34 +1,37 @@
-@implementation PriorityTableDataView : CPControl
+@import <AppKit/CPView.j>
+
+@implementation PriorityTableDataView : CPView
 {
+    float value;
 }
+
 - (void)setObjectValue:(id)aValue
 {
-    [super setObjectValue: MAX(MIN(aValue, 1), 0)];
+    value = MAX(MIN(aValue, 1), 0);
     [self setNeedsDisplay:YES];
 }
 
 - (void)drawRect:(CGRect)aRect
 {
-    // reset the master rect to draw
-    aRect = CGRectMake(aRect.origin.x, aRect.origin.y + 3, aRect.size.width * [self floatValue], aRect.size.height - 6);
-
-    var context = [[CPGraphicsContext currentContext] graphicsPort],
-        rectToDraw = CGRectMake(0, aRect.origin.y, 5, aRect.size.height),
+    var bounds = [self bounds],
+        maxWidth = (bounds.size.width - 2) * value,
+        context = [[CPGraphicsContext currentContext] graphicsPort],
+        rectToDraw = CGRectMake(2, 2, 5, bounds.size.height - 4),
         transform = CGAffineTransformMakeTranslation(6, 0);
 
-    // while the progress block rect doesn't intesect the edge of the drawing bounds
-    while (rectToDraw.origin.x < CGRectGetMaxX(aRect))
+    CGContextBeginPath(context);
+    while (rectToDraw.origin.x < maxWidth)
     {
-        CGContextAddRect(context, rectToDraw);
+        if (CGRectGetMaxX(rectToDraw) > maxWidth)
+            rectToDraw.size.width -= (CGRectGetMaxX(rectToDraw) - maxWidth);
 
-        // reposition the progress block
+        CGContextAddRect(context, rectToDraw);
         rectToDraw = CGRectApplyAffineTransform(rectToDraw, transform);
     }
 
-    if ([self hasThemeState:CPThemeStateSelected])
-        var color = [CPColor whiteColor];
-    else
-        var color = [CPColor colorWithHexString:@"929496"];
+    var color = [CPColor whiteColor];
+    if (![self hasThemeState:CPThemeStateSelected])
+        color = [CPColor colorWithRed:176/255 green:178/255 blue:180/255 alpha:1.0];
 
     CGContextSetFillColor(context, color);
     CGContextFillPath(context);

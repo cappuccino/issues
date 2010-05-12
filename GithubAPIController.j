@@ -196,8 +196,19 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
         if (openRequest.success())
         {
             try {
-                var issues = [CPDictionary dictionaryWithJSObject:JSON.parse(openRequest.responseText()) recursively:YES];
-                aRepo.openIssues = [issues objectForKey:"issues"];
+                var issues = [[CPDictionary dictionaryWithJSObject:JSON.parse(openRequest.responseText()) recursively:YES] objectForKey:"issues"];
+                aRepo.openIssues = issues;
+
+                var maxPosition = 0,
+                    minPosition = Infinity;
+                for (var i = 0, count = issues.length; i < count; i++)
+                {
+                    maxPosition = MAX([issues[i] objectForKey:"position"], maxPosition);
+                    minPosition = MIN([issues[i] objectForKey:"position"], minPosition);
+                }
+
+                aRepo.openIssuesMax = maxPosition;
+                aRepo.openIssuesMin = minPosition;
             }
             catch (e) {
                 CPLog.error("Unable to load issues for repo: "+aRepo+" -- "+e);
@@ -216,8 +227,19 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
         if (closedRequest.success())
         {
             try {
-                var issues = [CPDictionary dictionaryWithJSObject:JSON.parse(closedRequest.responseText()) recursively:YES];
-                aRepo.closedIssues = [issues objectForKey:"issues"];
+                var issues = [[CPDictionary dictionaryWithJSObject:JSON.parse(closedRequest.responseText()) recursively:YES] objectForKey:"issues"];
+                aRepo.closedIssues = issues;
+
+                var maxPosition = 0,
+                    minPosition = Infinity;
+                for (var i = 0, count = issues.length; i < count; i++)
+                {
+                    maxPosition = MAX([issues[i] objectForKey:"position"], maxPosition);
+                    minPosition = MIN([issues[i] objectForKey:"position"], minPosition);
+                }
+
+                aRepo.closedIssuesMax = maxPosition;
+                aRepo.closedIssuesMin = minPosition;
             }
             catch (e) {
                 CPLog.error("Unable to load repositority with identifier: "+anIdentifier+" -- "+e);
