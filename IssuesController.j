@@ -117,20 +117,6 @@
 
     [issuesTableView addTableColumn:priority];
 
-    var desc = [CPSortDescriptor sortDescriptorWithKey:@"position" ascending:YES],
-        priority = [[CPTableColumn alloc] initWithIdentifier:"PriorityNumber"],
-        priorityDataView = [PriorityTableDataView new];
-
-    [[priority headerView] setStringValue:"PriorityNumber"];
-   // [priority setDataView:priorityDataView];
-    [priority setWidth:60.0];
-    [priority setMinWidth:50.0];
-    [priority setEditable:YES];
-    [priority setSortDescriptorPrototype:desc];
-    [priority setResizingMask:CPTableColumnUserResizingMask];
-
-    [issuesTableView addTableColumn:priority];
-
     [issuesTableView setTarget:self];
     [issuesTableView setDoubleAction:@selector(openIssueInNewWindow:)];
     [issuesTableView setUsesAlternatingRowBackgroundColors:YES];
