@@ -191,7 +191,7 @@
     var mainBundle = [CPBundle mainBundle],
         toolbarItem = [[CPToolbarItem alloc] initWithItemIdentifier:itemIdentifier];
 
-    [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityHigh];
+    [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityUser];
     [toolbarItem setEnabled:NO];
 
     switch(itemIdentifier)
@@ -229,7 +229,7 @@
             
             [toolbarItem setMinSize:CGSizeMake(32, 32)];
             [toolbarItem setMaxSize:CGSizeMake(32, 32)];
-            [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityLow];
+            [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityHigh];
         break;
 
         case @"openissue":
@@ -246,7 +246,7 @@
             
             [toolbarItem setMinSize:CGSizeMake(32, 32)];
             [toolbarItem setMaxSize:CGSizeMake(32, 32)];
-            [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityLow];
+            [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityHigh];
         break;
 
         case @"closeissue":
@@ -264,7 +264,7 @@
             
             [toolbarItem setMinSize:CGSizeMake(32, 32)];
             [toolbarItem setMaxSize:CGSizeMake(32, 32)];
-            [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityLow];
+            [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityHigh];
         break;
 
         case @"commentissue":
@@ -281,7 +281,7 @@
             
             [toolbarItem setMinSize:CGSizeMake(32, 32)];
             [toolbarItem setMaxSize:CGSizeMake(32, 32)];
-            [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityLow];
+            [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityHigh];
         break;
 
         case @"searchfield":
@@ -295,7 +295,6 @@
             [toolbarItem setLabel:"Search Issues"];
             [toolbarItem setView:searchField];
             [toolbarItem setTag:@"SearchIssues"];
-            [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityHigh];
             
             [toolbarItem setMinSize:CGSizeMake(200, 30)];
             [toolbarItem setMaxSize:CGSizeMake(200, 30)];
