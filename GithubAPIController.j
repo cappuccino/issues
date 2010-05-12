@@ -416,7 +416,6 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
     {
         if (request.success())
         {
-            alert("win");
             // not really sure what we need to do here
             // I'm getting false back...
         }
