@@ -64,7 +64,7 @@ var IssuesHTMLTemplate = nil;
 
     if (![issue objectForKey:"body_html"])
     {
-        [issue setObject:Markdown.makeHtml([issue objectForKey:"body"]) forKey:"body_html"];
+        [issue setObject:Markdown.makeHtml([issue objectForKey:"body"] || "") forKey:"body_html"];
         [issue setObject:[CPDate simpleDate:[issue objectForKey:"created_at"]] forKey:"human_readable_created_date"];
         [issue setObject:[CPDate simpleDate:[issue objectForKey:"updated_at"]] forKey:"human_readable_updated_date"];
         [issue setObject:([issue objectForKey:"labels"] || []).join(", ") forKey:"comma_separated_tags"];
@@ -76,7 +76,7 @@ var IssuesHTMLTemplate = nil;
             for (var i = 0, count = [comments count]; i < count; i++)
             {
                 var comment = comments[i];
-                comment.body_html = Markdown.makeHtml(comment.body);
+                comment.body_html = Markdown.makeHtml(comment.body || "");
                 comment.human_readable_date = [CPDate simpleDate:comment.created_at];
             }
 

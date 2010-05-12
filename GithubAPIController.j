@@ -390,7 +390,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 
             var comments = [anIssue objectForKey:"all_comments"];
 
-            comment.body_html = Markdown.makeHtml(comment.body);
+            comment.body_html = Markdown.makeHtml(comment.body || "");
             comment.human_readable_date = [CPDate simpleDate:comment.created_at];
 
             comments.push(comment);
