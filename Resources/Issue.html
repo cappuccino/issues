@@ -370,7 +370,7 @@ function toggleIssueState() {
     if (STATE === "open")
         GitHubAPI.closeIssue(ISSUE, REPO);
     else
-        GitHubAPI.openIssue(ISSUE, REPO);
+        GitHubAPI.reopenIssue(ISSUE, REPO);
 }
 
 function showCommentForm() {

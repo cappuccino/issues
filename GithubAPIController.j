@@ -276,6 +276,8 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 
         if (aCallback)
             aCallback(comments, anIssue, aRepo, request)
+
+        [[CPRunLoop currentRunLoop] performSelectors];
     }
 
     request.send("");
@@ -299,6 +301,8 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 
         if (aCallback)
             aCallback(request.success(), anIssue, aRepo, request);
+
+        [[CPRunLoop currentRunLoop] performSelectors];
     }
     
     request.send("");
@@ -322,6 +326,44 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 
         if (aCallback)
             aCallback(request.success(), anIssue, aRepo, request);
+
+        [[CPRunLoop currentRunLoop] performSelectors];
+    }
+
+    request.send("");
+}
+
+- (void)openNewIssueWithTitle:(CPString)aTitle body:(CPString)aBody repository:(id)aRepo callback:(Function)aCallback
+{
+    var request = new CFHTTPRequest();
+    request.open("POST", BASE_URL+"issues/open/"+aRepo.identifier+[self _credentialsString]+
+                                                 "&title="+encodeURIComponent(aTitle)+
+                                                 "&body="+encodeURIComponent(aBody), true);
+
+    request.oncomplete = function()
+    {
+        if (request.success())
+        {
+            var issue = nil;
+            try {
+                issue = [CPDictionary dictionaryWithJSObject:JSON.parse(request.responseText()).issue];
+                aRepo.openIssues.push(issue);
+                
+                if (![issue containsKey:"position"])
+                    [issue setObject:aRepo.minPosition forKey:"position"];
+                
+                aRepo.openIssuesMax = MAX([issue objectForKey:"position"], aRepo.openIssuesMax);
+                aRepo.openIssuesMin = MIN([issue objectForKey:"position"], aRepo.openIssuesMin);
+            }
+            catch (e) {
+                CPLog.error("Unable to open new issue: "+aTitle+" -- "+e);
+            }
+        }
+
+        if (aCallback)
+            aCallback(issue, aRepo, request);
+
+        [[CPRunLoop currentRunLoop] performSelectors];
     }
 
     request.send("");
@@ -358,6 +400,8 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 
         if (aCallback)
             aCallback(comment, request);
+
+            [[CPRunLoop currentRunLoop] performSelectors];
     }
 
     request.send("");
@@ -379,7 +423,10 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 
         if (aCallback)
             aCallback(request.success(), anIssue, aRepo, request);
+
+        [[CPRunLoop currentRunLoop] performSelectors];
     }
+
     request.send("");
 }
 
@@ -408,7 +455,7 @@ GitHubAPI = {
                             callback:callback];
     },
     
-    openIssue: function(anIssue, aRepo, callback)
+    reopenIssue: function(anIssue, aRepo, callback)
     {
         [SharedController reopenIssue:anIssue 
                            repository:aRepo

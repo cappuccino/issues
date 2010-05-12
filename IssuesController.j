@@ -4,6 +4,7 @@
 @import "FilterBar.j"
 @import "IssueWebView.j"
 @import "PriorityTableDataView.j"
+@import "NewIssueWindowController.j"
 
 @implementation IssuesController : CPObject
 {
@@ -78,20 +79,6 @@
 
     [issuesTableView addTableColumn:votes];
 
-    var desc = [CPSortDescriptor sortDescriptorWithKey:@"position" ascending:YES],
-        priority = [[CPTableColumn alloc] initWithIdentifier:"position"],
-        priorityDataView = [PriorityTableDataView new];
-
-    [[priority headerView] setStringValue:"Priority"];
-    [priority setDataView:priorityDataView];
-    [priority setWidth:60.0];
-    [priority setMinWidth:50.0];
-    [priority setEditable:YES];
-    [priority setSortDescriptorPrototype:desc];
-    [priority setResizingMask:CPTableColumnUserResizingMask];
-
-    [issuesTableView addTableColumn:priority];
-
     var desc = [CPSortDescriptor sortDescriptorWithKey:@"created_at" ascending:YES],
         date = [[CPTableColumn alloc] initWithIdentifier:"created_at"];
 
@@ -115,6 +102,20 @@
     [updated setResizingMask:CPTableColumnUserResizingMask];
 
     [issuesTableView addTableColumn:updated];
+
+    var desc = [CPSortDescriptor sortDescriptorWithKey:@"position" ascending:YES],
+        priority = [[CPTableColumn alloc] initWithIdentifier:"position"],
+        priorityDataView = [PriorityTableDataView new];
+
+    [[priority headerView] setStringValue:"Priority"];
+    [priority setDataView:priorityDataView];
+    [priority setWidth:60.0];
+    [priority setMinWidth:50.0];
+    [priority setEditable:YES];
+    [priority setSortDescriptorPrototype:desc];
+    [priority setResizingMask:CPTableColumnUserResizingMask];
+
+    [issuesTableView addTableColumn:priority];
 
     [issuesTableView setTarget:self];
     [issuesTableView setDoubleAction:@selector(openIssueInNewWindow:)];
@@ -281,12 +282,17 @@
 
 - (@action)newIssue:(id)sender
 {
-    var issue = [self selectedIssue];
-    if (!issue)
-        return;
+    var controller = [[NewIssueWindowController alloc] initWithWindowCibName:"NewIssueWindow"];
+    [controller showWindow:self];
+    [controller setRepos:[[[CPApp delegate] reposController] sortedRepos]];
+    [controller selectRepo:repo];
+    [controller setDelegate:self];
+}
 
-    var newIssueWindow = [NewIssueWindow sharedNewIssueWindow];
-    [newIssueWindow makeKeyAndOrderFront:self];
+- (void)newIssueWindowController:(CPWindowController)aController didAddIssue:(id)anIssue toRepo:(id)aRepo
+{
+    if (aRepo === repo)
+        [issuesTableView reloadData];
 }
 
 - (@action)reload:(id)sender
