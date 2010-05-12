@@ -422,6 +422,11 @@
     [textfield setValue:CGInsetMake(0.0, 0.0, 0.0, 0.0) forThemeAttribute:@"bezel-inset" inState:CPThemeStateBezeled|CPTextFieldStateRounded|CPThemeStateEditing];
 }
 
+- (void)swapMainWindowOrientation:(id)sender
+{
+    GitHubIssuesToggleVertical();
+}
+
 @end
 
 @implementation ToolbarSearchField : CPSearchField
@@ -451,4 +456,5 @@ window.GitHubIssuesToggleVertical = function()
     var splitView = [CPApp delegate].detailLevelSplitView;
     [splitView setVertical:![splitView isVertical]];
     [splitView setNeedsDisplay:YES];
+    [[CPRunLoop mainRunLoop] performSelectors];
 }
