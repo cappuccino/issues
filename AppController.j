@@ -178,12 +178,17 @@
 
 -(CPArray)toolbarAllowedItemIdentifiers:(CPToolbar)toolbar
 {
-    return [CPToolbarFlexibleSpaceItemIdentifier, CPToolbarSpaceItemIdentifier, @"searchfield", @"newissue", @"switchViewStatus", "commentissue", "openissue", "closeissue", "logo"];
+    return [CPToolbarFlexibleSpaceItemIdentifier, CPToolbarSpaceItemIdentifier, @"searchfield", @"newissue", @"switchViewStatus", "commentissue", "openissue", "reload", "closeissue", "logo"];
 }
 
 -(CPArray)toolbarDefaultItemIdentifiers:(CPToolbar)toolbar
 {
-    return ["logo", "switchViewStatus", CPToolbarFlexibleSpaceItemIdentifier, "newissue", @"commentissue", "openissue", "closeissue", CPToolbarFlexibleSpaceItemIdentifier, @"searchfield"];
+    var items = ["switchViewStatus", CPToolbarFlexibleSpaceItemIdentifier, "newissue", @"commentissue", "closeissue", "openissue", "reload", CPToolbarFlexibleSpaceItemIdentifier, @"searchfield"];
+
+    if ([CPPlatform isBrowser])
+        items.unshift("logo");
+
+    return items;
 }
 
 - (CPToolbarItem)toolbar:(CPToolbar)toolbar itemForItemIdentifier:(CPString)itemIdentifier willBeInsertedIntoToolbar:(BOOL)flag
@@ -295,8 +300,8 @@
             [toolbarItem setView:searchField];
             [toolbarItem setTag:@"SearchIssues"];
             
-            [toolbarItem setMinSize:CGSizeMake(180, 30)];
-            [toolbarItem setMaxSize:CGSizeMake(180, 30)];
+            [toolbarItem setMinSize:CGSizeMake([CPPlatform isBrowser] ? 180 : 220, 30)];
+            [toolbarItem setMaxSize:CGSizeMake([CPPlatform isBrowser] ? 180 : 220, 30)];
 
             [self addCustomSearchFieldAttributes:searchField];
         break;
@@ -308,8 +313,8 @@
             [aSwitch setTarget:issuesController];
             [aSwitch setAction:@selector(takeIssueTypeFrom:)];
             [aSwitch setSegmentCount:2];
-            [aSwitch setWidth:65 forSegment:0];
-            [aSwitch setWidth:65 forSegment:1];
+            [aSwitch setWidth:[CPPlatform isBrowser] ? 65 : 80 forSegment:0];
+            [aSwitch setWidth:[CPPlatform isBrowser] ? 65 : 80 forSegment:1];
             [aSwitch setTag:@"openIssues" forSegment:0];
             [aSwitch setTag:@"closedIssues" forSegment:1];
             [aSwitch setLabel:@"Open" forSegment:0];
@@ -320,8 +325,8 @@
             [toolbarItem setTag:@"changeViewStatus"];
             [toolbarItem setLabel:"View Issues in State"];
             
-            [toolbarItem setMinSize:CGSizeMake(130, 24)];
-            [toolbarItem setMaxSize:CGSizeMake(130, 24)];
+            [toolbarItem setMinSize:CGSizeMake([CPPlatform isBrowser] ? 130 : 160, 24)];
+            [toolbarItem setMaxSize:CGSizeMake([CPPlatform isBrowser] ? 130 : 160, 24)];
             
             [self addCustomSegmentedAttributes:aSwitch];
         break;
