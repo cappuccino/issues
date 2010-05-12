@@ -26,6 +26,7 @@
     [errorField setVerticalAlignment:CPCenterVerticalTextAlignment];
     [errorField setTextColor:[CPColor redColor]];
     [errorField setStringValue:""];
+    [titleField sizeToFit];
 
     var box = [CPBox boxEnclosingView:bodyField];
     [box setBorderType:CPBezelBorder];
@@ -102,6 +103,18 @@
 
     [[self window] close];
     [[[self window] platformWindow] orderOut:nil];
+}
+
+@end
+
+// FIXME: needed because of a missing feature in Atlas
+@implementation NewIssueWindow : CPWindow
+{
+}
+
+- (id)initWithContentRect:(CGRect)aRect styleMask:(unsigned)aMask
+{
+    return [super initWithContentRect:aRect styleMask:aMask|CPResizableWindowMask|CPMiniaturizableWindowMask];
 }
 
 @end

@@ -225,7 +225,8 @@
     if (issue === nil)
         return;
 
-    var newWindow = [[CPWindow alloc] initWithContentRect:CGRectMake(100, 100, 800, 600) styleMask:CPTitledWindowMask|CPClosableWindowMask|CPMiniaturizableWindowMask];
+    var newWindow = [[CPWindow alloc] initWithContentRect:CGRectMake(100, 100, 800, 600) styleMask:CPTitledWindowMask|CPClosableWindowMask|CPMiniaturizableWindowMask|CPResizableWindowMask];
+    [newWindow setMinSize:CGSizeMake(300, 300)];
 
     if ([CPPlatform isBrowser])
     {
