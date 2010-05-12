@@ -160,6 +160,18 @@
 {
     [topLevelSplitView setIsPaneSplitter:YES];
     [CPMenu setMenuBarVisible:NO];
+
+    var toolbar = [[CPToolbar alloc] initWithIdentifier:"mainToolbar"];
+    [toolbar setDelegate:self];
+    [[self mainWindow] setToolbar:toolbar];
+
+    var toolbarColor = [CPColor colorWithPatternImage:
+                            [[CPImage alloc] initWithContentsOfFile:
+                                [[CPBundle mainBundle] pathForResource:"toolbarBackgroundColor.png"] 
+                                                               size:CGSizeMake(1, 59)]];
+    
+    if ([CPPlatform isBrowser])
+        [[toolbar _toolbarView] setBackgroundColor:toolbarColor];
 }
 
 - (CGFloat)splitView:(CPSplitView)splitView constrainMinCoordinate:(float)proposedMin ofSubviewAt:(int)dividerIndex
