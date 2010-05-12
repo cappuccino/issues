@@ -210,7 +210,6 @@
                 {
                     [superview setClipsToBounds:NO];
                     superview = [superview superview];
-                    console.log(superview);
                 }
             }, 0);
         break;
