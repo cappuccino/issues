@@ -173,11 +173,17 @@
 
 - (id)selectedIssue
 {
+
     var row = [issuesTableView selectedRow],
         item = nil;
 
-    if (row >= 0 && repo && ([filteredIssues count] || [repo[displayedIssuesKey] count]))
-        item = [(filteredIssues || repo[displayedIssuesKey]) objectAtIndex:row];
+    if (row >= 0 && repo)
+    {
+        if ([filteredIssues count])
+            item = [filteredIssues objectAtIndex:row];    
+        else if ([repo[displayedIssuesKey] count])
+            item = [repo[displayedIssuesKey] objectAtIndex:row];
+    }
 
     return item;
 }

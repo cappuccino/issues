@@ -73,7 +73,7 @@ var IssuesHTMLTemplate = nil;
         [[GithubAPIController sharedController] loadCommentsForIssue:issue repository:repo callback:function()
         {
             var comments = [issue objectForKey:"all_comments"];
-            for (var i = 0, count = comments.length; i < count; i++)
+            for (var i = 0, count = [comments count]; i < count; i++)
             {
                 var comment = comments[i];
                 comment.body_html = Markdown.makeHtml(comment.body);
@@ -83,7 +83,7 @@ var IssuesHTMLTemplate = nil;
             var jsItem = [issue toJSObject],
                 html = Mustache.to_html(IssuesHTMLTemplate, jsItem);
 
-            [self loadHTMLString:html];
+                [self loadHTMLString:html];
         }];
     }
     else
@@ -91,7 +91,7 @@ var IssuesHTMLTemplate = nil;
         var jsItem = [issue toJSObject],
             html = Mustache.to_html(IssuesHTMLTemplate, jsItem);
 
-        [self loadHTMLString:html];
+            [self loadHTMLString:html];
     }
 }
 
