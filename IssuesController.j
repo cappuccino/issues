@@ -117,6 +117,20 @@
 
     [issuesTableView addTableColumn:priority];
 
+    var desc = [CPSortDescriptor sortDescriptorWithKey:@"position" ascending:YES],
+        priority = [[CPTableColumn alloc] initWithIdentifier:"PriorityNumber"],
+        priorityDataView = [PriorityTableDataView new];
+
+    [[priority headerView] setStringValue:"PriorityNumber"];
+   // [priority setDataView:priorityDataView];
+    [priority setWidth:60.0];
+    [priority setMinWidth:50.0];
+    [priority setEditable:YES];
+    [priority setSortDescriptorPrototype:desc];
+    [priority setResizingMask:CPTableColumnUserResizingMask];
+
+    [issuesTableView addTableColumn:priority];
+
     [issuesTableView setTarget:self];
     [issuesTableView setDoubleAction:@selector(openIssueInNewWindow:)];
     [issuesTableView setUsesAlternatingRowBackgroundColors:YES];
@@ -387,7 +401,6 @@
     {
         //[issuesTableView reloadData];
         // FIX ME: this is returning false... XD
-        console.log(success);
     }];
 
    
@@ -429,6 +442,9 @@
         value = (max - value)/(max - min);
     }
 
+    if (columnIdentifier === @"PriorityNumber")
+        value = [issue objectForKey:@"position"];
+
     return value;
 }
 
@@ -458,6 +474,9 @@
 
 - (BOOL)tableView:(CPTableView)aTableView writeRowsWithIndexes:(CPIndexSet)rowIndexes toPasteboard:(CPPasteboard)pboard
 {
+    // early return because it doesn't look like the GitHub API supports repositioning yet.
+    return NO;
+
     // we can only reposition issue if they're sorted by position and we're not filtering them
     if (![[aTableView sortDescriptors] count] || [[aTableView sortDescriptors][0] key] !== @"position" || [filteredIssues count])
         return NO;
