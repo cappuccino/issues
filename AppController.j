@@ -296,8 +296,8 @@
             [toolbarItem setView:searchField];
             [toolbarItem setTag:@"SearchIssues"];
             
-            [toolbarItem setMinSize:CGSizeMake(200, 30)];
-            [toolbarItem setMaxSize:CGSizeMake(200, 30)];
+            [toolbarItem setMinSize:CGSizeMake(180, 30)];
+            [toolbarItem setMaxSize:CGSizeMake(180, 30)];
 
             [self addCustomSearchFieldAttributes:searchField];
         break;
@@ -309,8 +309,8 @@
             [aSwitch setTarget:issuesController];
             [aSwitch setAction:@selector(takeIssueTypeFrom:)];
             [aSwitch setSegmentCount:2];
-            [aSwitch setWidth:75 forSegment:0];
-            [aSwitch setWidth:75 forSegment:1];
+            [aSwitch setWidth:65 forSegment:0];
+            [aSwitch setWidth:65 forSegment:1];
             [aSwitch setTag:@"openIssues" forSegment:0];
             [aSwitch setTag:@"closedIssues" forSegment:1];
             [aSwitch setLabel:@"Open" forSegment:0];
@@ -321,8 +321,8 @@
             [toolbarItem setTag:@"changeViewStatus"];
             [toolbarItem setLabel:"View Issues in State"];
             
-            [toolbarItem setMinSize:CGSizeMake(150, 24)];
-            [toolbarItem setMaxSize:CGSizeMake(150, 24)];
+            [toolbarItem setMinSize:CGSizeMake(130, 24)];
+            [toolbarItem setMaxSize:CGSizeMake(130, 24)];
             
             [self addCustomSegmentedAttributes:aSwitch];
         break;
