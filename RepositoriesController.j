@@ -2,8 +2,6 @@
 @import <Foundation/CPObject.j>
 @import "IssuesController.j"
 
-var ToolbarColor = nil;
-
 @implementation RepositoriesController : CPObject
 {
     @outlet CPView      repositoryView;
@@ -13,12 +11,6 @@ var ToolbarColor = nil;
 
             CPArray     sortedRepos @accessors;
     @outlet IssuesController issuesController;
-}
-
-+ (void)initialize
-{
-    // FIXME this needs to be themeable
-    ToolbarColor = [CPColor colorWithPatternImage:[[CPImage alloc] initWithContentsOfFile:[[CPBundle mainBundle] pathForResource:"toolbarBackgroundColor.png"] size:CGSizeMake(1, 59)]];
 }
 
 - (id)init
@@ -88,15 +80,6 @@ var ToolbarColor = nil;
 
 - (void)hideNoReposView
 {
-    var toolbar = [[CPToolbar alloc] initWithIdentifier:"mainToolbar"],
-        delegate = [CPApp delegate];
-
-    [toolbar setDelegate:delegate];
-    [[delegate mainWindow] setToolbar:toolbar];
-
-    if ([CPPlatform isBrowser])
-        [[toolbar _toolbarView] setBackgroundColor:ToolbarColor];
-
     [noReposView removeFromSuperview];
 }
 
