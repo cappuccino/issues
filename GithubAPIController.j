@@ -341,6 +341,26 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
     request.send("");
 }
 
+- (void)setPositionForIssue:(id)anIssue inRepository:(id)aRepo to:(int)aPosition callback:(Function)aCallback
+{
+    var request = new CFHTTPRequest();
+    request.open("POST", BASE_URL+"issues/edit/"+aRepo.identifier+"/"+[anIssue objectForKey:"number"]+[self _credentialsString]+"&position="+encodeURIComponent(aPosition), true);
+
+    request.oncomplete = function()
+    {
+        if (request.success())
+        {
+            alert("win");
+            // not really sure what we need to do here
+            // I'm getting false back...
+        }
+
+        if (aCallback)
+            aCallback(request.success(), anIssue, aRepo, request);
+    }
+    request.send("");
+}
+
 - (void)_noteIssueChanged:(id)anIssue
 {
     [[CPNotificationCenter defaultCenter] postNotificationName:GitHubAPIIssueDidChangeNotification

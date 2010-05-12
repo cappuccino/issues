@@ -119,6 +119,8 @@
     [issuesTableView setDoubleAction:@selector(openIssueInNewWindow:)];
     [issuesTableView setUsesAlternatingRowBackgroundColors:YES];
     [issuesTableView setColumnAutoresizingStyle:CPTableViewUniformColumnAutoresizingStyle];
+    [issuesTableView registerForDraggedTypes:[@"RepositionIssueDragType"]];
+
 
     filterBar = [[FilterBar alloc] initWithFrame:CGRectMake(0, 0, 400, 32)];
     [filterBar setAutoresizingMask:CPViewWidthSizable];
@@ -357,6 +359,34 @@
     [[[[CPApp delegate] mainWindow] toolbar] validateVisibleToolbarItems];
 }
 
+- (void)moveIssueWithNumber:(int)issueNumber toPosition:(int)newPosition
+{
+    // we can assume the we're not filtering issues
+
+    // find the issue
+    var item = nil;
+
+    for (var i = 0; i < [repo[displayedIssuesKey] count]; i++)
+    {
+        item = repo[displayedIssuesKey][i];
+
+        if ([item valueForKey:@"number"] === issueNumber)
+            break;
+    }
+
+    if (!item)
+        return;
+
+    [[GithubAPIController sharedController] setPositionForIssue:item inRepository:repo to:newPosition callback:function(success)
+    {
+        //[issuesTableView reloadData];
+        // FIX ME: this is returning false... XD
+        console.log(success);
+    }];
+
+   
+}
+
 - (void)tableViewSelectionDidChange:(CPNotification)aNotification
 {
     var item = [self selectedIssue];
@@ -413,6 +443,55 @@
     if (newIndex >= 0)
         [aTableView selectRowIndexes:[CPIndexSet indexSetWithIndex:newIndex] byExtendingSelection:NO];
 }
+
+- (BOOL)tableView:(CPTableView)aTableView writeRowsWithIndexes:(CPIndexSet)rowIndexes toPasteboard:(CPPasteboard)pboard
+{
+    // we can only reposition issue if they're sorted by position and we're not filtering them
+    if (![[aTableView sortDescriptors] count] || [[aTableView sortDescriptors][0] key] !== @"position" || [filteredIssues count])
+        return NO;
+
+    [pboard declareTypes:[CPArray arrayWithObject:@"RepositionIssueDragType"] owner:self];
+
+    // give the issue number to the pasteboard.
+    var item = [[repo[displayedIssuesKey] objectAtIndex:[rowIndexes firstIndex]] valueForKey:@"number"],
+        encodedData = [CPKeyedArchiver archivedDataWithRootObject:item];
+    [pboard setData:encodedData forType:@"RepositionIssueDragType"];
+
+    return YES;
+}
+
+- (CPDragOperation)tableView:(CPTableView)aTableView 
+                   validateDrop:(id)info 
+                   proposedRow:(CPInteger)row 
+                   proposedDropOperation:(CPTableViewDropOperation)operation
+{
+    if([[[info draggingPasteboard] types] containsObject:@"RepositionIssueDragType"])
+    {
+        [aTableView setDropRow:row dropOperation:CPTableViewDropAbove];
+        return CPDragOperationMove;
+    }
+
+    return CPDragOperationNone;
+}
+
+- (BOOL)tableView:(CPTableView)aTableView acceptDrop:(id)info row:(int)row dropOperation:(CPTableViewDropOperation)operation
+{
+    if([[[info draggingPasteboard] types] containsObject:@"RepositionIssueDragType"])
+    {
+
+        var pboard = [info draggingPasteboard],
+            dragData = [pboard dataForType:@"RepositionIssueDragType"];
+
+            dragData = [CPKeyedUnarchiver unarchiveObjectWithData:dragData];
+
+        [self moveIssueWithNumber:dragData toPosition:row];
+
+        return YES;
+    }
+
+    return NO;
+}
+
 
 - (void)searchFieldDidChange:(id)sender
 {
