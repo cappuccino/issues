@@ -315,11 +315,7 @@
     [[GithubAPIController sharedController] loadIssuesForRepository:repo callback:function(success)
     {
         [issuesTableView reloadData];
-
-        if (success && (repo.openIssues.length || repo.closedIssues.length))
-            [self showView:nil];
-        else
-            [self showView:noIssuesView];
+        [self showView:nil];
     }];
 }
 
@@ -347,14 +343,9 @@
     {
         if (repo.openIssues && repo.closedIssues)
         {
-            if (repo.openIssues.length || repo.closedIssues.length)
-            {
-                [issuesTableView selectRowIndexes:[CPIndexSet indexSet] byExtendingSelection:NO];
-                [self showView:nil];
-                [self tableViewSelectionDidChange:nil];
-            }
-            else
-                [self showView:noIssuesView];
+            [issuesTableView selectRowIndexes:[CPIndexSet indexSet] byExtendingSelection:NO];
+            [self showView:nil];
+            [self tableViewSelectionDidChange:nil];
         }
         else
         {
