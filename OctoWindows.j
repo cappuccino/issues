@@ -192,7 +192,6 @@ var SharedRepoWindow = nil;
     [self setAlignment:CPLeftTextAlignment];
     [self setValue:CGInsetMake(0.0, 0.0, 0.0, 22.0) forThemeAttribute:@"content-inset" inState:CPThemeStateNormal];
     [self setValue:[[self class] textColor] forThemeAttribute:@"text-color" inState:CPThemeStateNormal];
-    [self setValue:[CPColor whiteColor] forThemeAttribute:@"text-color" inState:CPThemeStateHighlighted];
     [self setValue:[[self class] bezelColor] forThemeAttribute:@"bezel-color" inState:CPThemeStateNormal];
     [self setValue:[[self class] highlightedBezelColor] forThemeAttribute:@"bezel-color" inState:CPThemeStateHighlighted];
 }
@@ -216,7 +215,7 @@ var SharedRepoWindow = nil;
 - (void)awakeFromCib
 {
     [self setFont:[CPFont boldSystemFontOfSize:12.0]];
-    [self setValue:[CPColor grayColor] forThemeAttribute:@"text-color" inState:CPTextFieldStatePlaceholder];
+    [self setValue:[CPColor colorWithWhite:0.6 alpha:1.0] forThemeAttribute:@"text-color" inState:CPTextFieldStatePlaceholder];
     [self setValue:CGInsetMakeZero() forThemeAttribute:@"bezel-inset" inState:CPThemeStateNormal];
     [self setValue:CGInsetMake(0.0, 22.0, 0.0, 22.0) forThemeAttribute:@"content-inset" inState:CPThemeStateNormal];
     [self setVerticalAlignment:CPCenterVerticalTextAlignment];

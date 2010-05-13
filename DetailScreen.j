@@ -29,6 +29,49 @@
 
 @implementation NoReposView : DetailScreen
 {
+    @outlet CPImageView             repoNotFoundIndicator;
+    @outlet CPView                  containerView;
+    @outlet RepositoriesController  repositoriesController;
+}
+
+- (@action)takeRepoFromButton:(id)aSender
+{
+    [self loadRepositoryWithIdentifier:[aSender tag]];
+}
+
+- (@action)takeRepoFromTextField:(id)aSender
+{
+    [self loadRepositoryWithIdentifier:[aSender stringValue]];
+}
+
+- (void)controlTextDidChange:(CPNotification)aNotification
+{
+    [repoNotFoundIndicator setHidden:YES];
+}
+
+- (void)loadRepositoryWithIdentifier:(CPString)aString
+{
+    if (!aString)
+        return;
+
+    var repository = [[GithubAPIController sharedController] repositoryForIdentifier:aString];
+
+    if (repository)
+        return [repositoriesController addRepository:repository];
+
+    [self setHitTests:NO];
+    [containerView setAlphaValue:0.8];
+
+    [[GithubAPIController sharedController] loadRepositoryWithIdentifier:aString callback:function(repo)
+    {
+        if (repo)
+            [repositoriesController addRepository:repo];
+        else
+            [repoNotFoundIndicator setHidden:NO];
+
+        [self setHitTests:YES];
+        [containerView setAlphaValue:1.0];
+    }];
 }
 
 @end
