@@ -70,8 +70,14 @@
 
 - (void)showNoReposView
 {
+    if ([noReposView superview])
+        return;
+
     var theWindow = [[CPApp delegate] mainWindow],
-        contentView = [theWindow contentView];
+        contentView = [theWindow contentView],
+        subviews = [contentView subviews];
+
+    [subviews makeObjectsPerformSelector:@selector(setHidden:) withObject:YES];
 
     [noReposView setFrame:[contentView bounds]];
     [contentView addSubview:noReposView];
@@ -80,6 +86,11 @@
 - (void)hideNoReposView
 {
     [noReposView removeFromSuperview];
+
+    var theWindow = [[CPApp delegate] mainWindow],
+        subviews = [[theWindow contentView] subviews];
+
+    [subviews makeObjectsPerformSelector:@selector(setHidden:) withObject:NO];
 }
 
 - (void)addRepository:(id)aRepo
