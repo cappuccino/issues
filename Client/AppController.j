@@ -39,6 +39,8 @@
     var args = [CPApp arguments],
         argCount = [args count];
 
+    [[[[[CPApp mainMenu] itemAtIndex:0] submenu] itemAtIndex:0] setTarget:self];
+
     if (argCount >= 2)
     {
         var contentView = [mainWindow contentView],
