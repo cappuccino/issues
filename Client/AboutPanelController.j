@@ -22,8 +22,6 @@
     var panel = [self window],
         contentView = [panel contentView];
 
-    [contentView setBackgroundColor:[CPColor colorWithWhite:240/255 alpha:1.0]];
-
     [thanksTextField setLineBreakMode:CPLineBreakByWordWrapping];
 
     var buttons = [githubButton, randyButton, northButton, cappuccinoButton, nodeButton, herokuButton, mustacheButton, markdownButton, ludwigButton, atlasButton],
