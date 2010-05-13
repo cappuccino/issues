@@ -64,7 +64,12 @@ var IssuesHTMLTemplate = nil;
 
     if (![issue objectForKey:"body_html"])
     {
-        [issue setObject:Markdown.makeHtml([issue objectForKey:"body"] || "") forKey:"body_html"];
+        try {
+            [issue setObject:Markdown.makeHtml([issue objectForKey:"body"] || "") forKey:"body_html"];            
+        } catch (e) { 
+            [issue setObject:"" forKey:"body_html"];            
+        }
+
         [issue setObject:[CPDate simpleDate:[issue objectForKey:"created_at"]] forKey:"human_readable_created_date"];
         [issue setObject:[CPDate simpleDate:[issue objectForKey:"updated_at"]] forKey:"human_readable_updated_date"];
         [issue setObject:([issue objectForKey:"labels"] || []).join(", ") forKey:"comma_separated_tags"];
@@ -76,22 +81,32 @@ var IssuesHTMLTemplate = nil;
             for (var i = 0, count = [comments count]; i < count; i++)
             {
                 var comment = comments[i];
-                comment.body_html = Markdown.makeHtml(comment.body || "");
-                comment.human_readable_date = [CPDate simpleDate:comment.created_at];
+                try {
+                    comment.body_html = Markdown.makeHtml(comment.body || "");
+                    comment.human_readable_date = [CPDate simpleDate:comment.created_at];                    
+                } catch (e) {
+                    comment.body_html = "";
+                    comment.human_readable_date = "";
+                };
             }
 
-            var jsItem = [issue toJSObject],
-                html = Mustache.to_html(IssuesHTMLTemplate, jsItem);
-
-                [self loadHTMLString:html];
+            [self _loadIssue:issue];
         }];
     }
     else
-    {
-        var jsItem = [issue toJSObject],
-            html = Mustache.to_html(IssuesHTMLTemplate, jsItem);
+        [self _loadIssue:issue];
+}
 
-            [self loadHTMLString:html];
+- (void)_loadIssue:(id)anIssue
+{
+    try {
+        var jsItem = [issue toJSObject],
+            html = Mustache.to_html(IssuesHTMLTemplate, jsItem);        
+
+        [self loadHTMLString:html];
+    }
+    catch (e) {
+        [self loadHTMLString:""];        
     }
 }
 

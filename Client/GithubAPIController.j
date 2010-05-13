@@ -383,19 +383,19 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
         {
             try {
                 comment = JSON.parse(request.responseText()).comment;
+
+                var comments = [anIssue objectForKey:"all_comments"];
+
+                comment.body_html = Markdown.makeHtml(comment.body || "");
+                comment.human_readable_date = [CPDate simpleDate:comment.created_at];
+
+                comments.push(comment);
+
+                [self _noteIssueChanged:anIssue];
             }
             catch (e) {
                 CPLog.error("Unable to load comments for issue: "+anIssue+" -- "+e);
             }
-
-            var comments = [anIssue objectForKey:"all_comments"];
-
-            comment.body_html = Markdown.makeHtml(comment.body || "");
-            comment.human_readable_date = [CPDate simpleDate:comment.created_at];
-
-            comments.push(comment);
-
-            [self _noteIssueChanged:anIssue];
         }
 
         if (aCallback)
