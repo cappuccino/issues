@@ -24,6 +24,8 @@ HTTP.createServer(function (request, response) {
     }
 }).listen(parseInt(process.env.PORT || 8001));
 
+// based on http://github.com/pkrumins/nodejs-proxy
+// http://www.catonmat.net/http-proxy-in-nodejs
 function githubProxy(request, response) {
     request.headers.host = "github.com";
     request.url = "/api/v2/json/" + request.url.match(/^\/github\/(.*)$/)[1];
