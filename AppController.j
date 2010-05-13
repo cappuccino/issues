@@ -8,6 +8,8 @@
 
 @import <Foundation/CPObject.j>
 @import <AppKit/CPScrollView.j>
+@import <AppKit/CPTableColumn.j>
+@import <AppKit/CPCookie.j>
 @import "RepositoriesController.j"
 @import "IssuesController.j"
 @import "OctoWindows.j"
