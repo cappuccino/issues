@@ -31,6 +31,28 @@
     @outlet IssuesController issuesController @accessors;
 }
 
+- (@action)addRepository:(id)aSender
+{
+    var repoIdentifier = [aSender stringValue];
+
+    if (!repoIdentifier)
+        return;
+
+    var existingRepo = [[GithubAPIController sharedController] repositoryForIdentifier:repoIdentifier];
+
+    if (existingRepo)
+    {
+        [reposController addRepository:existingRepo];
+        return;
+    }
+
+    [[GithubAPIController sharedController] loadRepositoryWithIdentifier:repoIdentifier callback:function(repo)
+    {
+        if (repo)
+            [reposController addRepository:repo];
+    }];
+}
+
 - (void)applicationDidFinishLaunching:(CPNotification)aNotification
 {
     // parse the url arguments here. i.e. load a repo/issue on startup.

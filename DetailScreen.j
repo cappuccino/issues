@@ -14,7 +14,7 @@
     backgroundView = [[CPView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth([self bounds]), 150)];
     [backgroundView setBackgroundColor:[CPColor colorWithPatternImage:backgroundImage]];
     [backgroundView setAutoresizingMask:CPViewWidthSizable];
-    [self addSubview:backgroundView];
+    [self addSubview:backgroundView positioned:CPWindowBelow relativeTo:nil];
 
     [self setBackgroundColor:[CPColor colorWithRed:211/255 green:218/255 blue:223/255 alpha:1.0]];
 }
