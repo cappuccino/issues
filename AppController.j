@@ -7,6 +7,7 @@
  */
 
 @import <Foundation/CPObject.j>
+@import <AppKit/CPScrollView.j>
 @import "RepositoriesController.j"
 @import "IssuesController.j"
 @import "OctoWindows.j"
