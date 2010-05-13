@@ -18,6 +18,7 @@
 @import "UserView.j"
 @import "GithubAPIController.j"
 @import "LPMultiLineTextField.j"
+@import "AboutPanelController.j"
 
 @implementation AppController : CPObject
 {
@@ -29,6 +30,7 @@
     @outlet CPView      logoView;
     @outlet RepositoriesController reposController @accessors;
     @outlet IssuesController issuesController @accessors;
+            CPPanel     cachedAboutPanel;
 }
 
 - (void)applicationDidFinishLaunching:(CPNotification)aNotification
@@ -220,7 +222,7 @@
             [toolbarItem setView:logoView];
             [toolbarItem setMinSize:CGSizeMake(200, 32)];
             [toolbarItem setMaxSize:CGSizeMake(200, 32)];
-            
+
             //FIXME this should be possible without this
             window.setTimeout(function(){
                 var toolbarView = [toolbar _toolbarView],
@@ -446,6 +448,22 @@
 - (void)swapMainWindowOrientation:(id)sender
 {
     GitHubIssuesToggleVertical();
+}
+
+- (@action)orderFrontStandardAboutPanel:(id)sender
+{
+    if (cachedAboutPanel)
+    {
+        [cachedAboutPanel orderFront:nil];
+        return;
+    }
+    
+    var aboutPanelController = [[AboutPanelController alloc] initWithWindowCibName:@"AboutPanel"],
+        aboutPanel = [aboutPanelController window];
+
+    [aboutPanel center];
+    [aboutPanel orderFront:self];
+    cachedAboutPanel = aboutPanel;
 }
 
 @end
