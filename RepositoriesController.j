@@ -150,12 +150,14 @@
     [sourcesListView reloadData];
 
     if (sortedRepos.length === 0)
-        [self showNoReposView];
-    else
     {
-        [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:MAX(MIN(selectedRow, sortedRepos.length - 1), 0)] byExtendingSelection:NO];
-        [self tableViewSelectionDidChange:nil];
+        [self showNoReposView];        
+        [sourcesListView selectRowIndexes:[CPIndexSet indexSet] byExtendingSelection:NO];
     }
+    else
+        [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:MAX(MIN(selectedRow, sortedRepos.length - 1), 0)] byExtendingSelection:NO];
+
+    [self tableViewSelectionDidChange:nil];
 }
 
 - (void)tableViewSelectionDidChange:(CPNotification)aNotification
