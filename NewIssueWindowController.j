@@ -9,6 +9,9 @@
     @outlet CPTextField          bodyLabel;
     @outlet CPTextField          repoLabel;
     @outlet CPTextField          errorField;
+    @outlet CPImageView          progressView;
+    @outlet CPButton             okButton;
+    @outlet CPButton             cancelButton;
 
     id delegate @accessors;
 }
@@ -81,11 +84,19 @@
     else 
     {
         [errorField setStringValue:""];
+        [progressView setHidden:NO];
+        [okButton setEnabled:NO];
+        [cancelButton setEnabled:NO];
+
         [[GithubAPIController sharedController] openNewIssueWithTitle:[titleField stringValue]
                                                                  body:[bodyField stringValue]
                                                            repository:[[selectedRepo selectedItem] tag]
                                                              callback:function(issue, repo)
         {
+            [progressView setHidden:YES];
+            [okButton setEnabled:YES];
+            [cancelButton setEnabled:YES];
+
             if (issue && [delegate respondsToSelector:@selector(newIssueWindowController:didAddIssue:toRepo:)])
                 [delegate newIssueWindowController:self didAddIssue:issue toRepo:repo];
             else if (!issue)
@@ -100,6 +111,9 @@
 - (@action)cancel:(id)sender
 {
     [errorField setStringValue:""];
+    [progressView setHidden:YES];
+    [okButton setEnabled:YES];
+    [cancelButton setEnabled:YES];
 
     [[self window] close];
     [[[self window] platformWindow] orderOut:nil];
