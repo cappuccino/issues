@@ -98,6 +98,11 @@
     OPEN_LINK("http://280atlas.com");
 }
 
+- (@action)openIssuesRepo:(id)sender
+{
+    OPEN_LINK("http://github.com/280north/issues");
+}
+
 @end
 
 var OPEN_LINK = function(link)
