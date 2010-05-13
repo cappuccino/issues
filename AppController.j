@@ -193,12 +193,12 @@
 
 -(CPArray)toolbarAllowedItemIdentifiers:(CPToolbar)toolbar
 {
-    return [CPToolbarFlexibleSpaceItemIdentifier, CPToolbarSpaceItemIdentifier, @"searchfield", @"newissue", @"switchViewStatus", "commentissue", "openissue", "reload", "closeissue", "logo"];
+    return [CPToolbarFlexibleSpaceItemIdentifier, CPToolbarSpaceItemIdentifier, "searchfield", "newissue", "switchViewStatus", "commentissue", "openissue", "reload", "closeissue", "logo"];
 }
 
 -(CPArray)toolbarDefaultItemIdentifiers:(CPToolbar)toolbar
 {
-    var items = ["switchViewStatus", CPToolbarFlexibleSpaceItemIdentifier, "newissue", @"commentissue", "closeissue", "openissue", "reload", CPToolbarFlexibleSpaceItemIdentifier, @"searchfield"];
+    var items = ["switchViewStatus", CPToolbarFlexibleSpaceItemIdentifier, "newissue", "commentissue", "closeissue", "openissue", "reload", CPToolbarFlexibleSpaceItemIdentifier, @"searchfield"];
 
     if ([CPPlatform isBrowser])
         items.unshift("logo");
@@ -252,8 +252,8 @@
         break;
 
         case @"openissue":
-            var image = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"reopenIcon.png"] size:CPSizeMake(27, 27)],
-                highlighted = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"reopenIconHighlighted.png"] size:CPSizeMake(27, 27)];
+            var image = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"reopenIcon.png"] size:CPSizeMake(28, 27)],
+                highlighted = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"reopenIconHighlighted.png"] size:CPSizeMake(28, 27)];
                 
             [toolbarItem setImage:image];
             [toolbarItem setAlternateImage:highlighted];
@@ -281,6 +281,24 @@
             [toolbarItem setTag:@"Close"];
             [toolbarItem setEnabled:NO];
             
+            [toolbarItem setMinSize:CGSizeMake(32, 32)];
+            [toolbarItem setMaxSize:CGSizeMake(32, 32)];
+            [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityHigh];
+        break;
+
+        case @"reload":
+            var image = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"refreshIcon.png"] size:CPSizeMake(24, 24)],
+                highlighted = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"refreshIconHighlighted.png"] size:CPSizeMake(24, 24)];
+
+            [toolbarItem setImage:image];
+            [toolbarItem setAlternateImage:highlighted];
+
+            [toolbarItem setTarget:issuesController];
+            [toolbarItem setAction:@selector(reload:)];
+            [toolbarItem setLabel:"Reload Issues"];
+            [toolbarItem setTag:@"Reload"];
+            [toolbarItem setEnabled:NO];
+
             [toolbarItem setMinSize:CGSizeMake(32, 32)];
             [toolbarItem setMaxSize:CGSizeMake(32, 32)];
             [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityHigh];
