@@ -81,10 +81,11 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 
 - (CPString)_credentialsString
 {
+    var authString = "?app_id=280issues";
     if ([self isAuthenticated])
-        return "?login="+encodeURIComponent(username)+"&token="+encodeURIComponent(authenticationToken);
-    else
-        return "";
+        authString += "&login="+encodeURIComponent(username)+"&token="+encodeURIComponent(authenticationToken);
+
+    return authString;
 }
 
 - (void)authenticateWithCallback:(Function)aCallback
