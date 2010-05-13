@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
         <title>Github Issue #{{number}}</title>
         <style type="text/css" media="screen">
 body {
@@ -304,6 +305,7 @@ img.issue-author-image {
 .comment-form-wrapper {
     text-align: right;
     margin-top: 2em;
+    margin-bottom: 20px;
 }
 
 .fakebutton {
@@ -367,7 +369,33 @@ img.issue-author-image {
     width: 100%;
 }
                 </style>
-
+<!--[if IE]>
+<style>
+.issue {
+    display: block;
+    clear: both;
+    float: left;
+    width: 100%;
+    border: 1px solid #bbb;
+}
+.comment-author-image {
+    border: 1px solid #bbb;
+}
+.comment {
+    float: left;
+    width: 93%;
+}
+.comment-body-wrapper {
+    border: 1px solid rgb(226, 228, 202);
+}
+#add-comment-textarea {
+    border: 1px solid rgb(226, 228, 202);
+}
+#add-comment-textarea:active {
+    border: 1px solid yellow;
+}
+</style>
+<![endif]-->
                 <script type="text/javascript">
 
 function toggleIssueState() {
