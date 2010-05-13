@@ -35,7 +35,7 @@
     [[self window] setShowsResizeIndicator:YES];
     [[[self window] contentView] setBackgroundColor:[CPColor colorWithWhite:244/255 alpha:1.0]];
 
-    if ([CPPlatform isBrowser])
+    if ([CPPlatformWindow supportsMultipleInstances])
     {
         var platformWindow = [[CPPlatformWindow alloc] initWithContentRect:CGRectMake(100, 100, 500, 450)];
         [[self window] setFullBridge:YES];

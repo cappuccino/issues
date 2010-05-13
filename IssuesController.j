@@ -221,6 +221,9 @@
 
 - (@action)openIssueInNewWindow:(id)sender
 {
+    if ([CPPlatform isBrowser] && ![CPPlatformWindow supportsMultipleInstances])
+        return;
+
     var issue = [self selectedIssue];
     if (issue === nil)
         return;
@@ -274,6 +277,7 @@
     if (!issue)
         return;
 
+    // FIXME
     var webFrame = [issueWebView._frameView frame];
     [issueWebView._frameView scrollPoint:CGPointMake(0, CGRectGetMaxY(webFrame))];
 
