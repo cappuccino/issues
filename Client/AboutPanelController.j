@@ -45,57 +45,57 @@
 
 - (@action)downloadNativeClient:(id)sender
 {
-    OPEN_LINK("http://am")
+    OPEN_LINK("https://download.cappuccino.org.s3.amazonaws.com/Issues-1.0.zip");
 }
 
 - (@action)openGithub:(id)sender
 {
-    
+    OPEN_LINK("http://github.com");
 }
 
 - (@action)open280north:(id)sender
 {
-    
+    OPEN_LINK("http://280north.com");
 }
 
 - (@action)openRandy:(id)sender
 {
-    
+    OPEN_LINK("http://github.com/me1000");
 }
 
 - (@action)openHeroku:(id)sender
 {
-    
+    OPEN_LINK("http://heroku.com");
 }
 
 - (@action)openNode:(id)sender
 {
-    
+    OPEN_LINK("http://nodejs.org");
 }
 
 - (@action)openMustache:(id)sender
 {
-    
+    OPEN_LINK("http://github.com/boucher/mustache.js");
 }
 
 - (@action)openMarkdown:(id)sender
 {
-    
+    OPEN_LINK("http://github.github.com/github-flavored-markdown/scripts/showdown.js")
 }
 
 - (@action)openCappuccino:(id)sender
 {
-    
+    OPEN_LINK("http://cappuccino.org");
 }
 
 - (@action)openLuddep:(id)sender
 {
-    
+    OPEN_LINK("http://github.com/luddep");
 }
 
 - (@action)openAtlas:(id)sender
 {
-    
+    OPEN_LINK("http://280atlas.com");
 }
 
 @end
