@@ -73,7 +73,6 @@
     var theWindow = [[CPApp delegate] mainWindow],
         contentView = [theWindow contentView];
 
-    [theWindow setToolbar:nil];
     [noReposView setFrame:[contentView bounds]];
     [contentView addSubview:noReposView];
 }
