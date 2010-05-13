@@ -43,7 +43,7 @@
 
 - (@action)downloadNativeClient:(id)sender
 {
-    OPEN_LINK("https://download.cappuccino.org.s3.amazonaws.com/Issues-1.0.zip");
+    OPEN_LINK("http://download.cappuccino.org/Issues-1.0.zip");
 }
 
 - (@action)openGithub:(id)sender
