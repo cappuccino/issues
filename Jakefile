@@ -2,6 +2,8 @@ var JAKE = require("jake");
 var FILE = require("file");
 var OS = require("os");
 
+var VERSION = "1.0";
+
 var BUILD_PATH = FILE.path("Build");
 var SERVER_BUILD_PATH = BUILD_PATH.join("Server");
 var CLIENT_BUILD_PATH = SERVER_BUILD_PATH.join("static");
@@ -36,6 +38,15 @@ JAKE.task("checkout", function() {
         SERVER_BUILD_PATH.dirname().mkdirs();
         OS.system(["git", "clone", DEPLOY_GIT_REMOTE, SERVER_BUILD_PATH, "-o", "heroku"]);
     }
+});
+
+JAKE.task("zip", function() {
+    var zipName = "Issues-"+VERSION+".zip";
+    if (BUILD_PATH.join(zipName).isFile())
+        BUILD_PATH.join(zipName).remove();
+
+    OS.system("cd Client && jake desktop");
+    OS.system("cd Client/Build/Desktop/Issues && zip -r ../../../../Build/"+zipName+" Issues.app");
 });
 
 function getGitSHA(directory) {
