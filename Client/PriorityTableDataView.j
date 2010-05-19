@@ -30,7 +30,7 @@
     }
 
     var color = [CPColor whiteColor];
-    if (![self hasThemeState:CPThemeStateSelected])
+    if (![self hasThemeState:CPThemeStateSelectedDataView])
         color = [CPColor colorWithRed:176/255 green:178/255 blue:180/255 alpha:1.0];
 
     CGContextSetFillColor(context, color);

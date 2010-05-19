@@ -17,7 +17,7 @@
     [nameField setLineBreakMode:CPLineBreakByTruncatingTail];
     [nameField setFont:[CPFont systemFontOfSize:13.0]];
     [nameField setVerticalAlignment:CPCenterVerticalTextAlignment];
-    [self unsetThemeState:CPThemeStateSelected];
+    [self unsetThemeState:CPThemeStateSelectedDataView];
 }
 
 - (void)setObjectValue:(Object)anObject
@@ -29,7 +29,7 @@
 - (void)setThemeState:(CPThemeState)aState
 {
     [super setThemeState:aState];
-    if (aState === CPThemeStateSelected)
+    if (aState === CPThemeStateSelectedDataView)
     {
         [self setBackgroundColor:backgroundColor];
         [nameField setTextColor:[CPColor whiteColor]];
@@ -41,7 +41,7 @@
 - (void)unsetThemeState:(CPThemeState)aState
 {
     [super unsetThemeState:aState];
-    if (aState === CPThemeStateSelected)
+    if (aState === CPThemeStateSelectedDataView)
     {
         [self setBackgroundColor:nil];
         [nameField setTextColor:[CPColor blackColor]];

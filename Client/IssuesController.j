@@ -40,8 +40,8 @@
     [dataView setAlignment:CPRightTextAlignment];
     [dataView setLineBreakMode:CPLineBreakByTruncatingTail];
     [dataView setValue:[CPColor colorWithHexString:@"929496"] forThemeAttribute:@"text-color"];
-    [dataView setValue:[CPColor whiteColor] forThemeAttribute:@"text-color" inState:CPThemeStateSelected];
-    [dataView setValue:[CPFont boldSystemFontOfSize:12] forThemeAttribute:@"font" inState:CPThemeStateSelected];
+    [dataView setValue:[CPColor whiteColor] forThemeAttribute:@"text-color" inState:CPThemeStateSelectedDataView];
+    [dataView setValue:[CPFont boldSystemFontOfSize:12] forThemeAttribute:@"font" inState:CPThemeStateSelectedDataView];
     [dataView setValue:CGInsetMake(0,10,0,0) forThemeAttribute:@"content-inset"];
     [dataView setValue:CPCenterVerticalTextAlignment forThemeAttribute:@"vertical-alignment"];
 
