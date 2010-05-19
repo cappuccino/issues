@@ -179,6 +179,8 @@
     
     if ([CPPlatform isBrowser])
         [[toolbar _toolbarView] setBackgroundColor:toolbarColor];
+
+    [toolbar validateVisibleToolbarItems];
 }
 
 - (CGFloat)splitView:(CPSplitView)splitView constrainMinCoordinate:(float)proposedMin ofSubviewAt:(int)dividerIndex
@@ -216,7 +218,6 @@
         toolbarItem = [[CPToolbarItem alloc] initWithItemIdentifier:itemIdentifier];
 
     [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityUser];
-    [toolbarItem setEnabled:NO];
 
     switch(itemIdentifier)
     {

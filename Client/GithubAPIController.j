@@ -146,6 +146,10 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 
 - (void)loadRepositoryWithIdentifier:(CPString)anIdentifier callback:(Function)aCallback
 {
+    var parts = anIdentifier.split("/");
+    if (parts.length > 2)
+        anIdentifier = parts.slice(0, 2).join("/");
+
     var request = new CFHTTPRequest();
     request.open("GET", BASE_URL+"repos/show/"+anIdentifier+[self _credentialsString], true);
 
