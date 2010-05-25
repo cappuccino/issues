@@ -186,7 +186,7 @@
         [issuesController setRepo:repo];
     }
 
-    [[[[CPApp delegate] mainWindow] toolbar] validateVisibleToolbarItems];
+    [[[[CPApp delegate] mainWindow] toolbar] validateVisibleItems];
 }
 
 - (id)tableView:(CPTableView)aTableView objectValueForTableColumn:(int)aColumn row:(int)aRow

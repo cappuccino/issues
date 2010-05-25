@@ -357,7 +357,7 @@
         [self showView:noRepoView];
 
     [issuesTableView reloadData];
-    [[[[CPApp delegate] mainWindow] toolbar] validateVisibleToolbarItems];
+    [[[[CPApp delegate] mainWindow] toolbar] validateVisibleItems];
 }
 
 - (void)moveIssueWithNumber:(int)issueNumber toPosition:(int)newPosition
@@ -402,7 +402,7 @@
         [CPApp setArguments:[repo.owner, repo.name, [item objectForKey:"number"]]];
     }
 
-    [[[[CPApp delegate] mainWindow] toolbar] validateVisibleToolbarItems];
+    [[[[CPApp delegate] mainWindow] toolbar] validateVisibleItems];
 }
 
 - (id)tableView:(CPTableView)aTableView objectValueForTableColumn:(int)aColumn row:(int)aRow

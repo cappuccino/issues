@@ -180,7 +180,7 @@
     if ([CPPlatform isBrowser])
         [[toolbar _toolbarView] setBackgroundColor:toolbarColor];
 
-    [toolbar validateVisibleToolbarItems];
+    [toolbar validateVisibleItems];
 }
 
 - (CGFloat)splitView:(CPSplitView)splitView constrainMinCoordinate:(float)proposedMin ofSubviewAt:(int)dividerIndex
