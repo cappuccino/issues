@@ -523,6 +523,13 @@
                 continue;
             }
 
+            if ((searchFilter === IssuesFilterAll || searchFilter === IssuesFilterCreator) && [item valueForKey:@"user"] !== [CPNull null] &&
+                [[item valueForKey:@"user"] lowercaseString].match(searchString))
+            {
+                [filteredIssues addObject:[theIssues objectAtIndex:i]];
+                continue;
+            }
+
             if ((searchFilter === IssuesFilterAll || searchFilter === IssuesFilterBody) && 
                 [[item valueForKey:@"body"] lowercaseString].match(searchString))
             {

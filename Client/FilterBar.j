@@ -5,6 +5,7 @@ IssuesFilterAll = 0;
 IssuesFilterTitle = 1;
 IssuesFilterBody = 2;
 IssuesFilterLabels = 3;
+IssuesFilterCreator = 4;
 
 @implementation FilterBar : CPView
 {
@@ -29,7 +30,8 @@ IssuesFilterLabels = 3;
             titleRadio = [CPRadio radioWithTitle:@"Title"],
             bodyRadio = [CPRadio radioWithTitle:@"Body"],
             labelsRadio = [CPRadio radioWithTitle:@"Labels"],
-            radioButtons = [allRadio, titleRadio, bodyRadio, labelsRadio];
+            creatorRadio = [CPRadio radioWithTitle:@"Creator"],
+            radioButtons = [allRadio, titleRadio, bodyRadio, creatorRadio, labelsRadio];
 
         for (var i=0, count = radioButtons.length; i < count; i++)
         {
@@ -59,16 +61,19 @@ IssuesFilterLabels = 3;
         [titleRadio setRadioGroup:radioGroup];
         [bodyRadio setRadioGroup:radioGroup];
         [labelsRadio setRadioGroup:radioGroup];
+        [creatorRadio setRadioGroup:radioGroup];
 
         [allRadio setTag:IssuesFilterAll];
         [titleRadio setTag:IssuesFilterTitle];
         [bodyRadio setTag:IssuesFilterBody];
+        [creatorRadio setTag:IssuesFilterCreator];
         [labelsRadio setTag:IssuesFilterLabels];
 
         [allRadio setFrameOrigin:CGPointMake(8, 6)];
         [titleRadio setFrameOrigin:CGPointMake(CGRectGetMaxX([allRadio frame]) + 8, CGRectGetMinY([allRadio frame]))];
         [bodyRadio setFrameOrigin:CGPointMake(CGRectGetMaxX([titleRadio frame]) + 8, CGRectGetMinY([titleRadio frame]))];
-        [labelsRadio setFrameOrigin:CGPointMake(CGRectGetMaxX([bodyRadio frame]) + 8, CGRectGetMinY([bodyRadio frame]))];
+        [creatorRadio setFrameOrigin:CGPointMake(CGRectGetMaxX([bodyRadio frame]) + 8, CGRectGetMinY([bodyRadio frame]))];
+        [labelsRadio setFrameOrigin:CGPointMake(CGRectGetMaxX([creatorRadio frame]) + 8, CGRectGetMinY([creatorRadio frame]))];
 
         [allRadio setState:CPOnState];
     }
