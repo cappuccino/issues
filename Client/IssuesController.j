@@ -504,7 +504,7 @@
 - (void)searchFieldDidChange:(id)sender
 {
     if (sender)
-        searchString = [sender stringValue];
+        searchString = [[sender stringValue]  lowercaseString];
 
     if (searchString)
     {
