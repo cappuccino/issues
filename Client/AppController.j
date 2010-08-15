@@ -19,6 +19,7 @@
 @import "GithubAPIController.j"
 @import "LPMultiLineTextField.j"
 @import "AboutPanelController.j"
+@import "RLTableHeaderView.j"
 
 @implementation AppController : CPObject
 {
@@ -165,7 +166,6 @@
 
 - (void)awakeFromCib
 {
-    [topLevelSplitView setIsPaneSplitter:YES];
     [CPMenu setMenuBarVisible:NO];
 
     var toolbar = [[CPToolbar alloc] initWithIdentifier:"mainToolbar"];

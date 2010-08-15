@@ -44,6 +44,7 @@
     [sourcesListButtonBar setValue:buttonBezel forThemeAttribute:"button-bezel-color"];
     [sourcesListButtonBar setValue:buttonBezelHighlighted forThemeAttribute:"button-bezel-color" inState:CPThemeStateHighlighted];
 
+    [sourcesListView setIntercellSpacing:CGSizeMakeZero()];
     [sourcesListView setHeaderView:nil];
     [sourcesListView setCornerView:nil];
 

@@ -33,6 +33,9 @@
 
     [self showView:noRepoView];
 
+    // custom headerview so we can show/hide columns
+    [issuesTableView setHeaderView:[[RLTableHeaderView alloc] initWithFrame:[[issuesTableView headerView] frame]]];
+
     var desc = [CPSortDescriptor sortDescriptorWithKey:@"number" ascending:YES],
         ID = [[CPTableColumn alloc] initWithIdentifier:"number"],
         dataView = [CPTextField new];
@@ -73,7 +76,6 @@
     [[votes headerView] setStringValue:"Votes"];
     [votes setWidth:60.0];
     [votes setMinWidth:50.0];
-    [votes setEditable:YES];
     [votes setSortDescriptorPrototype:desc];
     [votes setResizingMask:CPTableColumnUserResizingMask];
 
@@ -85,7 +87,6 @@
     [[date headerView] setStringValue:"Created"];
     [date setWidth:120.0];
     [date setMinWidth:50.0];
-    [date setEditable:YES];
     [date setSortDescriptorPrototype:desc];
     [date setResizingMask:CPTableColumnUserResizingMask];
 
@@ -97,7 +98,6 @@
     [[updated headerView] setStringValue:"Updated"];
     [updated setWidth:120.0];
     [updated setMinWidth:50.0];
-    [updated setEditable:YES];
     [updated setSortDescriptorPrototype:desc];
     [updated setResizingMask:CPTableColumnUserResizingMask];
 
@@ -111,11 +111,46 @@
     [priority setDataView:priorityDataView];
     [priority setWidth:60.0];
     [priority setMinWidth:50.0];
-    [priority setEditable:YES];
     [priority setSortDescriptorPrototype:desc];
     [priority setResizingMask:CPTableColumnUserResizingMask];
 
     [issuesTableView addTableColumn:priority];
+
+    var desc = [CPSortDescriptor sortDescriptorWithKey:@"user" ascending:YES],
+        creator = [[CPTableColumn alloc] initWithIdentifier:"user"];
+
+    [[creator headerView] setStringValue:"Creator"];
+    [creator setWidth:120.0];
+    [creator setHidden:YES];
+    [creator setMinWidth:50.0];
+    [creator setSortDescriptorPrototype:desc];
+    [creator setResizingMask:CPTableColumnUserResizingMask];
+
+    [issuesTableView addTableColumn:creator];
+
+    var desc = [CPSortDescriptor sortDescriptorWithKey:@"comments" ascending:YES],
+        comments = [[CPTableColumn alloc] initWithIdentifier:"comments"];
+
+    [[comments headerView] setStringValue:"Comments"];
+    [comments setWidth:120.0];
+    [comments setHidden:YES];
+    [comments setMinWidth:50.0];
+    [comments setSortDescriptorPrototype:desc];
+    [comments setResizingMask:CPTableColumnUserResizingMask];
+
+    [issuesTableView addTableColumn:comments];
+
+    var desc = [CPSortDescriptor sortDescriptorWithKey:@"closed_at" ascending:YES],
+        closedAt = [[CPTableColumn alloc] initWithIdentifier:"closed_at"];
+
+    [[closedAt headerView] setStringValue:"Closed On"];
+    [closedAt setWidth:120.0];
+    [closedAt setHidden:YES];
+    [closedAt setMinWidth:50.0];
+    [closedAt setSortDescriptorPrototype:desc];
+    [closedAt setResizingMask:CPTableColumnUserResizingMask];
+
+    [issuesTableView addTableColumn:closedAt];
 
     [issuesTableView setTarget:self];
     [issuesTableView setDoubleAction:@selector(openIssueInNewWindow:)];
@@ -411,16 +446,25 @@
         issue = [(filteredIssues || repo[displayedIssuesKey]) objectAtIndex:aRow],
         value = [issue objectForKey:columnIdentifier];
 
+    console.log(issue);
+
     //special cases
     if(columnIdentifier === @"created_at" || columnIdentifier === @"updated_at")
         value = [CPDate simpleDate:value];
-    else if (columnIdentifier === @"votes" && value === 0)
+    else if ((columnIdentifier === @"votes" && value === 0) || columnIdentifier === @"comments" && value === 0)
         value = @"-";
     else if (columnIdentifier === @"position") 
     {
         var min = repo[displayedIssuesKey+"Min"],
             max = repo[displayedIssuesKey+"Max"];
         value = (max - value)/(max - min);
+    }
+    else if (columnIdentifier === @"closed_at")
+    {
+        if (value === [CPNull null])
+            return "Open";
+        else
+            value = [CPDate simpleDate:value];
     }
     return value;
 }
