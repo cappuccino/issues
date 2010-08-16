@@ -446,8 +446,6 @@
         issue = [(filteredIssues || repo[displayedIssuesKey]) objectAtIndex:aRow],
         value = [issue objectForKey:columnIdentifier];
 
-    console.log(issue);
-
     //special cases
     if(columnIdentifier === @"created_at" || columnIdentifier === @"updated_at")
         value = [CPDate simpleDate:value];
