@@ -8,6 +8,7 @@ var IssuesHTMLTemplate = nil;
 {
     id issue @accessors;
     id repo @accessors;
+    id issuesController @accessors;
 
     CGRect scrollRect;
 }

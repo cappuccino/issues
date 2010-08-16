@@ -431,6 +431,10 @@ function submitCommentForm() {
     });
 }
 
+function editIssue() {
+    GitHubAPI.openEditWindow(ISSUE, REPO);
+}
+
                 </script>
 
     </head>
@@ -447,7 +451,10 @@ function submitCommentForm() {
                             <h1 class="issue-title">{{title}}</h1>
                             <div class="issue-body">
                                 {{{body_html}}}
-                                <p><a target="_blank" class="view-on-github" href="http://github.com/{{repo_identifier}}/issues/{{number}}">View on github</a></p>
+                                <p>
+                                    <a target="_blank" class="view-on-github" href="http://github.com/{{repo_identifier}}/issues/{{number}}">View on github</a>
+                                     | <a class="view-on-github" href="#" onclick="editIssue(); return false;">Edit</a>
+                                </p>
                             </div>
                         </div>
                     </div>

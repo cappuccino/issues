@@ -14,6 +14,8 @@
     @outlet CPButton             cancelButton;
 
     id delegate @accessors;
+    BOOL shouldEdit @accessors;
+    id selectedIssue @accessors;
 }
 
 - (void)awakeFromCib
@@ -46,6 +48,20 @@
     }
 
     [bodyField setBackgroundColor:[CPColor whiteColor]];
+
+    if (selectedIssue)
+    {
+        [bodyField setStringValue:[selectedIssue objectForKey:"body"]];
+        [titleField setStringValue:[selectedIssue objectForKey:"title"]];
+    }
+}
+
+- (void)setSelectedIssue:(id)anIssue
+{
+    selectedIssue = anIssue;
+
+    [bodyField setStringValue:[selectedIssue objectForKey:"body"]];
+    [titleField setStringValue:[selectedIssue objectForKey:"title"]];
 }
 
 - (void)setRepos:(CPArray)anArray
@@ -88,11 +104,32 @@
         [okButton setEnabled:NO];
         [cancelButton setEnabled:NO];
 
-        [[GithubAPIController sharedController] openNewIssueWithTitle:[titleField stringValue]
+        if (shouldEdit)
+        {
+            [[GithubAPIController sharedController] editIsssue:selectedIssue
+                                                        title:[titleField stringValue]
+                                                         body:[bodyField stringValue]
+                                                   repository:[[selectedRepo selectedItem] tag]
+                                                     callback:function(issue, repo)
+            {
+            [progressView setHidden:YES];
+            [okButton setEnabled:YES];
+            [cancelButton setEnabled:YES];
+
+            if (!issue)
+                [errorField setStringValue:@"Problem editing issue. Try again."];
+
+            if (issue)
+                [self cancel:nil];
+            }];
+        }
+        else
+        {
+            [[GithubAPIController sharedController] openNewIssueWithTitle:[titleField stringValue]
                                                                  body:[bodyField stringValue]
                                                            repository:[[selectedRepo selectedItem] tag]
                                                              callback:function(issue, repo)
-        {
+            {
             [progressView setHidden:YES];
             [okButton setEnabled:YES];
             [cancelButton setEnabled:YES];
@@ -104,7 +141,8 @@
 
             if (issue)
                 [self cancel:nil];
-        }];
+            }];
+        }
     }
 }
 

@@ -475,6 +475,43 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
     request.send("");
 }
 
+- (void)editIsssue:(Issue)anIssue title:(CPString)aTitle body:(CPString)aBody repository:(id)aRepo callback:(Function)aCallback
+{
+    // we've got to make two calls one for the title and one for the body
+    var request = new CFHTTPRequest();
+    request.open("POST", BASE_URL+"issues/edit/"+aRepo.identifier+"/"+[anIssue objectForKey:"number"]+[self _credentialsString]+
+                                                 "&title="+encodeURIComponent(aTitle)+
+                                                 "&body="+encodeURIComponent(aBody), true);
+    
+    request.oncomplete = function()
+    {
+        if (request.success())
+        {
+            var issue = nil;
+            try {
+                issue = [CPDictionary dictionaryWithJSObject:JSON.parse(request.responseText()).issue];
+
+                [anIssue setObject:[issue objectForKey:"title"] forKey:"title"];
+                [anIssue setObject:[issue objectForKey:"body"] forKey:"body"];
+                [anIssue setObject:[issue objectForKey:"updated_at"] forKey:"updated_at"];
+
+                [self _noteIssueChanged:anIssue];
+            }
+            catch (e) {
+                CPLog.error("Unable to open new issue: "+aTitle+" -- "+e);
+            }
+        }
+    
+        if (aCallback)
+            aCallback(issue, aRepo, request);
+    
+        [[CPRunLoop currentRunLoop] performSelectors];
+    }
+    
+    request.send("");
+
+}
+
 - (void)setPositionForIssue:(id)anIssue inRepository:(id)aRepo to:(int)aPosition callback:(Function)aCallback
 {
     var request = new CFHTTPRequest();
@@ -527,5 +564,10 @@ GitHubAPI = {
         [SharedController reopenIssue:anIssue 
                            repository:aRepo
                             callback:callback];
+    },
+
+    openEditWindow: function(anIssue, aRepo)
+    {
+        [[[CPApp delegate] issuesController] editIssue:anIssue repo:aRepo];
     }
 }

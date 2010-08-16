@@ -164,6 +164,9 @@
     [filterBar setDelegate:self];
     searchFilter = 0;
 
+    [issueWebView setIssuesController:self];
+
+
     [[CPNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(issueChanged:)
                                                  name:GitHubAPIIssueDidChangeNotification
@@ -707,6 +710,18 @@
 - (void)unsetTagForSelectedIssue:(CPString)aTag
 {
     [[GithubAPIController sharedController] label:aTag forIssue:[self selectedIssue] repository:repo shouldRemove:YES];
+}
+
+- (void) editIssue:(Issue)anIssue repo:(Repository)aRepo
+{
+    var controller = [[NewIssueWindowController alloc] initWithWindowCibName:"NewIssueWindow"];
+    
+    [controller showWindow:self];
+    [controller setRepos:[[[CPApp delegate] reposController] sortedRepos]];
+    [controller selectRepo:repo];
+    [controller setDelegate:self];
+    [controller setShouldEdit:YES];
+    [controller setSelectedIssue:anIssue];
 }
 
 @end
