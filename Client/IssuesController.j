@@ -250,6 +250,8 @@
         return displayedIssuesKey === "openIssues" && hasSelection;
     else if (identifier === "commentissue")
         return hasSelection;
+    else if (identifier === "tagissue")
+        return hasSelection;
     else 
         return !!repo;
 }
@@ -318,6 +320,41 @@
 
     var scriptObject = [issueWebView windowScriptObject];
     [scriptObject callWebScriptMethod:"showCommentForm" withArguments:nil];
+}
+
+- (@action)tag:(id)aSender
+{
+    var menu = [[CPMenu alloc] init];
+
+    [menu addItemWithTitle:@"New Tag" action:@selector(newTag:) keyEquivalent:nil];
+    [menu addItem:[CPMenuItem separatorItem]];
+
+    var tags = [self tagsForSelectedIssue];
+    for (var i = 0, count = tags.length; i < count; i++)
+    {
+        var tag = tags[i],
+            item = [[CPMenuItem alloc] initWithTitle:tag.label action:@selector(_toggleTag:) keyEquivalent:nil];
+
+        if (tag.isUsed)
+            [item setState:CPOnState];
+
+        [item setTarget:self];
+        [item setTag:tag];
+        [menu addItem:item];
+    }
+
+    var toolbarView = [[aSender toolbar] _toolbarView],
+        view = [toolbarView viewForItem:aSender];
+
+    [CPMenu popUpContextMenu:menu withEvent:[CPApp currentEvent] forView:view];
+}
+
+- (@action)_toggleTag:(id)aSender
+{
+    var tag = [aSender tag],
+        selector = tag.isUsed ? @selector(unsetTagForSelectedIssue:) : @selector(setTagForSelectedIssue:);
+
+    [self performSelector:selector withObject:tag.label];
 }
 
 - (@action)newIssue:(id)sender
@@ -643,6 +680,33 @@
     frame.origin.y = 0;
     frame.size.height += 32;
     [scrollView setFrame:frame];
+}
+
+- (CPArray)tagsForSelectedIssue
+{
+    var items = [],
+        issuesLabels = [[self selectedIssue] objectForKey:@"labels"],
+        repoLabelCount = [repo.labels count];
+
+    for (var i = 0; i < repoLabelCount; i++)
+    {
+        var currentLabel = repo.labels[i],
+            newItem = {label: currentLabel, isUsed: [issuesLabels containsObject:currentLabel]};
+
+        items.push(newItem);
+    }
+
+    return items;
+}
+
+- (void)setTagForSelectedIssue:(CPString)aTag
+{
+    [[GithubAPIController sharedController] label:aTag forIssue:[self selectedIssue] repository:repo shouldRemove:NO];
+}
+
+- (void)unsetTagForSelectedIssue:(CPString)aTag
+{
+    [[GithubAPIController sharedController] label:aTag forIssue:[self selectedIssue] repository:repo shouldRemove:YES];
 }
 
 @end

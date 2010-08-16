@@ -20,6 +20,7 @@
     CPArray  openIssues @accessors;
     CPArray  closedIssues @accessors;
     CPArray  filteredIssues @accessors;
+    CPArray  labels @accessors;
 }
 
 + (id)repositoryWithObject:(JSObject)anObject
@@ -39,7 +40,10 @@
     [repo setForks:anObject.forks];
     [repo setWatched:anObject.watched];
     [repo setIdentifier:[self owner]+"/"+[self name]];
-    
+
+    labels = [];
+    [[GithubAPIController sharedController] loadLabelsForRepository:self];
+
     return repo;
 }
 
