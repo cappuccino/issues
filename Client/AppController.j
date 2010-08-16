@@ -203,12 +203,12 @@
 
 -(CPArray)toolbarAllowedItemIdentifiers:(CPToolbar)toolbar
 {
-    return [CPToolbarFlexibleSpaceItemIdentifier, CPToolbarSpaceItemIdentifier, "searchfield", "newissue", "switchViewStatus", "commentissue", "openissue", "reload", "closeissue", "logo"];
+    return [CPToolbarFlexibleSpaceItemIdentifier, CPToolbarSpaceItemIdentifier, "searchfield", "newissue", "switchViewStatus", "commentissue", "tagissue", "openissue", "reload", "closeissue", "logo"];
 }
 
 -(CPArray)toolbarDefaultItemIdentifiers:(CPToolbar)toolbar
 {
-    var items = ["switchViewStatus", CPToolbarFlexibleSpaceItemIdentifier, "newissue", "commentissue", "closeissue", "openissue", "reload", CPToolbarFlexibleSpaceItemIdentifier, @"searchfield"];
+    var items = ["switchViewStatus", CPToolbarFlexibleSpaceItemIdentifier, "newissue", "commentissue", "tagissue", "closeissue", "openissue", "reload", CPToolbarFlexibleSpaceItemIdentifier, @"searchfield"];
 
     if ([CPPlatform isBrowser])
         items.unshift("logo");
@@ -327,6 +327,23 @@
             
             [toolbarItem setMinSize:CGSizeMake(32, 32)];
             [toolbarItem setMaxSize:CGSizeMake(32, 32)];
+            [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityHigh];
+        break;
+
+        case @"tagissue":
+            var image = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"tagIcon.png"] size:CPSizeMake(26, 27)],
+                highlighted = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"tagIconHighlighted.png"] size:CPSizeMake(26, 27)];
+
+            [toolbarItem setImage:image];
+            [toolbarItem setAlternateImage:highlighted];
+
+            [toolbarItem setTarget:issuesController];
+            [toolbarItem setAction:@selector(tag:)];
+            [toolbarItem setLabel:@"Tag Issue"];
+            [toolbarItem setTag:@"Tag"];
+
+            [toolbarItem setMinSize:CGSizeMake(42.0, 32.0)];
+            [toolbarItem setMaxSize:CGSizeMake(42.0, 32.0)];
             [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityHigh];
         break;
 

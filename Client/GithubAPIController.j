@@ -163,6 +163,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
                 repo.identifier = anIdentifier;
 
                 [repositoriesByIdentifier setObject:repo forKey:anIdentifier];
+                [self loadLabelsForRepository:repo];
             }
             catch (e) {
                 CPLog.error("Unable to load repositority with identifier: "+anIdentifier+" -- "+e);
@@ -286,6 +287,68 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
     }
 
     request.send("");
+}
+
+- (void)loadLabelsForRepository:(Repository)aRepo
+{
+    var request = new CFHTTPRequest();
+    request.open(@"GET", [CPString stringWithFormat:@"%@issues/labels/%@/%@", BASE_URL, aRepo.identifier, [self _credentialsString]], YES);
+
+    request.oncomplete = function()
+    {
+        var labels;
+        if (request.success())
+        {
+            try
+            {
+                labels = JSON.parse(request.responseText()).labels || [];
+            }
+            catch (e)
+            {
+                CPLog.error(@"Unable to load labels for issue: " + anIssue + @" -- " + e);
+            }
+        }
+
+        aRepo.labels = labels;
+        [[CPRunLoop currentRunLoop] performSelectors];
+    };
+
+    request.send(@"");
+}
+
+- (void)label:(CPString)aLabel forIssue:(Issue)anIssue repository:(Repository)aRepo shouldRemove:(BOOL)shouldRemove
+{
+    var request = new CFHTTPRequest(),
+        addOrRemove = shouldRemove ? @"remove" : @"add";
+
+    request.open(@"GET", [CPString stringWithFormat:@"%@issues/label/%@/%@/%@/%@%@", BASE_URL, addOrRemove, aRepo.identifier, aLabel, [anIssue objectForKey:@"number"], [self _credentialsString]], YES);
+
+    request.oncomplete = function()
+    {
+        var labels;
+        if (request.success())
+        {
+            try
+            {
+                // returns all the labels for the issue it was assigned to
+                labels = JSON.parse(request.responseText()).labels || [];
+                [anIssue setObject:labels forKey:@"labels"];
+                [self _noteIssueChanged:anIssue];
+
+                // now that we know it worked add the label to the repo if it's new
+                if (![aRepo.labels containsObject:aLabel])
+                    aRepo.labels.push(aLabel);
+            }
+            catch (e)
+            {
+                CPLog.error(@"Unable to set labels for issue: " + anIssue + @" -- " + e);
+            }
+        }
+
+        [[CPRunLoop currentRunLoop] performSelectors];
+    };
+
+    request.send(@"");
 }
 
 - (void)closeIssue:(id)anIssue repository:(id)aRepo callback:(Function)aCallback
