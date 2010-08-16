@@ -46,6 +46,11 @@
     OPEN_LINK("http://download.cappuccino.org/Issues-1.0.zip");
 }
 
+- (@action)downloadSafariExtention:(id)sender
+{
+    alert("soon");
+}
+
 - (@action)openGithub:(id)sender
 {
     OPEN_LINK("http://github.com");
