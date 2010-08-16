@@ -164,9 +164,6 @@
     [filterBar setDelegate:self];
     searchFilter = 0;
 
-    [issueWebView setIssuesController:self];
-
-
     [[CPNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(issueChanged:)
                                                  name:GitHubAPIIssueDidChangeNotification

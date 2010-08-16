@@ -8,7 +8,6 @@ var IssuesHTMLTemplate = nil;
 {
     id issue @accessors;
     id repo @accessors;
-    id issuesController @accessors;
 
     CGRect scrollRect;
 }
@@ -76,6 +75,8 @@ var IssuesHTMLTemplate = nil;
         [issue setObject:([issue objectForKey:"labels"] || []).join(", ") forKey:"comma_separated_tags"];
         [issue setObject:repo.identifier forKey:@"repo_identifier"];
 
+        console.log(issue);
+
         [[GithubAPIController sharedController] loadCommentsForIssue:issue repository:repo callback:function()
         {
             var comments = [issue objectForKey:"all_comments"];
@@ -118,6 +119,7 @@ var IssuesHTMLTemplate = nil;
         var rect = [_frameView visibleRect];
         [self loadIssue];
         scrollRect = rect;
+        [issue setObject:nil forKey:"body_html"];
     }    
 }
 
