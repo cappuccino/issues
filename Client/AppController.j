@@ -72,7 +72,6 @@
                     if (argCount >= 3)
                     {
                         [[GithubAPIController sharedController] loadIssuesForRepository:repo callback:function(){
-
                             var issueNumber = parseInt(args[2], 10),
                                 openIssues = repo.openIssues,
                                 count = openIssues.length,

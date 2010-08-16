@@ -399,6 +399,9 @@ img.issue-author-image {
                 <script type="text/javascript">
 
 function toggleIssueState() {
+    if (!REPO)
+        return;
+
     if (STATE === "open")
         GitHubAPI.closeIssue(ISSUE, REPO);
     else
@@ -417,6 +420,9 @@ function hideCommentForm() {
 }
 
 function submitCommentForm() {
+    if (!REPO)
+        return;
+
 	var errorMessageField = document.getElementById("comment-form-error-message"),
         textarea = document.getElementById("add-comment-textarea");
 
@@ -432,7 +438,8 @@ function submitCommentForm() {
 }
 
 function editIssue() {
-    GitHubAPI.openEditWindow(ISSUE, REPO);
+    if (REPO)
+        GitHubAPI.openEditWindow(ISSUE, REPO);
 }
 
                 </script>

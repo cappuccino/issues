@@ -65,7 +65,7 @@ var IssuesHTMLTemplate = nil;
     if (![issue objectForKey:"body_html"])
     {
         try {
-            [issue setObject:Markdown.makeHtml([issue objectForKey:"body"] || "") forKey:"body_html"];            
+            [issue setObject:Markdown.makeHtml([issue objectForKey:"body"] || "") forKey:"body_html"];
         } catch (e) { 
             [issue setObject:"" forKey:"body_html"];            
         }
@@ -73,7 +73,9 @@ var IssuesHTMLTemplate = nil;
         [issue setObject:[CPDate simpleDate:[issue objectForKey:"created_at"]] forKey:"human_readable_created_date"];
         [issue setObject:[CPDate simpleDate:[issue objectForKey:"updated_at"]] forKey:"human_readable_updated_date"];
         [issue setObject:([issue objectForKey:"labels"] || []).join(", ") forKey:"comma_separated_tags"];
-        [issue setObject:repo.identifier forKey:@"repo_identifier"];
+
+        if (repo)
+            [issue setObject:repo.identifier forKey:@"repo_identifier"];
 
         [[GithubAPIController sharedController] loadCommentsForIssue:issue repository:repo callback:function()
         {
@@ -92,6 +94,9 @@ var IssuesHTMLTemplate = nil;
 
             [self _loadIssue:issue];
         }];
+
+        if (!repo)
+            [self _loadIssue:issue];
     }
     else
         [self _loadIssue:issue];
@@ -101,12 +106,11 @@ var IssuesHTMLTemplate = nil;
 {
     try {
         var jsItem = [issue toJSObject],
-            html = Mustache.to_html(IssuesHTMLTemplate, jsItem);        
-
+            html = Mustache.to_html(IssuesHTMLTemplate, jsItem);
         [self loadHTMLString:html];
     }
     catch (e) {
-        [self loadHTMLString:""];        
+        [self loadHTMLString:""];
     }
 }
 
@@ -115,9 +119,9 @@ var IssuesHTMLTemplate = nil;
     if ([aNote object] === issue)
     {
         var rect = [_frameView visibleRect];
+        [issue setObject:nil forKey:"body_html"];
         [self loadIssue];
         scrollRect = rect;
-        [issue setObject:nil forKey:"body_html"];
     }    
 }
 

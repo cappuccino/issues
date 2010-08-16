@@ -12,6 +12,7 @@
     @outlet CPImageView          progressView;
     @outlet CPButton             okButton;
     @outlet CPButton             cancelButton;
+    @outlet CPButton             previewButton;
 
     id delegate @accessors;
     BOOL shouldEdit @accessors;
@@ -25,7 +26,7 @@
 
     [bodyLabel setAlignment:CPRightTextAlignment];
     [repoLabel setAlignment:CPRightTextAlignment];
-    [errorField setAlignment:CPRightTextAlignment]
+
     [bodyLabel setVerticalAlignment:CPCenterVerticalTextAlignment];
     [repoLabel setVerticalAlignment:CPCenterVerticalTextAlignment];
     [errorField setVerticalAlignment:CPCenterVerticalTextAlignment];
@@ -53,6 +54,7 @@
     {
         [bodyField setStringValue:[selectedIssue objectForKey:"body"]];
         [titleField setStringValue:[selectedIssue objectForKey:"title"]];
+        [selectedRepo setEnabled:NO];
     }
 }
 
@@ -62,6 +64,7 @@
 
     [bodyField setStringValue:[selectedIssue objectForKey:"body"]];
     [titleField setStringValue:[selectedIssue objectForKey:"title"]];
+    [selectedRepo setEnabled:NO];
 }
 
 - (void)setRepos:(CPArray)anArray
@@ -94,15 +97,16 @@
 - (@action)submitNewIssue:(id)sender
 {
     if (![titleField stringValue])
-        [errorField setStringValue:@"Enter a title before submitting this issue."];
+        [errorField setStringValue:@"You must enter a title."];
     else if (![bodyField stringValue])
-        [errorField setStringValue:@"Enter a description before submitting this issue."];
+        [errorField setStringValue:@"You must enter a description."];
     else 
     {
         [errorField setStringValue:""];
         [progressView setHidden:NO];
         [okButton setEnabled:NO];
         [cancelButton setEnabled:NO];
+        [previewButton setEnabled:NO];
 
         if (shouldEdit)
         {
@@ -115,6 +119,7 @@
             [progressView setHidden:YES];
             [okButton setEnabled:YES];
             [cancelButton setEnabled:YES];
+            [previewButton setEnabled:YES];
 
             if (!issue)
                 [errorField setStringValue:@"Problem editing issue. Try again."];
@@ -133,6 +138,7 @@
             [progressView setHidden:YES];
             [okButton setEnabled:YES];
             [cancelButton setEnabled:YES];
+            [previewButton setEnabled:YES];
 
             if (issue && [delegate respondsToSelector:@selector(newIssueWindowController:didAddIssue:toRepo:)])
                 [delegate newIssueWindowController:self didAddIssue:issue toRepo:repo];
@@ -146,12 +152,50 @@
     }
 }
 
+- (@action)previewIssue:(id)sender
+{
+    // create a mock issue
+    var issue = [CPDictionary dictionaryWithObjects:[[titleField stringValue], [bodyField stringValue], "You", "open", "#", 0] 
+                                             forKeys:[@"title", @"body", "user", "state", "repo_identifier", "votes"]];
+
+    try {
+        [issue setObject:Markdown.makeHtml([issue objectForKey:"body"] || "") forKey:"body_html"];
+    } catch (e) {
+        [issue setObject:"" forKey:"body_html"];
+    }
+
+    var newWindow = [[CPWindow alloc] initWithContentRect:CGRectMake(100, 100, 800, 600) styleMask:CPTitledWindowMask|CPClosableWindowMask|CPMiniaturizableWindowMask|CPResizableWindowMask];
+    [newWindow setMinSize:CGSizeMake(300, 300)];
+
+    if ([CPPlatform isBrowser])
+    {
+        var platformWindow = [[CPPlatformWindow alloc] initWithContentRect:CGRectMake(100, 100, 800, 600)];
+        [newWindow setPlatformWindow:platformWindow];
+        [newWindow setFullBridge:YES];
+
+    }
+
+    var contentView = [newWindow contentView],
+        webView = [[IssueWebView alloc] initWithFrame:[contentView bounds]];
+    [webView setAutoresizingMask:CPViewWidthSizable|CPViewHeightSizable];
+
+    [contentView addSubview:webView];
+    [newWindow setTitle:[issue objectForKey:"title"]];
+    [newWindow orderFront:self];
+
+    [newWindow setDelegate:nil];
+    [webView setIssue:issue];
+    [webView setRepo:nil];
+    [webView loadIssue];
+}
+
 - (@action)cancel:(id)sender
 {
     [errorField setStringValue:""];
     [progressView setHidden:YES];
     [okButton setEnabled:YES];
     [cancelButton setEnabled:YES];
+    [previewButton setEnabled:YES];
 
     [[self window] close];
     [[[self window] platformWindow] orderOut:nil];
