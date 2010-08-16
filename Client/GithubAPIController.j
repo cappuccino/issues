@@ -163,7 +163,6 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
                 repo.identifier = anIdentifier;
 
                 [repositoriesByIdentifier setObject:repo forKey:anIdentifier];
-                [self loadLabelsForRepository:repo];
             }
             catch (e) {
                 CPLog.error("Unable to load repositority with identifier: "+anIdentifier+" -- "+e);

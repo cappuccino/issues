@@ -111,6 +111,8 @@
     var count = sortedRepos.length,
         repoIdentifier = aRepo.identifier;
 
+    [[GithubAPIController sharedController] loadLabelsForRepository:aRepo];
+
     for (var index = 0; index < count; index++)
     {
         if (sortedRepos[index].identifier === repoIdentifier)
