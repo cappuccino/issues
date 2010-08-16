@@ -181,6 +181,10 @@
         [[toolbar _toolbarView] setBackgroundColor:toolbarColor];
 
     [toolbar validateVisibleItems];
+
+    var reloadItem = [[CPMenuItem alloc] initWithTitle:"Reload Issues" action:@selector(reload:) keyEquivalent:"r"];
+    [reloadItem setTarget:issuesController];
+    [[CPApp mainMenu] addItem:reloadItem];
 }
 
 - (CGFloat)splitView:(CPSplitView)splitView constrainMinCoordinate:(float)proposedMin ofSubviewAt:(int)dividerIndex
