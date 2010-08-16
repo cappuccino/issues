@@ -24,6 +24,7 @@
 {
     var plusButton = [CPButtonBar plusButton],
         minusButton = [CPButtonBar minusButton],
+        changeOrientationButton = [CPButtonBar minusButton],
         bezelColor = [CPColor colorWithPatternImage:[[CPImage alloc] initWithContentsOfFile:[[CPBundle mainBundle] pathForResource:"buttonBarBackground.png"] size:CGSizeMake(1, 27)]],
         leftBezel = [[CPImage alloc] initWithContentsOfFile:[[CPBundle mainBundle] pathForResource:"buttonBarLeftBezel.png"] size:CGSizeMake(2, 26)],
         centerBezel = [[CPImage alloc] initWithContentsOfFile:[[CPBundle mainBundle] pathForResource:"buttonBarCenterBezel.png"] size:CGSizeMake(1, 26)],
@@ -38,8 +39,11 @@
     [plusButton setAction:@selector(promptForNewRepository:)];
     [minusButton setTarget:self];
     [minusButton setAction:@selector(removeRepository:)];
+    [changeOrientationButton setTarget:[CPApp delegate]];
+    [changeOrientationButton setAction:@selector(swapMainWindowOrientation:)];
+    [changeOrientationButton setImage:[[CPImage alloc] initWithContentsOfFile:[[CPBundle mainBundle] pathForResource:"swapOrientationIcon.png"] size:CGSizeMake(12,12)]];
 
-    [sourcesListButtonBar setButtons:[plusButton, minusButton]];
+    [sourcesListButtonBar setButtons:[plusButton, minusButton, changeOrientationButton]];
     [sourcesListButtonBar setValue:bezelColor forThemeAttribute:"bezel-color"];
     [sourcesListButtonBar setValue:buttonBezel forThemeAttribute:"button-bezel-color"];
     [sourcesListButtonBar setValue:buttonBezelHighlighted forThemeAttribute:"button-bezel-color" inState:CPThemeStateHighlighted];
