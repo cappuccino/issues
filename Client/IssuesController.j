@@ -159,6 +159,7 @@
     [issuesTableView setUsesAlternatingRowBackgroundColors:YES];
     [issuesTableView setColumnAutoresizingStyle:CPTableViewUniformColumnAutoresizingStyle];
     [issuesTableView registerForDraggedTypes:[@"RepositionIssueDragType"]];
+    [issuesTableView setAllowsMultipleSelection:YES];
 
 
     filterBar = [[FilterBar alloc] initWithFrame:CGRectMake(0, 0, 400, 32)];
@@ -193,10 +194,10 @@
     if (!repo)
         return;
 
+    [self selectIssueAtIndex:-1];
     [issuesTableView reloadData];
 
     [self searchFieldDidChange:nil];
-    [self selectIssueAtIndex:-1];
 }
 
 - (void)selectIssueAtIndex:(unsigned)index
@@ -212,6 +213,10 @@
 
 - (id)selectedIssue
 {
+    if ([[issuesTableView selectedRowIndexes] count] > 1)
+        return nil;
+
+    [[issuesTableView selectedRowIndexes] count];
 
     var row = [issuesTableView selectedRow],
         item = nil;
@@ -225,6 +230,24 @@
     }
 
     return item;
+}
+
+- (CPArray)selectedIssues
+{
+    var rows = [issuesTableView selectedRowIndexes],
+        count = [rows count],
+        items = [ ],
+        item = nil;
+
+    if ([rows count] >= 0 && repo)
+    {
+        if ([filteredIssues count])
+            items = [filteredIssues objectsAtIndexes:rows];    
+        else if ([repo[displayedIssuesKey] count])
+            items = [repo[displayedIssuesKey] objectsAtIndexes:rows];
+    }
+
+    return items;
 }
 
 - (void)issueChanged:(CPNotification)aNote
@@ -244,12 +267,13 @@
 - (void)validateToolbarItem:(CPToolbarItem)anItem
 {
     var hasSelection = [self selectedIssue] !== nil,
+        hasMultipleSelection = [[issuesTableView selectedRowIndexes] count] > 1;
         identifier = [anItem itemIdentifier];
 
     if (identifier === "openissue")
-        return displayedIssuesKey === "closedIssues" && hasSelection;
+        return displayedIssuesKey === "closedIssues" && (hasSelection || hasMultipleSelection);
     else if (identifier === "closeissue")
-        return displayedIssuesKey === "openIssues" && hasSelection;
+        return displayedIssuesKey === "openIssues" && (hasSelection || hasMultipleSelection);
     else if (identifier === "commentissue")
         return hasSelection;
     else if (identifier === "tagissue")
@@ -294,19 +318,31 @@
 
 - (@action)closeIssue:(id)sender
 {
-    var issue = [self selectedIssue];
-    if (issue && [issue objectForKey:"state"] === "open")
+    var issues = [self selectedIssues],
+        count = [issues count];
+
+    [issuesTableView selectRowIndexes:[CPIndexSet indexSet] byExtendingSelection:NO]
+    while(count--)
     {
-        [[GithubAPIController sharedController] closeIssue:issue repository:repo callback:nil];
+        var issue = issues[count];
+
+        if (issue && [issue objectForKey:"state"] === "open")
+            [[GithubAPIController sharedController] closeIssue:issue repository:repo callback:function(){[issuesTableView reloadData];}];
     }
 }
 
 - (@action)reopenIssue:(id)sender
 {
-    var issue = [self selectedIssue];
-    if (issue && [issue objectForKey:"state"] === "closed")
+    var issues = [self selectedIssues],
+        count = [issues count];
+
+    [issuesTableView selectRowIndexes:[CPIndexSet indexSet] byExtendingSelection:NO]
+    while(count--)
     {
-        [[GithubAPIController sharedController] reopenIssue:issue repository:repo callback:nil];
+        var issue = issues[count];
+
+        if (issue && [issue objectForKey:"state"] === "closed")
+            [[GithubAPIController sharedController] reopenIssue:issue repository:repo callback:function(){[issuesTableView reloadData];}];
     }
 }
 
@@ -494,17 +530,25 @@
 
 - (void)tableViewSelectionDidChange:(CPNotification)aNotification
 {
-    var item = [self selectedIssue];
-
     [issueWebView loadHTMLString:""];
 
-    if (item)
+    if ([[issuesTableView selectedRowIndexes] count] === 1)
+    {
+        var item = [self selectedIssue];
+
+        if (item)
+        {
+            [issueWebView setIssue:item];
+            [issueWebView setRepo:repo];
+            [issueWebView loadIssue];
+        
+            [CPApp setArguments:[repo.owner, repo.name, [item objectForKey:"number"]]];
+        }
+    }
+    else
     {
         [issueWebView setIssue:item];
         [issueWebView setRepo:repo];
-        [issueWebView loadIssue];
-
-        [CPApp setArguments:[repo.owner, repo.name, [item objectForKey:"number"]]];
     }
 
     [[[[CPApp delegate] mainWindow] toolbar] validateVisibleItems];

@@ -251,7 +251,7 @@
 
             [toolbarItem setTarget:issuesController];
             [toolbarItem setAction:@selector(newIssue:)];
-            [toolbarItem setLabel:"New Issue"];
+            [toolbarItem setLabel:"New"];
             [toolbarItem setTag:@"NewIssue"];
             
             [toolbarItem setMinSize:CGSizeMake(32, 32)];
@@ -268,7 +268,7 @@
             
             [toolbarItem setTarget:issuesController];
             [toolbarItem setAction:@selector(reopenIssue:)];
-            [toolbarItem setLabel:"Re-open Issue"];
+            [toolbarItem setLabel:"Re-open"];
             [toolbarItem setTag:@"Open"];
             
             [toolbarItem setMinSize:CGSizeMake(32, 32)];
@@ -285,12 +285,12 @@
             
             [toolbarItem setTarget:issuesController];
             [toolbarItem setAction:@selector(closeIssue:)];
-            [toolbarItem setLabel:"Close Issue"];
+            [toolbarItem setLabel:"Close"];
             [toolbarItem setTag:@"Close"];
             [toolbarItem setEnabled:NO];
             
-            [toolbarItem setMinSize:CGSizeMake(32, 32)];
-            [toolbarItem setMaxSize:CGSizeMake(32, 32)];
+            [toolbarItem setMinSize:CGSizeMake(38, 32)];
+            [toolbarItem setMaxSize:CGSizeMake(38, 32)];
             [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityHigh];
         break;
 
@@ -303,7 +303,7 @@
 
             [toolbarItem setTarget:issuesController];
             [toolbarItem setAction:@selector(reload:)];
-            [toolbarItem setLabel:"Reload Issues"];
+            [toolbarItem setLabel:"Reload"];
             [toolbarItem setTag:@"Reload"];
             [toolbarItem setEnabled:NO];
 
@@ -338,7 +338,7 @@
 
             [toolbarItem setTarget:issuesController];
             [toolbarItem setAction:@selector(tag:)];
-            [toolbarItem setLabel:@"Tag Issue"];
+            [toolbarItem setLabel:@"Tag"];
             [toolbarItem setTag:@"Tag"];
 
             [toolbarItem setMinSize:CGSizeMake(42.0, 32.0)];
