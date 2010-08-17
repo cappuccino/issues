@@ -178,9 +178,14 @@
     [self tableViewSelectionDidChange:nil];
 }
 
-- (BOOL)selectionShouldChangeInTableView:(CPTableView)aTable
+- (BOOL)tableView:(CPTableView)aTableView shouldSelectRow:(int)aRow
 {
-    return [issuesController selectionShouldChangeInTableView:nil];
+    var callback = function()
+    {
+        [aTableView selectRowIndexes:[CPIndexSet indexSetWithIndex:aRow] byExtendingSelection:NO];
+        [self tableViewSelectionDidChange:nil];
+    }
+    return [issuesController _shouldUnloadIssueWithCallBack:callback];
 }
 
 - (void)tableViewSelectionDidChange:(CPNotification)aNotification

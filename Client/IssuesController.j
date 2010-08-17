@@ -28,6 +28,7 @@
 
     id          _ephemeralSelectedIssue;
     int         _openIssueWindows;
+    Function   _callbackIfReturnYes;
 }
 
 - (void)awakeFromCib
@@ -193,6 +194,7 @@
 - (void)setDisplayedIssuesKey:(CPString)aKey
 {
     displayedIssuesKey = aKey;
+
     if (!repo)
         return;
 
@@ -505,6 +507,8 @@
     [[[[CPApp delegate] mainWindow] toolbar] validateVisibleItems];
 }
 
+/*
+// it would be nice if the GitHub API would support this
 - (void)moveIssueWithNumber:(int)issueNumber toPosition:(int)newPosition
 {
     // we can assume the we're not filtering issues
@@ -530,16 +534,60 @@
     }];
 
    
+}*/
+
+- (void)alertDidEnd:(CPAlert)anAlert returnCode:(int)tag
+{
+    if (tag === 0)
+    {
+        // change selection
+        if (_callbackIfReturnYes)
+            _callbackIfReturnYes()
+    }
+
+    _callbackIfReturnYes = nil;
 }
 
-- (BOOL)selectionShouldChangeInTableView:(CPTableView)aTable
+/*
+    The API here is a little weird so bear with me.
+    The initial return is BOOL. If it returns NO the 
+    callback supplied will get called if the user clicks "okay"
+    otherwise nothing happens.
+*/
+- (BOOL)_shouldUnloadIssueWithCallBack:(Function)aCallback
 {
-    try {
+    if (_callbackIfReturnYes !== nil)
+        return NO;
+
+     try {
         if ([issueWebView DOMWindow].hasUnsubmittedComment())
-            return confirm("You have an unsubmitted comment. This comment will be lost if you switch issue. Would you still like to switch issues?");
+        {
+            var shouldClose = [[CPAlert alloc] init];
+            [shouldClose setTitle:"Unsubmitted Comment"];
+            [shouldClose setDelegate:self];
+            [shouldClose setAlertStyle:CPWarningAlertStyle];
+            [shouldClose setMessageText:"You have an unsubmitted comment. This comment will be lost if you switch issue. Would you still like to switch issues?"]
+            [shouldClose addButtonWithTitle:"Okay"];
+            [shouldClose addButtonWithTitle:"Cancel"];
+            [shouldClose runModal];
+            _callbackIfReturnYes = aCallback;
+
+            return NO;
+        }
+            
     } catch(e) { }
 
     return YES;
+}
+
+- (BOOL)tableView:(CPTableView)aTableView shouldSelectRow:(int)aRow
+{
+    var callback = function()
+    {
+        [issuesTableView selectRowIndexes:[CPIndexSet indexSetWithIndex:aRow] byExtendingSelection:NO];
+        [self tableViewSelectionDidChange:nil];
+    }
+    return [self _shouldUnloadIssueWithCallBack:callback];
 }
 
 - (void)tableViewSelectionDidChange:(CPNotification)aNotification
