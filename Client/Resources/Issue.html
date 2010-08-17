@@ -442,6 +442,9 @@ function editIssue() {
         GitHubAPI.openEditWindow(ISSUE, REPO);
 }
 
+function hasUnsubmittedComment() {
+    return document.getElementById("add-comment-textarea").value;
+}
                 </script>
 
     </head>

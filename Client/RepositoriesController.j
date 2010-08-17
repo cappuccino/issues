@@ -178,6 +178,11 @@
     [self tableViewSelectionDidChange:nil];
 }
 
+- (BOOL)selectionShouldChangeInTableView:(CPTableView)aTable
+{
+    return [issuesController selectionShouldChangeInTableView:nil];
+}
+
 - (void)tableViewSelectionDidChange:(CPNotification)aNotification
 {
     var selectedRow = [sourcesListView selectedRow];

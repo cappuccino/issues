@@ -144,6 +144,17 @@
     else
         initializationFunction();
 
+    // special DOM hook if you have unsubmitted issues or comments.
+    window.onbeforeunload = function() {
+        //alert([[issuesController issueWebView] DOMWindow].hasUnsubmittedComment());
+        if(issuesController._openIssueWindows)
+            return "You have unsubmitted issues. Reloading or quitting the application will prevent you from submitting these issues. You have Are you sure you want to quit?";
+        try {
+            //if([[issuesController issueWebView] DOMWindow].hasUnsubmittedComment())
+              //  return "You have an unsubmitted comment. This comment will be lost if you reload or quit the application. Are you sure you want to quit?";
+        }catch (e){}
+    }
+
 }
 
 - (void)applicationWillTerminate:(CPNotification)aNote

@@ -40,12 +40,21 @@
 
     [[self window] setShowsResizeIndicator:YES];
     [[[self window] contentView] setBackgroundColor:[CPColor colorWithWhite:244/255 alpha:1.0]];
+    [[self window] setDelegate:self];
 
     if ([CPPlatform isBrowser] && [CPPlatformWindow supportsMultipleInstances])
     {
         var platformWindow = [[CPPlatformWindow alloc] initWithContentRect:CGRectMake(100, 100, 500, 450)];
         [[self window] setFullBridge:YES];
         [[self window] setPlatformWindow:platformWindow];
+
+        // timeout here because we can't talk to the DOM window until we open it... 
+        window.setTimeout(function(){
+            platformWindow._DOMWindow.onbeforeunload = function() {
+                if (delegate)
+                    delegate._openIssueWindows--;
+            }
+        },0);
     }
 
     [bodyField setBackgroundColor:[CPColor whiteColor]];
@@ -199,6 +208,12 @@
 
     [[self window] close];
     [[[self window] platformWindow] orderOut:nil];
+}
+
+- (BOOL)windowShouldClose:(CPWindow)aWin
+{
+    if ((![CPPlatform isBrowser] || ![CPPlatformWindow supportsMultipleInstances]) && delegate)
+        delegate._openIssueWindows--;
 }
 
 @end

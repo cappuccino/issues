@@ -27,11 +27,13 @@
     unsigned    searchFilter;
 
     id          _ephemeralSelectedIssue;
+    int         _openIssueWindows;
 }
 
 - (void)awakeFromCib
 {
     displayedIssuesKey = "openIssues";
+    _openIssueWindows = 0;
 
     [self showView:noRepoView];
 
@@ -422,6 +424,8 @@
     [controller setRepos:[[[CPApp delegate] reposController] sortedRepos]];
     [controller selectRepo:repo];
     [controller setDelegate:self];
+
+    _openIssueWindows++;
 }
 
 - (void)newIssueWindowController:(CPWindowController)aController didAddIssue:(id)anIssue toRepo:(id)aRepo
@@ -526,6 +530,16 @@
     }];
 
    
+}
+
+- (BOOL)selectionShouldChangeInTableView:(CPTableView)aTable
+{
+    try {
+        if ([issueWebView DOMWindow].hasUnsubmittedComment())
+            return confirm("You have an unsubmitted comment. This comment will be lost if you switch issue. Would you still like to switch issues?");
+    } catch(e) { }
+
+    return YES;
 }
 
 - (void)tableViewSelectionDidChange:(CPNotification)aNotification
