@@ -538,12 +538,8 @@
 
 - (void)alertDidEnd:(CPAlert)anAlert returnCode:(int)tag
 {
-    if (tag === 0)
-    {
-        // change selection
-        if (_callbackIfReturnYes)
-            _callbackIfReturnYes()
-    }
+    if (tag === 0 && _callbackIfReturnYes)
+        _callbackIfReturnYes();
 
     _callbackIfReturnYes = nil;
 }
