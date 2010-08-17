@@ -25,6 +25,8 @@
     CPArray     filteredIssues;
     CPString    searchString;
     unsigned    searchFilter;
+
+    id          _ephemeralSelectedIssue;
 }
 
 - (void)awakeFromCib
@@ -357,6 +359,26 @@
     [self performSelector:selector withObject:tag.label];
 }
 
+- (int)_indexOfEphemeralSelectedIssue
+{
+    var visiableIssues = filteredIssues || repo[displayedIssuesKey],
+        count = [visiableIssues count],
+        index = CPNotFound;
+
+    while(count--)
+    {
+        var sig = repo.identifier + "---" + [visiableIssues[count] objectForKey:"number"];
+
+        if (sig === _ephemeralSelectedIssue)
+        {
+            index = count;
+            break;
+        }
+    }
+
+    return index;
+}
+
 - (@action)newIssue:(id)sender
 {
     var controller = [[NewIssueWindowController alloc] initWithWindowCibName:"NewIssueWindow"];
@@ -374,6 +396,10 @@
 
 - (@action)reload:(id)sender
 {
+    var issue = [self selectedIssue];
+        
+    _ephemeralSelectedIssue = [issue objectForKey:"repo_identifier"] + "---" + [issue objectForKey:"number"];
+
     delete repo.openIssues;
     delete repo.closedIssues;
     [self loadIssues];
@@ -388,6 +414,13 @@
     {
         [issuesTableView reloadData];
         [self showView:nil];
+
+        // reselect the issue if it's still there:
+        if (_ephemeralSelectedIssue)
+        {
+            [self selectIssueAtIndex:[self _indexOfEphemeralSelectedIssue]];
+            _ephemeralSelectedIssue = nil;
+        }
     }];
 }
 
