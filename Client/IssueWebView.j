@@ -142,7 +142,6 @@ var IssuesHTMLTemplate = nil;
     domWindow.ISSUE = issue;
     domWindow.STATE = [issue objectForKey:"state"];
     domWindow.GitHubAPI = window.GitHubAPI;
-    domWindow.HasUnsubmittedComment = false;
 
     if (scrollRect)
         [_frameView scrollRectToVisible:scrollRect];
