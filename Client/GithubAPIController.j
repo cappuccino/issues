@@ -593,3 +593,13 @@ GitHubAPI = {
         [[[CPApp delegate] issuesController] editIssue:anIssue repo:aRepo];
     }
 }
+
+@implementation CPNull (compare)
+- (CPComparisonResult)compare:(id)anObj
+{
+    if (self === anObj){
+        return CPOrderedSame;
+
+    return CPOrderedAscending;
+}
+@end
