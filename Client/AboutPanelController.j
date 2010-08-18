@@ -43,12 +43,12 @@
 
 - (@action)downloadNativeClient:(id)sender
 {
-    OPEN_LINK("http://github.com/downloads/280north/issues/Issues-2.zip");
+    OPEN_LINK("http://download.cappuccino.org/Issues-2_1.zip");
 }
 
 - (@action)downloadSafariExtention:(id)sender
 {
-    OPEN_LINE("http://github.com/downloads/Me1000/PrettyIssues/PrettyIssues.safariextz.zip");
+    OPEN_LINK("http://github.com/downloads/Me1000/PrettyIssues/PrettyIssues.safariextz.zip");
 }
 
 - (@action)openGithub:(id)sender
