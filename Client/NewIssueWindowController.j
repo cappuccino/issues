@@ -207,7 +207,9 @@
     [previewButton setEnabled:YES];
 
     [[self window] close];
-    [[[self window] platformWindow] orderOut:nil];
+
+    if ([CPPlatform isBrowser] && [CPPlatformWindow supportsMultipleInstances])
+        [[[self window] platformWindow] orderOut:nil];
 }
 
 - (BOOL)windowShouldClose:(CPWindow)aWin
