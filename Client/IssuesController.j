@@ -854,7 +854,7 @@
     [[GithubAPIController sharedController] label:aTag forIssue:[self selectedIssue] repository:repo shouldRemove:YES];
 }
 
-- (void) editIssue:(Issue)anIssue repo:(Repository)aRepo
+- (void)editIssue:(Issue)anIssue repo:(Repository)aRepo
 {
     var controller = [[NewIssueWindowController alloc] initWithWindowCibName:"NewIssueWindow"];
     
@@ -864,6 +864,8 @@
     [controller setDelegate:self];
     [controller setShouldEdit:YES];
     [controller setSelectedIssue:anIssue];
+
+    _openIssueWindows++;
 }
 
 @end

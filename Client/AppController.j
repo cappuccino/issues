@@ -154,7 +154,7 @@
 
     // special DOM hook if you have unsubmitted issues or comments.
     window.onbeforeunload = function() {
-        if(issuesController._openIssueWindows)
+        if(issuesController._openIssueWindows > 0)
             return "You have unsubmitted issues. Reloading or quitting the application will prevent you from submitting these issues. You have Are you sure you want to quit?";
         try {
             if([[issuesController issueWebView] DOMWindow].hasUnsubmittedComment())
