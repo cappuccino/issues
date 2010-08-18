@@ -318,7 +318,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 
     request.oncomplete = function()
     {
-        var labels;
+        var labels = [];
         if (request.success())
         {
             try
