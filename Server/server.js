@@ -10,10 +10,26 @@ MIME.types[".plist"] = "application/xml";
 
 var puts = require("sys").puts;
 
+// used for the oauth requests
+// REMOVE BEFORE PUSHING
+var CLIENT_SECRET = "6d7ca325c70f97741cb19f6c6f3926370382563c";
+var CLIENT_ID     = "c775a44a08cffa50eba3";
+var CLIENT_REDIRECT_URL = "http://localhost:8001/getAccessToken/";
+
 HTTP.createServer(function (request, response) {
     try {
         if (/^\/github\//.test(request.url)) {
             githubProxy(request, response);
+        }
+        else if (/\/getAccessToken\/\?code=(\w+)/.test(request.url)) {
+            var code = request.url.replace(/\/getAccessToken\/\?code=(\w+)/, "$1");
+            getAccessKey(request, response, code);
+        
+        }
+        else if(/\/getAccessToken\/\?error=user_denied$/.test(request.url)) {
+            puts("rejection");
+            //http://localhost:8001/getAccessToken/?error=user_denied
+            response.write("<html><head><title>Authorization Failed</title><script>window.authFailed = true;</script></head><body></body></html>");
         }
         else {
             staticServe(request, response);
@@ -23,6 +39,35 @@ HTTP.createServer(function (request, response) {
         response.end("error: "+e+"\n");
     }
 }).listen(parseInt(process.env.PORT || 8001));
+
+function getAccessKey(request, response, code) {
+    var request_url = "https://github.com/login/oauth/access_token?client_id="+ CLIENT_ID + "&client_secret="+ CLIENT_SECRET +"&code=" + code;
+    var askForAccessToken = HTTP.createClient(443, "github.com", true);
+    var askForAccessToken_request = askForAccessToken.request("POST", request_url, {"host":"github.com","Content-Length":0, "location":request_url});
+
+    askForAccessToken_request.addListener("response", function (askForAccessToken_response) {
+        askForAccessToken_response.body = "";
+
+        askForAccessToken_response.addListener("data", function(chunk) {
+            askForAccessToken_response.body+=chunk;
+
+        });
+        askForAccessToken_response.addListener("end", function() {
+
+            var newBody = "<html><head><title>Authenticated</title><script>document.cookie='github."+ askForAccessToken_response.body +"';</script></head><body></body></html>";
+
+            response.writeHead(askForAccessToken_response.statusCode, askForAccessToken_response.headers["content-length"] = newBody.length);
+            response.write(newBody);
+            response.end();
+        });
+    });
+    request.addListener("data", function(chunk) {
+        askForAccessToken_request.write(chunk);
+    });
+    request.addListener("end", function() {
+        askForAccessToken_request.end();
+    });
+}
 
 // based on http://github.com/pkrumins/nodejs-proxy
 // http://www.catonmat.net/http-proxy-in-nodejs

@@ -26,6 +26,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 {
     CPString        username @accessors;
     CPString        authenticationToken @accessors;
+    CPString        oauthAccessToken @accessors;
 
     CPString        website @accessors;
     CPString        emailAddress @accessors;
@@ -76,6 +77,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
     authenticationToken = nil;
     userImage = nil;
     userThumbnailImage = nil;
+    oauthAccessToken = nil;
     [[CPUserSessionManager defaultManager] setStatus:CPUserSessionLoggedOutStatus];
 }
 
@@ -83,7 +85,12 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 {
     var authString = "?app_id=280issues";
     if ([self isAuthenticated])
-        authString += "&login="+encodeURIComponent(username)+"&token="+encodeURIComponent(authenticationToken);
+    {
+        if (oauthAccessToken)
+            authString += "&access_token="+encodeURIComponent(oauthAccessToken);
+        else
+            authString += "&login="+encodeURIComponent(username)+"&token="+encodeURIComponent(authenticationToken);
+    }
 
     return authString;
 }
@@ -91,7 +98,11 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 - (void)authenticateWithCallback:(Function)aCallback
 {
     var request = new CFHTTPRequest();
-    request.open("GET", BASE_URL+"user/show?login="+encodeURIComponent(username)+"&token="+encodeURIComponent(authenticationToken), true);
+
+    if (oauthAccessToken)
+        request.open("GET", BASE_URL+"user/show?access_token="+encodeURIComponent(oauthAccessToken), true);
+    else
+        request.open("GET", BASE_URL+"user/show?login="+encodeURIComponent(username)+"&token="+encodeURIComponent(authenticationToken), true);
 
     request.oncomplete = function()
     {
@@ -99,6 +110,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
         {
             var response = JSON.parse(request.responseText()).user;
 
+            username = response.login;
             emailAddress = response.email;
             emailAddressHashed = response.gravatar_id || (response.email ? hex_md5(emailAddress) : "");
             website = response.blog;
@@ -116,10 +128,12 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
         }
         else
         {
+            username = nil;
             emailAddress = nil;
             emailAddressHashed = nil;
             website = nil;
             userImage = nil;
+            oauthAccessToken = nil;
 
             [[CPUserSessionManager defaultManager] setStatus:CPUserSessionLoggedOutStatus];
         }
@@ -135,8 +149,17 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 
 - (void)promptForAuthentication:(id)sender
 {
-    var loginWindow = [LoginWindow sharedLoginWindow];
-    [loginWindow makeKeyAndOrderFront:self];
+    // because oauth relies on the server and multiple windows
+    if ([CPPlatform isBrowser] && [CPPlatformWindow supportsMultipleInstances])
+    {
+        var loginController = [[OAuthController alloc] init];
+        [loginController go];
+    }
+    else
+    {
+        var loginWindow = [LoginWindow sharedLoginWindow];
+        [loginWindow makeKeyAndOrderFront:self];
+    }
 }
 
 - (CPDictionary)repositoryForIdentifier:(CPString)anIdentifier
