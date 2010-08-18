@@ -27,8 +27,7 @@ HTTP.createServer(function (request, response) {
         
         }
         else if(/\/getAccessToken\/\?error=user_denied$/.test(request.url)) {
-            puts("rejection");
-            //http://localhost:8001/getAccessToken/?error=user_denied
+            response.writeHead(200, {"Content-Type": "text/plain"})
             response.write("<html><head><title>Authorization Failed</title><script>window.authFailed = true;</script></head><body></body></html>");
         }
         else {
