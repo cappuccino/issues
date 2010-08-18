@@ -562,9 +562,9 @@
             [shouldClose setTitle:"Unsubmitted Comment"];
             [shouldClose setDelegate:self];
             [shouldClose setAlertStyle:CPWarningAlertStyle];
-            [shouldClose setMessageText:"You have an unsubmitted comment. This comment will be lost if you switch issue. Would you still like to switch issues?"]
-            [shouldClose addButtonWithTitle:"Okay"];
-            [shouldClose addButtonWithTitle:"Cancel"];
+            [shouldClose setMessageText:"You have an unsubmitted comment. This comment will be lost if you switch issues."]
+            [shouldClose addButtonWithTitle:"Switch Issue"];
+            [shouldClose addButtonWithTitle:"Stay Here"];
             [shouldClose runModal];
             _callbackIfReturnYes = aCallback;
 
