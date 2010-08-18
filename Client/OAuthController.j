@@ -8,7 +8,7 @@
 - (void)go
 {
     var clientID = "c775a44a08cffa50eba3",
-        redirectURL = "http://10.0.1.9:8001/getAccessToken/";
+        redirectURL = "http://githubissues.heroku.com/getAccessToken/";
 
     var url = "https://github.com/login/oauth/authorize?scope=repo&client_id="+clientID+"&redirect_uri="+redirectURL;
 

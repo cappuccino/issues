@@ -12,7 +12,7 @@ var puts = require("sys").puts;
 
 // used for the oauth requests
 // REMOVE BEFORE PUSHING
-var CLIENT_SECRET = "6d7ca325c70f97741cb19f6c6f3926370382563c";
+var CLIENT_SECRET = "";
 var CLIENT_ID     = "c775a44a08cffa50eba3";
 var CLIENT_REDIRECT_URL = "http://localhost:8001/getAccessToken/";
 
