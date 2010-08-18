@@ -20,6 +20,7 @@
 @import "LPMultiLineTextField.j"
 @import "AboutPanelController.j"
 @import "RLTableHeaderView.j"
+@import "OAuthController.j"
 
 @implementation AppController : CPObject
 {
@@ -132,9 +133,16 @@
     }
 
     var usernameCookie = [[CPCookie alloc] initWithName:@"github.username"],
-        apiTokenCookie = [[CPCookie alloc] initWithName:@"github.apiToken"];
+        apiTokenCookie = [[CPCookie alloc] initWithName:@"github.apiToken"],
+        oauthAccessCookie = [[CPCookie alloc] initWithName:@"github.access_token"];
 
-    if ([usernameCookie value] && [apiTokenCookie value])
+    if ([oauthAccessCookie value])
+    {
+        var controller = [GithubAPIController sharedController];
+        [controller setOauthAccessToken:[oauthAccessCookie value]];
+        [controller authenticateWithCallback:initializationFunction];
+    }
+    else if ([usernameCookie value] && [apiTokenCookie value])
     {
         var controller = [GithubAPIController sharedController];
         [controller setUsername:[usernameCookie value]];
@@ -153,7 +161,6 @@
                 return "You have an unsubmitted comment. This comment will be lost if you reload or quit the application. Are you sure you want to quit?";
         }catch (e){}
     }
-
 }
 
 - (void)applicationWillTerminate:(CPNotification)aNote
@@ -169,6 +176,10 @@
                                                           domain:nil];
 
     [[[CPCookie alloc] initWithName:@"github.apiToken"] setValue:[githubController authenticationToken] || ""
+                                                         expires:[CPDate dateWithTimeIntervalSinceNow:31536000]
+                                                          domain:nil];
+
+    [[[CPCookie alloc] initWithName:@"github.access_token"] setValue:[githubController authenticationToken] || ""
                                                          expires:[CPDate dateWithTimeIntervalSinceNow:31536000]
                                                           domain:nil];
 }
