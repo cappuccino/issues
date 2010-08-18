@@ -150,7 +150,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 - (void)promptForAuthentication:(id)sender
 {
     // because oauth relies on the server and multiple windows
-    if ([CPPlatform isBrowser] && [CPPlatformWindow supportsMultipleInstances])
+    if ([CPPlatform isBrowser] && [CPPlatformWindow supportsMultipleInstances] && BASE_URL === "/github/")
     {
         var loginController = [[OAuthController alloc] init];
         [loginController go];
