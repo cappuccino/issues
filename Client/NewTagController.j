@@ -19,7 +19,7 @@
 
 - (void)loadWindow
 {
-    var theWindow = [[CPWindow alloc] initWithContentRect:CGRectMake(0.0, 0.0, 300.0, 130.0) styleMask:CPTitledWindowMask | CPClosableWindowMask | CPMiniaturizableWindowMask];
+    var theWindow = [[CPWindow alloc] initWithContentRect:CGRectMake(0.0, 0.0, 300.0, 120.0) styleMask:CPTitledWindowMask | CPClosableWindowMask | CPMiniaturizableWindowMask];
     [theWindow setAutoresizingMask:CPViewMinXMargin | CPViewMinYMargin | CPViewMaxXMargin | CPViewMaxYMargin];
     [theWindow setTitle:@"New Tag"];
 

@@ -574,6 +574,7 @@
             [shouldClose setMessageText:"You have an unsubmitted comment. This comment will be lost if you switch issues."]
             [shouldClose addButtonWithTitle:"Switch Issue"];
             [shouldClose addButtonWithTitle:"Stay Here"];
+            [shouldClose._buttons[1] setKeyEquivalent:CPEscapeFunctionKey];
             [shouldClose runModal];
             _callbackIfReturnYes = aCallback;
 
