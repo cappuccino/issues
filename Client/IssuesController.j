@@ -5,6 +5,7 @@
 @import "IssueWebView.j"
 @import "PriorityTableDataView.j"
 @import "NewIssueWindowController.j"
+@import "NewTagController.j"
 
 @implementation IssuesController : CPObject
 {
@@ -368,7 +369,10 @@
 {
     var menu = [[CPMenu alloc] init];
 
-    [menu addItemWithTitle:@"New Tag" action:@selector(newTag:) keyEquivalent:nil];
+    var newItem = [[CPMenuItem alloc] initWithTitle:@"New Tag" action:@selector(newTag:) keyEquivalent:nil];
+    [newItem setTarget:self];
+
+    [menu addItem:newItem];
     [menu addItem:[CPMenuItem separatorItem]];
 
     var tags = [self tagsForSelectedIssue];
@@ -389,6 +393,11 @@
         view = [toolbarView viewForItem:aSender];
 
     [CPMenu popUpContextMenu:menu withEvent:[CPApp currentEvent] forView:view];
+}
+
+- (@action)newTag:(id)aSender
+{
+    [[[NewTagController alloc] init] showWindow:self];
 }
 
 - (@action)_toggleTag:(id)aSender
