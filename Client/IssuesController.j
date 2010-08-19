@@ -373,10 +373,14 @@
     [newItem setTarget:self];
 
     [menu addItem:newItem];
-    [menu addItem:[CPMenuItem separatorItem]];
 
-    var tags = [self tagsForSelectedIssue];
-    for (var i = 0, count = tags.length; i < count; i++)
+    var tags = [self tagsForSelectedIssue],
+        count = [tags count];
+
+    if (count)
+        [menu addItem:[CPMenuItem separatorItem]];
+
+    for (var i = 0; i < count; i++)
     {
         var tag = tags[i],
             item = [[CPMenuItem alloc] initWithTitle:tag.label action:@selector(_toggleTag:) keyEquivalent:nil];
