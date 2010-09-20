@@ -179,7 +179,7 @@
                                                          expires:[CPDate dateWithTimeIntervalSinceNow:31536000]
                                                           domain:nil];
 
-    [[[CPCookie alloc] initWithName:@"github.access_token"] setValue:[githubController authenticationToken] || ""
+    [[[CPCookie alloc] initWithName:@"github.access_token"] setValue:[githubController oauthAccessToken] || ""
                                                          expires:[CPDate dateWithTimeIntervalSinceNow:31536000]
                                                           domain:nil];
 }
