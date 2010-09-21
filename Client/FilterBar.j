@@ -22,7 +22,8 @@ IssuesFilterCreator = 4;
             leftCapImage = [[CPImage alloc] initWithContentsOfFile:[bundle pathForResource:@"MediaFilterLeftCap.png"] size:CGSizeMake(9, 19)],
             rightCapImage = [[CPImage alloc] initWithContentsOfFile:[bundle pathForResource:@"MediaFilterRightCap.png"] size:CGSizeMake(9, 19)],
             centerImage = [[CPImage alloc] initWithContentsOfFile:[bundle pathForResource:@"MediaFilterCenter.png"] size:CGSizeMake(1, 19)],
-            bezelImage = [[CPThreePartImage alloc] initWithImageSlices:[leftCapImage, centerImage, rightCapImage] isVertical:NO];
+            bezelImage = [[CPThreePartImage alloc] initWithImageSlices:[leftCapImage, centerImage, rightCapImage] isVertical:NO],
+            radioImageReplace = [[CPImage alloc] init];
 
         [self setBackgroundColor:[CPColor colorWithPatternImage:headerImage]];
 
@@ -38,8 +39,10 @@ IssuesFilterCreator = 4;
             var thisRadio = radioButtons[i];
 
             [thisRadio setAlignment:CPCenterTextAlignment];
-            [thisRadio setValue:[CPColor clearColor] forThemeAttribute:@"bezel-color"];
-            [thisRadio setValue:[CPColor colorWithPatternImage:bezelImage] forThemeAttribute:@"bezel-color" inState:CPThemeStateSelected];
+            [thisRadio setValue:radioImageReplace forThemeAttribute:@"image"];
+            [thisRadio setValue:1 forThemeAttribute:@"image-offset"];
+
+            [thisRadio setValue:[CPColor colorWithPatternImage:bezelImage] forThemeAttribute:@"bezel-color" inState:CPThemeStateSelected]
             [thisRadio setValue:CGInsetMake(0.0, 10.0, 0.0, 10.0) forThemeAttribute:@"content-inset"];
             [thisRadio setValue:CGSizeMake(0.0, 19.0) forThemeAttribute:@"min-size"];
 
@@ -91,4 +94,11 @@ IssuesFilterCreator = 4;
     [delegate filterBarSelectionDidChange:self];
 }
 
+@end
+
+@implementation CPThreePartImage (foo)
+- (unsigned)loadStatus
+{
+    return CPLoa
+}
 @end
