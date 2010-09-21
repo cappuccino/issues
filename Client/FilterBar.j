@@ -95,10 +95,3 @@ IssuesFilterCreator = 4;
 }
 
 @end
-
-@implementation CPThreePartImage (foo)
-- (unsigned)loadStatus
-{
-    return CPLoa
-}
-@end
