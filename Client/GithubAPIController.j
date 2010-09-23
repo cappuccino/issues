@@ -594,7 +594,7 @@ because one day maybe GitHub will give this to me... :)
                 var warn = [[CPAlert alloc] init];
                 [warn setTitle:"Not Authorized"];
                 [warn setMessageText:"Unauthorized Request"];
-                [warn setInformativeText:"Check to make sure you're logged in, or have sufficiant privilages to modify an issue."];
+                [warn setInformativeText:text];
                 [warn setAlertStyle:CPInformationalAlertStyle];
                 [warn addButtonWithTitle:"Okay"];
                 [warn setDelegate:self];
