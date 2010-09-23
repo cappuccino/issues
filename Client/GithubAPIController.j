@@ -343,10 +343,11 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
     var request = new CFHTTPRequest(),
         addOrRemove = shouldRemove ? @"remove" : @"add";
 
-    request.open(@"GET", [CPString stringWithFormat:@"%@issues/label/%@/%@/%@/%@%@", BASE_URL, addOrRemove, aRepo.identifier, aLabel, [anIssue objectForKey:@"number"], [self _credentialsString]], YES);
+    request.open(@"GET", [CPString stringWithFormat:@"%@issues/label/%@/%@/%@/%@%@", BASE_URL, addOrRemove, aRepo.identifier, encodeURIComponent(aLabel), [anIssue objectForKey:@"number"], [self _credentialsString]], YES);
 
     request.oncomplete = function()
     {
+        [self _checkGithubResponse:request];
         var labels;
         if (request.success())
         {
@@ -380,6 +381,8 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 
     request.oncomplete = function()
     {
+        [self _checkGithubResponse:request];
+
         if (request.success())
         {
             [anIssue setObject:"closed" forKey:"state"];
@@ -405,6 +408,8 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 
     request.oncomplete = function()
     {
+        [self _checkGithubResponse:request];
+
         if (request.success())
         {
             [anIssue setObject:"open" forKey:"state"];
@@ -432,6 +437,8 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 
     request.oncomplete = function()
     {
+        [self _checkGithubResponse:request];
+
         if (request.success())
         {
             var issue = nil;
@@ -468,7 +475,10 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 
     request.oncomplete = function()
     {
+        [self _checkGithubResponse:request];
+
         var comment = nil;
+
         if (request.success())
         {
             try {
@@ -507,6 +517,8 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
     
     request.oncomplete = function()
     {
+        [self _checkGithubResponse:request];
+
         if (request.success())
         {
             var issue = nil;
@@ -534,6 +546,8 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 
 }
 
+/*
+because one day maybe GitHub will give this to me... :) 
 - (void)setPositionForIssue:(id)anIssue inRepository:(id)aRepo to:(int)aPosition callback:(Function)aCallback
 {
     var request = new CFHTTPRequest();
@@ -554,13 +568,50 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
     }
 
     request.send("");
-}
+}*/
 
 - (void)_noteIssueChanged:(id)anIssue
 {
     [[CPNotificationCenter defaultCenter] postNotificationName:GitHubAPIIssueDidChangeNotification
                                                         object:anIssue
                                                       userInfo:nil];
+}
+
+- (void)_checkGithubResponse:(CFHTTPRequest)aRequest
+{
+    if (aRequest.status() === 401)
+    {
+        try
+        {
+            // we got a 401 from something else... o.0 
+            if (JSON.parse(aRequest.responseText()).error !== "not authorized")
+                return;
+            else
+            {
+                var auth = [self isAuthenticated],
+                    text = (auth) ? "Make sure your account has sufficiant privalies to modify an issue or reposotory. " : "The action you tried to perfom requires you to be authenticated. Please login.";
+
+                var warn = [[CPAlert alloc] init];
+                [warn setTitle:"Not Authorized"];
+                [warn setMessageText:"Unauthorized Request"];
+                [warn setInformativeText:"Check to make sure you're logged in, or have sufficiant privilages to modify an issue."];
+                [warn setAlertStyle:CPInformationalAlertStyle];
+                [warn addButtonWithTitle:"Okay"];
+                [warn setDelegate:self];
+
+                if (!auth)
+                    [warn addButtonWithTitle:"Login"];
+
+                [warn runModal];
+            }
+        }catch(e){}
+    }
+}
+
+- (void)alertDidEnd:(id)sender returnCode:(int)returnCode
+{
+    if (returnCode === 1)
+        [self promptForAuthentication:self];
 }
 @end
 
