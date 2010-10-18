@@ -10,6 +10,7 @@
 @import <AppKit/CPScrollView.j>
 @import <AppKit/CPTableColumn.j>
 @import <AppKit/CPCookie.j>
+@import <Foundation/CPDate.j>
 @import "RepositoriesController.j"
 @import "IssuesController.j"
 @import "OctoWindows.j"
