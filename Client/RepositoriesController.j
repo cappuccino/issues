@@ -146,7 +146,7 @@
 
     sortedRepos = repos;
     [sourcesListView reloadData];
-    [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
+    [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:1] byExtendingSelection:NO];
     [self tableViewSelectionDidChange:nil];
 
     [self hideNoReposView];
