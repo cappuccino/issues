@@ -212,7 +212,7 @@
 - (id)tableView:(CPTableView)aTableView objectValueForTableColumn:(int)aColumn row:(int)aRow
 {
     if (aRow === 0)
-        return {identifier:"REPOSITORIES", private:NO};
+        return {identifier:"REPOSITORIES", "private":NO};
 
     return sortedRepos[aRow - 1];
 }
@@ -226,10 +226,6 @@
 {
     return aRow === 0;
 }
-
-@end
-
-@implementation RepositoriesController (tableViewDragDrop)
 
 - (BOOL)tableView:(CPTableView)aTableView writeRowsWithIndexes:(CPIndexSet)rowIndexes toPasteboard:(CPPasteboard)pboard
 {
