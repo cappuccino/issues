@@ -117,7 +117,7 @@
     {
         if (sortedRepos[index].identifier === repoIdentifier)
         {
-            [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:index] byExtendingSelection:NO];
+            [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:index + 1] byExtendingSelection:NO];
             [self tableViewSelectionDidChange:nil];
             return;
         }
@@ -127,7 +127,7 @@
     {
         sortedRepos.unshift(aRepo);
         [sourcesListView reloadData];
-        [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
+        [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:1] byExtendingSelection:NO];
         [self tableViewSelectionDidChange:nil];
     }
     else
@@ -160,26 +160,28 @@
 
 - (@action)removeRepository:(id)sender
 {
-    var selectedRow = [sourcesListView selectedRow];
+    var selectedRow = [sourcesListView selectedRow] - 1;
+
     if (selectedRow < 0)
         return;
 
-    sortedRepos.splice(selectedRow, 1);
-    [sourcesListView reloadData];
+    [sortedRepos removeObjectAtIndex:selectedRow];
 
     if (sortedRepos.length === 0)
     {
         [self showNoReposView];        
         [sourcesListView selectRowIndexes:[CPIndexSet indexSet] byExtendingSelection:NO];
+        [self tableViewSelectionDidChange:nil];
     }
-    else
-        [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:MAX(MIN(selectedRow, sortedRepos.length - 1), 0)] byExtendingSelection:NO];
 
-    [self tableViewSelectionDidChange:nil];
+    [sourcesListView reloadData];
 }
 
 - (BOOL)tableView:(CPTableView)aTableView shouldSelectRow:(int)aRow
 {
+    if (aRow === 0)
+        return NO;
+
     var callback = function()
     {
         [aTableView selectRowIndexes:[CPIndexSet indexSetWithIndex:aRow] byExtendingSelection:NO];
@@ -190,8 +192,9 @@
 
 - (void)tableViewSelectionDidChange:(CPNotification)aNotification
 {
-    var selectedRow = [sourcesListView selectedRow];
-    if (selectedRow === -1)
+    var selectedRow = MAX([sourcesListView selectedRow] - 1, CPNotFound);
+
+    if (selectedRow === CPNotFound)
     {
         [CPApp setArguments:[]];
         [issuesController setRepo:nil];
@@ -208,12 +211,20 @@
 
 - (id)tableView:(CPTableView)aTableView objectValueForTableColumn:(int)aColumn row:(int)aRow
 {
-    return sortedRepos[aRow];
+    if (aRow === 0)
+        return {identifier:"REPOSITORIES", private:NO};
+
+    return sortedRepos[aRow - 1];
 }
 
 - (int)numberOfRowsInTableView:(CPTableView)aTableView
 {
-    return sortedRepos.length;
+    return sortedRepos.length + 1;
+}
+
+- (BOOL)tableView:(CPTableView)aTableView isGroupRow:(int)aRow
+{
+    return aRow === 0;
 }
 
 @end
@@ -222,7 +233,7 @@
 
 - (BOOL)tableView:(CPTableView)aTableView writeRowsWithIndexes:(CPIndexSet)rowIndexes toPasteboard:(CPPasteboard)pboard
 {
-    if(aTableView === sourcesListView)
+    if(aTableView === sourcesListView && ![rowIndexes containsIndex:0])
     {
         // encode the index(es)being dragged
         var encodedData = [CPKeyedArchiver archivedDataWithRootObject:rowIndexes];
@@ -242,8 +253,8 @@
 {
     if(aTableView === sourcesListView)
     {
-        if([info draggingSource] !== sourcesListView && row >= [sortedRepos count] || row < 0)
-            row = [sortedRepos count] - 1;
+        if([info draggingSource] !== sourcesListView && row >= [sortedRepos count] || row < 1)
+            row = [sortedRepos count];
 
         if([info draggingSource] === sourcesListView)
         {
@@ -266,18 +277,25 @@
 
             rowData = [CPKeyedUnarchiver unarchiveObjectWithData:rowData];
 
-            //row data contains an index set
-            //move the object at the first index to the row...
+            // if we drop below the drag point we must subtract one
             if([rowData firstIndex] < row)
-                var dropRow = row - 1;
+                var dropRow = row -1;
+            // otherwise we're on the correct index
             else
                 var dropRow = row;
 
-            var movedObject = [sortedRepos objectAtIndex:[rowData firstIndex]];
-            [sortedRepos removeObjectAtIndex:[rowData firstIndex]];
+            // remember that we must take into account that the first row is always the group row
+            dropRow--;
+
+            var movedObject = [sortedRepos objectAtIndex:[rowData firstIndex] - 1];
+            [sortedRepos removeObjectAtIndex:[rowData firstIndex] - 1];
             [sortedRepos insertObject:movedObject atIndex:dropRow];
+
+            // select the new row before we reload the data
             [sourcesListView reloadData];
-            [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:dropRow] byExtendingSelection:NO];
+            [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:dropRow + 1] byExtendingSelection:NO];
+            // select the row (index + 1 to account for the first group row)
+
 
             [aTableView _noteSelectionDidChange];
             return YES;

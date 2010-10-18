@@ -18,6 +18,21 @@
     [nameField setFont:[CPFont systemFontOfSize:13.0]];
     [nameField setVerticalAlignment:CPCenterVerticalTextAlignment];
     [self unsetThemeState:CPThemeStateSelectedDataView];
+
+
+    [nameField setValue:[CPColor colorWithCalibratedWhite:0 alpha:1]           forThemeAttribute:"text-color"         inState:CPThemeStateTableDataView];
+    [nameField setValue:[CPColor colorWithCalibratedWhite:1 alpha:1]           forThemeAttribute:"text-shadow-color"  inState:CPThemeStateTableDataView];
+    [nameField setValue:CGSizeMake(0,1)                                        forThemeAttribute:"text-shadow-offset" inState:CPThemeStateTableDataView];
+
+    [nameField setValue:[CPColor colorWithCalibratedWhite:1 alpha:1.0]         forThemeAttribute:"text-color"         inState:CPThemeStateTableDataView | CPThemeStateSelectedTableDataView];
+    [nameField setValue:[CPColor colorWithCalibratedWhite:0 alpha:1]           forThemeAttribute:"text-shadow-color"  inState:CPThemeStateTableDataView | CPThemeStateSelectedTableDataView];
+    [nameField setValue:CGSizeMake(0,-1)                                       forThemeAttribute:"text-shadow-offset" inState:CPThemeStateTableDataView | CPThemeStateSelectedTableDataView];
+
+    [nameField setValue:[CPFont boldSystemFontOfSize:12.0]                     forThemeAttribute:"font"               inState:CPThemeStateTableDataView | CPThemeStateGroupRow];
+    [nameField setValue:[CPColor colorWithCalibratedWhite:125 / 255 alpha:1.0] forThemeAttribute:"text-color"         inState:CPThemeStateTableDataView | CPThemeStateGroupRow];
+    [nameField setValue:[CPColor colorWithCalibratedWhite:1 alpha:1]           forThemeAttribute:"text-shadow-color"  inState:CPThemeStateTableDataView | CPThemeStateGroupRow];
+    [nameField setValue:CGSizeMake(0,1)                                        forThemeAttribute:"text-shadow-offset" inState:CPThemeStateTableDataView | CPThemeStateGroupRow];
+    [nameField setValue:CGInsetMake(1.0, 0.0, 0.0, 2.0)                        forThemeAttribute:"content-inset"      inState:CPThemeStateTableDataView | CPThemeStateGroupRow];
 }
 
 - (void)setObjectValue:(Object)anObject
@@ -29,25 +44,20 @@
 - (void)setThemeState:(CPThemeState)aState
 {
     [super setThemeState:aState];
+    [nameField setThemeState:aState];
+
     if (aState === CPThemeStateSelectedDataView)
-    {
         [self setBackgroundColor:backgroundColor];
-        [nameField setTextColor:[CPColor whiteColor]];
-        [nameField setTextShadowColor:[CPColor colorWithCalibratedRed: 0 green: 0 blue: 0 alpha:0.45]];
-        [nameField setTextShadowOffset:CGSizeMake(0.0, -1.0)];
-    }
+       
 }
 
 - (void)unsetThemeState:(CPThemeState)aState
 {
     [super unsetThemeState:aState];
+    [nameField unsetThemeState:aState];
+
     if (aState === CPThemeStateSelectedDataView)
-    {
         [self setBackgroundColor:nil];
-        [nameField setTextColor:[CPColor blackColor]];
-        [nameField setTextShadowColor:[CPColor whiteColor]];
-        [nameField setTextShadowOffset:CGSizeMake(0.0, 1.0)];
-    }
 }
 
 - (id)initWithCoder:(CPCoder)aCoder
