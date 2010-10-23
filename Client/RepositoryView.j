@@ -88,7 +88,7 @@
     [nameField sizeToFit];
 
     var fitWidth = CGRectGetMaxX([nameField frame]),
-        nameFrameSize = CGSizeMake((fitWidth > maxWidth ? maxWidth : fitWidth) + 2, 26),
+        nameFrameSize = CGSizeMake((fitWidth > maxWidth ? maxWidth : fitWidth) - 6, 26),
         lockOrigin = CGPointMake((fitWidth > maxWidth ? maxWidth : fitWidth) + 2, 0);
 
 
@@ -119,6 +119,7 @@
 @end
 
 @implementation BadgeView : _CPTokenFieldToken
+// we take this from CPTextField because we want to skip the super implementation
 - (void)layoutSubviews
 {
     var bezelView = [self layoutEphemeralSubviewNamed:@"bezel-view"
@@ -134,19 +135,7 @@
 
     if (contentView)
     {
-        [contentView setHidden:[self hasThemeState:CPThemeStateEditing]];
-
-        var string = "";
-
-        if ([self hasThemeState:CPTextFieldStatePlaceholder])
-            string = [self placeholderString];
-        else
-        {
-            string = [self stringValue];
-
-            if ([self isSecure])
-                string = secureStringForString(string);
-        }
+        var string = [self stringValue];
 
         [contentView setText:string];
 
