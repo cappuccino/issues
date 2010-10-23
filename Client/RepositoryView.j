@@ -88,8 +88,8 @@
     [nameField sizeToFit];
 
     var fitWidth = CGRectGetMaxX([nameField frame]),
-        nameFrameSize = CGSizeMake((fitWidth > maxWidth ? : maxWidth : fitWidth) + 2, 26),
-        lockOrigin = CGPointMake((fitWidth > maxWidth ? : maxWidth : fitWidth) + 2, 0);
+        nameFrameSize = CGSizeMake((fitWidth > maxWidth ? maxWidth : fitWidth) + 2, 26),
+        lockOrigin = CGPointMake((fitWidth > maxWidth ? maxWidth : fitWidth) + 2, 0);
 
 
     [nameField setFrameSize:nameFrameSize];
