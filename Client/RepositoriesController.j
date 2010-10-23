@@ -17,6 +17,8 @@
 {
     self = [super init];
     sortedRepos = [];
+    REPOS = sortedRepos;
+
     return self;
 }
 
@@ -41,7 +43,7 @@
     [minusButton setAction:@selector(removeRepository:)];
     [changeOrientationButton setTarget:[CPApp delegate]];
     [changeOrientationButton setAction:@selector(swapMainWindowOrientation:)];
-    [changeOrientationButton setImage:[[CPImage alloc] initWithContentsOfFile:[[CPBundle mainBundle] pathForResource:"swapOrientationIcon.png"] size:CGSizeMake(12,12)]];
+    [changeOrientationButton setImage:[[CPImage alloc] initWithContentsOfFile:[[CPBundle mainBundle] pathForResource:"swapOrientationIcon2.png"] size:CGSizeMake(15,11)]];
 
     [sourcesListButtonBar setButtons:[plusButton, minusButton, changeOrientationButton]];
     [sourcesListButtonBar setValue:bezelColor forThemeAttribute:"bezel-color"];
@@ -212,7 +214,7 @@
 - (id)tableView:(CPTableView)aTableView objectValueForTableColumn:(int)aColumn row:(int)aRow
 {
     if (aRow === 0)
-        return {identifier:"REPOSITORIES", "private":NO};
+        return {identifier:"REPOSITORIES", "private":NO, open_issues:0};
 
     return sortedRepos[aRow - 1];
 }
