@@ -47,9 +47,13 @@
     [nameField setStringValue:anObject.identifier];
     [lockView setHidden:!anObject["private"]];
 
-    if (anObject.open_issues > 0)
+    // since we don't update the issue count on the object if the actual issues are loaded
+    // we can just pull that value from the array of issues.
+    var count = anObject.openIssues ? anObject.openIssues.length : anObject.open_issues;
+
+    if (count > 0)
     {
-        [openIssuesBadge setStringValue:anObject.open_issues];
+        [openIssuesBadge setStringValue:count];
         [openIssuesBadge sizeToFit];
         [openIssuesBadge setHidden:NO]
     }

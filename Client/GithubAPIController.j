@@ -12,6 +12,7 @@ var SharedController = nil,
 
 // Sent whenever an issue changes
 GitHubAPIIssueDidChangeNotification = @"GitHubAPIIssueDidChangeNotification";
+GitHubAPIRepoDidChangeNotification  = "GitHubAPIRepoDidChangeNotification";
 
 
 CFHTTPRequest.AuthenticationDelegate = function(aRequest)
@@ -225,6 +226,9 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
         {
             try {
                 var issues = [[CPDictionary dictionaryWithJSObject:JSON.parse(openRequest.responseText()) recursively:YES] objectForKey:"issues"];
+
+                [self _noteRepoChanged:aRepo];
+
                 aRepo.openIssues = issues;
 
                 var maxPosition = 0,
@@ -390,6 +394,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
             aRepo.closedIssues.unshift(anIssue);
 
             [self _noteIssueChanged:anIssue];
+            [self _noteRepoChanged:aRepo];
         }
 
         if (aCallback)
@@ -417,6 +422,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
             aRepo.openIssues.unshift(anIssue);
 
             [self _noteIssueChanged:anIssue];
+            [self _noteRepoChanged:aRepo];
         }
 
         if (aCallback)
@@ -451,6 +457,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
                 
                 aRepo.openIssuesMax = MAX([issue objectForKey:"position"], aRepo.openIssuesMax);
                 aRepo.openIssuesMin = MIN([issue objectForKey:"position"], aRepo.openIssuesMin);
+                [self _noteRepoChanged:aRepo];
             }
             catch (e) {
                 CPLog.error("Unable to open new issue: "+aTitle+" -- "+e);
@@ -574,6 +581,13 @@ because one day maybe GitHub will give this to me... :)
 {
     [[CPNotificationCenter defaultCenter] postNotificationName:GitHubAPIIssueDidChangeNotification
                                                         object:anIssue
+                                                      userInfo:nil];
+}
+
+- (void)_noteRepoChanged:(id)aRepo
+{
+    [[CPNotificationCenter defaultCenter] postNotificationName:GitHubAPIRepoDidChangeNotification
+                                                        object:nil
                                                       userInfo:nil];
 }
 

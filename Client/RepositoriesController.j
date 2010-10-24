@@ -73,6 +73,11 @@
     [[[sourcesListView enclosingScrollView] superview] setBackgroundColor:[CPColor colorWithHexString:@"eef2f8"]];
 
     [self showNoReposView];
+
+    [[CPNotificationCenter defaultCenter] addObserver:sourcesListView
+                                             selector:@selector(reloadData)
+                                                 name:GitHubAPIRepoDidChangeNotification
+                                               object:nil];
 }
 
 - (void)showNoReposView
