@@ -5,26 +5,21 @@
 {
     @outlet CPImageView lockView;
     @outlet CPTextField nameField;
-            BadgeView   openIssuesBadge;
+    @outlet CPTextField openIssuesBadge;
             CPColor     backgroundColor;
 }
 
 - (void)awakeFromCib
 {
-    console.log([lockView imageScaling]);
     var path = [[CPBundle mainBundle] pathForResource:"sourceListSelectionBackground.png"],
         image = [[CPImage alloc] initWithContentsOfFile:path size:CGSizeMake(1, 26)];
 
     backgroundColor = [CPColor colorWithPatternImage:image];
 
-    openIssuesBadge = [[BadgeView alloc] initWithFrame:CGRectMake(0,0,30,19)];
-    [self addSubview:openIssuesBadge];
-
     [nameField setLineBreakMode:CPLineBreakByTruncatingTail];
     [nameField setFont:[CPFont boldSystemFontOfSize:11.0]];
     [nameField setVerticalAlignment:CPCenterVerticalTextAlignment];
     [self unsetThemeState:CPThemeStateSelectedDataView];
-
 
     [nameField setValue:[CPColor colorWithCalibratedRed:71/255 green:90/255 blue:102/255 alpha:1]           forThemeAttribute:"text-color"         inState:CPThemeStateTableDataView];
     [nameField setValue:[CPColor colorWithCalibratedWhite:1 alpha:1]           forThemeAttribute:"text-shadow-color"  inState:CPThemeStateTableDataView];
@@ -40,7 +35,11 @@
     [nameField setValue:CGSizeMake(0,1)                                        forThemeAttribute:"text-shadow-offset" inState:CPThemeStateTableDataView | CPThemeStateGroupRow];
     [nameField setValue:CGInsetMake(1.0, 0.0, 0.0, 2.0)                        forThemeAttribute:"content-inset"      inState:CPThemeStateTableDataView | CPThemeStateGroupRow];
 
-    [openIssuesBadge setValue:CGInsetMake(1.0, 10.0, 2.0, 10.0) forThemeAttribute:"content-inset" inState:CPThemeStateBezeled];
+    [openIssuesBadge setValue:CGInsetMake(2.0, 10.0, 2.0, 10.0) forThemeAttribute:"content-inset"];
+    [openIssuesBadge setValue:[[CPTheme defaultTheme] valueForAttributeWithName:"bezel-color" 
+                                                                        inState:CPThemeStateBezeled 
+                                                                       forClass:[_CPTokenFieldToken class]]
+            forThemeAttribute:"bezel-color"];
 }
 
 - (void)setObjectValue:(Object)anObject
@@ -116,36 +115,4 @@
     [aCoder encodeObject:backgroundColor forKey:"backgroundColor"];
 }
 
-@end
-
-@implementation BadgeView : _CPTokenFieldToken
-// we take this from CPTextField because we want to skip the super implementation
-- (void)layoutSubviews
-{
-    var bezelView = [self layoutEphemeralSubviewNamed:@"bezel-view"
-                                           positioned:CPWindowBelow
-                      relativeToEphemeralSubviewNamed:@"content-view"];
-
-    if (bezelView)
-        [bezelView setBackgroundColor:[self currentValueForThemeAttribute:@"bezel-color"]];
-
-    var contentView = [self layoutEphemeralSubviewNamed:@"content-view"
-                                             positioned:CPWindowAbove
-                        relativeToEphemeralSubviewNamed:@"bezel-view"];
-
-    if (contentView)
-    {
-        var string = [self stringValue];
-
-        [contentView setText:string];
-
-        [contentView setTextColor:[self currentValueForThemeAttribute:@"text-color"]];
-        [contentView setFont:[self currentValueForThemeAttribute:@"font"]];
-        [contentView setAlignment:[self currentValueForThemeAttribute:@"alignment"]];
-        [contentView setVerticalAlignment:[self currentValueForThemeAttribute:@"vertical-alignment"]];
-        [contentView setLineBreakMode:[self currentValueForThemeAttribute:@"line-break-mode"]];
-        [contentView setTextShadowColor:[self currentValueForThemeAttribute:@"text-shadow-color"]];
-        [contentView setTextShadowOffset:[self currentValueForThemeAttribute:@"text-shadow-offset"]];
-    }
-}
 @end
