@@ -10,6 +10,7 @@
 @import <AppKit/CPScrollView.j>
 @import <AppKit/CPTableColumn.j>
 @import <AppKit/CPCookie.j>
+@import <AppKit/CPSegmentedControl.j>
 @import <Foundation/CPDate.j>
 @import <Foundation/CPTimer.j>
 @import "RepositoriesController.j"

@@ -35,11 +35,15 @@
     [nameField setValue:CGSizeMake(0,1)                                        forThemeAttribute:"text-shadow-offset" inState:CPThemeStateTableDataView | CPThemeStateGroupRow];
     [nameField setValue:CGInsetMake(1.0, 0.0, 0.0, 2.0)                        forThemeAttribute:"content-inset"      inState:CPThemeStateTableDataView | CPThemeStateGroupRow];
 
-    [openIssuesBadge setValue:CGInsetMake(2.0, 10.0, 2.0, 10.0) forThemeAttribute:"content-inset"];
+    [openIssuesBadge setValue:CGInsetMake(2.0, 10.0, 4.0, 10.0) forThemeAttribute:"content-inset"];
     [openIssuesBadge setValue:[[CPTheme defaultTheme] valueForAttributeWithName:"bezel-color" 
                                                                         inState:CPThemeStateBezeled 
                                                                        forClass:[_CPTokenFieldToken class]]
             forThemeAttribute:"bezel-color"];
+
+    [openIssuesBadge setValue:[CPFont systemFontOfSize:11] forThemeAttribute:"font"];
+    [openIssuesBadge setValue:CGSizeMake(0,1) forThemeAttribute:"text-shadow-offset"];
+    [openIssuesBadge setValue:[CPColor colorWithCalibratedWhite:1 alpha:0.5] forThemeAttribute:"text-shadow-color"];
 }
 
 - (void)setObjectValue:(Object)anObject
