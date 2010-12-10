@@ -53,7 +53,7 @@ function getAccessKey(request, response, code) {
         });
         askForAccessToken_response.addListener("end", function() {
 
-            var newBody = "<html><head><title>Authenticated</title><script>document.cookie='github."+ askForAccessToken_response.body +"';</script></head><body></body></html>";
+            var newBody = "<html><head><title>Authenticated</title><script>window.opener.auth('"+askForAccessToken_response.body+"', this); function token(){ return '"+askForAccessToken_response.body+"'; }; document.cookie='github."+ askForAccessToken_response.body +"';</script></head><body></body></html>";
 
             response.writeHead(askForAccessToken_response.statusCode, askForAccessToken_response.headers["content-length"] = newBody.length);
             response.write(newBody);
