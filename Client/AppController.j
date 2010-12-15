@@ -10,6 +10,9 @@
 @import <AppKit/CPScrollView.j>
 @import <AppKit/CPTableColumn.j>
 @import <AppKit/CPCookie.j>
+@import <AppKit/CPSegmentedControl.j>
+@import <Foundation/CPDate.j>
+@import <Foundation/CPTimer.j>
 @import "RepositoriesController.j"
 @import "IssuesController.j"
 @import "OctoWindows.j"
@@ -19,6 +22,8 @@
 @import "GithubAPIController.j"
 @import "LPMultiLineTextField.j"
 @import "AboutPanelController.j"
+@import "RLTableHeaderView.j"
+@import "OAuthController.j"
 
 @implementation AppController : CPObject
 {
@@ -71,7 +76,6 @@
                     if (argCount >= 3)
                     {
                         [[GithubAPIController sharedController] loadIssuesForRepository:repo callback:function(){
-
                             var issueNumber = parseInt(args[2], 10),
                                 openIssues = repo.openIssues,
                                 count = openIssues.length,
@@ -132,9 +136,16 @@
     }
 
     var usernameCookie = [[CPCookie alloc] initWithName:@"github.username"],
-        apiTokenCookie = [[CPCookie alloc] initWithName:@"github.apiToken"];
+        apiTokenCookie = [[CPCookie alloc] initWithName:@"github.apiToken"],
+        oauthAccessCookie = [[CPCookie alloc] initWithName:@"github.access_token"];
 
-    if ([usernameCookie value] && [apiTokenCookie value])
+    if ([oauthAccessCookie value])
+    {
+        var controller = [GithubAPIController sharedController];
+        [controller setOauthAccessToken:[oauthAccessCookie value]];
+        [controller authenticateWithCallback:initializationFunction];
+    }
+    else if ([usernameCookie value] && [apiTokenCookie value])
     {
         var controller = [GithubAPIController sharedController];
         [controller setUsername:[usernameCookie value]];
@@ -144,6 +155,15 @@
     else
         initializationFunction();
 
+    // special DOM hook if you have unsubmitted issues or comments.
+    window.onbeforeunload = function() {
+        if(issuesController._openIssueWindows > 0)
+            return "You have unsubmitted issues. Reloading or quitting the application will prevent you from submitting these issues. You have Are you sure you want to quit?";
+        try {
+            if([[issuesController issueWebView] DOMWindow].hasUnsubmittedComment())
+                return "You have an unsubmitted comment. This comment will be lost if you reload or quit the application. Are you sure you want to quit?";
+        }catch (e){}
+    }
 }
 
 - (void)applicationWillTerminate:(CPNotification)aNote
@@ -161,11 +181,14 @@
     [[[CPCookie alloc] initWithName:@"github.apiToken"] setValue:[githubController authenticationToken] || ""
                                                          expires:[CPDate dateWithTimeIntervalSinceNow:31536000]
                                                           domain:nil];
+
+    [[[CPCookie alloc] initWithName:@"github.access_token"] setValue:[githubController oauthAccessToken] || ""
+                                                         expires:[CPDate dateWithTimeIntervalSinceNow:31536000]
+                                                          domain:nil];
 }
 
 - (void)awakeFromCib
 {
-    [topLevelSplitView setIsPaneSplitter:YES];
     [CPMenu setMenuBarVisible:NO];
 
     var toolbar = [[CPToolbar alloc] initWithIdentifier:"mainToolbar"];
@@ -180,7 +203,11 @@
     if ([CPPlatform isBrowser])
         [[toolbar _toolbarView] setBackgroundColor:toolbarColor];
 
-    [toolbar validateVisibleToolbarItems];
+    [toolbar validateVisibleItems];
+
+    var reloadItem = [[CPMenuItem alloc] initWithTitle:"Reload Issues" action:@selector(reload:) keyEquivalent:"r"];
+    [reloadItem setTarget:issuesController];
+    [[CPApp mainMenu] addItem:reloadItem];
 }
 
 - (CGFloat)splitView:(CPSplitView)splitView constrainMinCoordinate:(float)proposedMin ofSubviewAt:(int)dividerIndex
@@ -199,12 +226,12 @@
 
 -(CPArray)toolbarAllowedItemIdentifiers:(CPToolbar)toolbar
 {
-    return [CPToolbarFlexibleSpaceItemIdentifier, CPToolbarSpaceItemIdentifier, "searchfield", "newissue", "switchViewStatus", "commentissue", "openissue", "reload", "closeissue", "logo"];
+    return [CPToolbarFlexibleSpaceItemIdentifier, CPToolbarSpaceItemIdentifier, "searchfield", "newissue", "switchViewStatus", "commentissue", "tagissue", "openissue", "reload", "closeissue", "logo"];
 }
 
 -(CPArray)toolbarDefaultItemIdentifiers:(CPToolbar)toolbar
 {
-    var items = ["switchViewStatus", CPToolbarFlexibleSpaceItemIdentifier, "newissue", "commentissue", "closeissue", "openissue", "reload", CPToolbarFlexibleSpaceItemIdentifier, @"searchfield"];
+    var items = ["switchViewStatus", CPToolbarFlexibleSpaceItemIdentifier, "newissue", "commentissue", "tagissue", "closeissue", "openissue", "reload", CPToolbarFlexibleSpaceItemIdentifier, @"searchfield"];
 
     if ([CPPlatform isBrowser])
         items.unshift("logo");
@@ -248,7 +275,7 @@
 
             [toolbarItem setTarget:issuesController];
             [toolbarItem setAction:@selector(newIssue:)];
-            [toolbarItem setLabel:"New Issue"];
+            [toolbarItem setLabel:"New"];
             [toolbarItem setTag:@"NewIssue"];
             
             [toolbarItem setMinSize:CGSizeMake(32, 32)];
@@ -265,7 +292,7 @@
             
             [toolbarItem setTarget:issuesController];
             [toolbarItem setAction:@selector(reopenIssue:)];
-            [toolbarItem setLabel:"Re-open Issue"];
+            [toolbarItem setLabel:"Re-open"];
             [toolbarItem setTag:@"Open"];
             
             [toolbarItem setMinSize:CGSizeMake(32, 32)];
@@ -282,12 +309,12 @@
             
             [toolbarItem setTarget:issuesController];
             [toolbarItem setAction:@selector(closeIssue:)];
-            [toolbarItem setLabel:"Close Issue"];
+            [toolbarItem setLabel:"Close"];
             [toolbarItem setTag:@"Close"];
             [toolbarItem setEnabled:NO];
             
-            [toolbarItem setMinSize:CGSizeMake(32, 32)];
-            [toolbarItem setMaxSize:CGSizeMake(32, 32)];
+            [toolbarItem setMinSize:CGSizeMake(38, 32)];
+            [toolbarItem setMaxSize:CGSizeMake(38, 32)];
             [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityHigh];
         break;
 
@@ -300,7 +327,7 @@
 
             [toolbarItem setTarget:issuesController];
             [toolbarItem setAction:@selector(reload:)];
-            [toolbarItem setLabel:"Reload Issues"];
+            [toolbarItem setLabel:"Reload"];
             [toolbarItem setTag:@"Reload"];
             [toolbarItem setEnabled:NO];
 
@@ -323,6 +350,23 @@
             
             [toolbarItem setMinSize:CGSizeMake(32, 32)];
             [toolbarItem setMaxSize:CGSizeMake(32, 32)];
+            [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityHigh];
+        break;
+
+        case @"tagissue":
+            var image = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"tagIcon.png"] size:CPSizeMake(26, 27)],
+                highlighted = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"tagIconHighlighted.png"] size:CPSizeMake(26, 27)];
+
+            [toolbarItem setImage:image];
+            [toolbarItem setAlternateImage:highlighted];
+
+            [toolbarItem setTarget:issuesController];
+            [toolbarItem setAction:@selector(tag:)];
+            [toolbarItem setLabel:@"Tag"];
+            [toolbarItem setTag:@"Tag"];
+
+            [toolbarItem setMinSize:CGSizeMake(42.0, 32.0)];
+            [toolbarItem setMaxSize:CGSizeMake(42.0, 32.0)];
             [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityHigh];
         break;
 

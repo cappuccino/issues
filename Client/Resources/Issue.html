@@ -399,6 +399,9 @@ img.issue-author-image {
                 <script type="text/javascript">
 
 function toggleIssueState() {
+    if (!REPO)
+        return;
+
     if (STATE === "open")
         GitHubAPI.closeIssue(ISSUE, REPO);
     else
@@ -417,6 +420,9 @@ function hideCommentForm() {
 }
 
 function submitCommentForm() {
+    if (!REPO)
+        return;
+
 	var errorMessageField = document.getElementById("comment-form-error-message"),
         textarea = document.getElementById("add-comment-textarea");
 
@@ -431,6 +437,14 @@ function submitCommentForm() {
     });
 }
 
+function editIssue() {
+    if (REPO)
+        GitHubAPI.openEditWindow(ISSUE, REPO);
+}
+
+function hasUnsubmittedComment() {
+    return document.getElementById("add-comment-textarea").value;
+}
                 </script>
 
     </head>
@@ -447,7 +461,10 @@ function submitCommentForm() {
                             <h1 class="issue-title">{{title}}</h1>
                             <div class="issue-body">
                                 {{{body_html}}}
-                                <p><a target="_blank" class="view-on-github" href="http://github.com/{{repo_identifier}}/issues/{{number}}">View on github</a></p>
+                                <p>
+                                    <a target="_blank" class="view-on-github" href="http://github.com/{{repo_identifier}}/issues/{{number}}">View on github</a>
+                                     | <a class="view-on-github" href="#" onclick="editIssue(); return false;">Edit</a>
+                                </p>
                             </div>
                         </div>
                     </div>

@@ -17,6 +17,8 @@
 {
     self = [super init];
     sortedRepos = [];
+    REPOS = sortedRepos;
+
     return self;
 }
 
@@ -24,6 +26,7 @@
 {
     var plusButton = [CPButtonBar plusButton],
         minusButton = [CPButtonBar minusButton],
+        changeOrientationButton = [CPButtonBar minusButton],
         bezelColor = [CPColor colorWithPatternImage:[[CPImage alloc] initWithContentsOfFile:[[CPBundle mainBundle] pathForResource:"buttonBarBackground.png"] size:CGSizeMake(1, 27)]],
         leftBezel = [[CPImage alloc] initWithContentsOfFile:[[CPBundle mainBundle] pathForResource:"buttonBarLeftBezel.png"] size:CGSizeMake(2, 26)],
         centerBezel = [[CPImage alloc] initWithContentsOfFile:[[CPBundle mainBundle] pathForResource:"buttonBarCenterBezel.png"] size:CGSizeMake(1, 26)],
@@ -38,12 +41,16 @@
     [plusButton setAction:@selector(promptForNewRepository:)];
     [minusButton setTarget:self];
     [minusButton setAction:@selector(removeRepository:)];
+    [changeOrientationButton setTarget:[CPApp delegate]];
+    [changeOrientationButton setAction:@selector(swapMainWindowOrientation:)];
+    [changeOrientationButton setImage:[[CPImage alloc] initWithContentsOfFile:[[CPBundle mainBundle] pathForResource:"swapOrientationIcon2.png"] size:CGSizeMake(15,11)]];
 
-    [sourcesListButtonBar setButtons:[plusButton, minusButton]];
+    [sourcesListButtonBar setButtons:[plusButton, minusButton, changeOrientationButton]];
     [sourcesListButtonBar setValue:bezelColor forThemeAttribute:"bezel-color"];
     [sourcesListButtonBar setValue:buttonBezel forThemeAttribute:"button-bezel-color"];
     [sourcesListButtonBar setValue:buttonBezelHighlighted forThemeAttribute:"button-bezel-color" inState:CPThemeStateHighlighted];
 
+    [sourcesListView setIntercellSpacing:CGSizeMakeZero()];
     [sourcesListView setHeaderView:nil];
     [sourcesListView setCornerView:nil];
 
@@ -66,6 +73,11 @@
     [[[sourcesListView enclosingScrollView] superview] setBackgroundColor:[CPColor colorWithHexString:@"eef2f8"]];
 
     [self showNoReposView];
+
+    [[CPNotificationCenter defaultCenter] addObserver:sourcesListView
+                                             selector:@selector(reloadData)
+                                                 name:GitHubAPIRepoDidChangeNotification
+                                               object:nil];
 }
 
 - (void)showNoReposView
@@ -106,11 +118,13 @@
     var count = sortedRepos.length,
         repoIdentifier = aRepo.identifier;
 
+    [[GithubAPIController sharedController] loadLabelsForRepository:aRepo];
+
     for (var index = 0; index < count; index++)
     {
         if (sortedRepos[index].identifier === repoIdentifier)
         {
-            [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:index] byExtendingSelection:NO];
+            [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:index + 1] byExtendingSelection:NO];
             [self tableViewSelectionDidChange:nil];
             return;
         }
@@ -120,7 +134,7 @@
     {
         sortedRepos.unshift(aRepo);
         [sourcesListView reloadData];
-        [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
+        [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:1] byExtendingSelection:NO];
         [self tableViewSelectionDidChange:nil];
     }
     else
@@ -139,7 +153,7 @@
 
     sortedRepos = repos;
     [sourcesListView reloadData];
-    [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
+    [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:1] byExtendingSelection:NO];
     [self tableViewSelectionDidChange:nil];
 
     [self hideNoReposView];
@@ -153,28 +167,41 @@
 
 - (@action)removeRepository:(id)sender
 {
-    var selectedRow = [sourcesListView selectedRow];
+    var selectedRow = [sourcesListView selectedRow] - 1;
+
     if (selectedRow < 0)
         return;
 
-    sortedRepos.splice(selectedRow, 1);
-    [sourcesListView reloadData];
+    [sortedRepos removeObjectAtIndex:selectedRow];
 
     if (sortedRepos.length === 0)
     {
         [self showNoReposView];        
         [sourcesListView selectRowIndexes:[CPIndexSet indexSet] byExtendingSelection:NO];
+        [self tableViewSelectionDidChange:nil];
     }
-    else
-        [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:MAX(MIN(selectedRow, sortedRepos.length - 1), 0)] byExtendingSelection:NO];
 
-    [self tableViewSelectionDidChange:nil];
+    [sourcesListView reloadData];
+}
+
+- (BOOL)tableView:(CPTableView)aTableView shouldSelectRow:(int)aRow
+{
+    if (aRow === 0)
+        return NO;
+
+    var callback = function()
+    {
+        [aTableView selectRowIndexes:[CPIndexSet indexSetWithIndex:aRow] byExtendingSelection:NO];
+        [self tableViewSelectionDidChange:nil];
+    }
+    return [issuesController _shouldUnloadIssueWithCallBack:callback];
 }
 
 - (void)tableViewSelectionDidChange:(CPNotification)aNotification
 {
-    var selectedRow = [sourcesListView selectedRow];
-    if (selectedRow === -1)
+    var selectedRow = MAX([sourcesListView selectedRow] - 1, CPNotFound);
+
+    if (selectedRow === CPNotFound)
     {
         [CPApp setArguments:[]];
         [issuesController setRepo:nil];
@@ -186,26 +213,30 @@
         [issuesController setRepo:repo];
     }
 
-    [[[[CPApp delegate] mainWindow] toolbar] validateVisibleToolbarItems];
+    [[[[CPApp delegate] mainWindow] toolbar] validateVisibleItems];
 }
 
 - (id)tableView:(CPTableView)aTableView objectValueForTableColumn:(int)aColumn row:(int)aRow
 {
-    return sortedRepos[aRow];
+    if (aRow === 0)
+        return {identifier:"REPOSITORIES", "private":NO, open_issues:0};
+
+    return sortedRepos[aRow - 1];
 }
 
 - (int)numberOfRowsInTableView:(CPTableView)aTableView
 {
-    return sortedRepos.length;
+    return sortedRepos.length + 1;
 }
 
-@end
-
-@implementation RepositoriesController (tableViewDragDrop)
+- (BOOL)tableView:(CPTableView)aTableView isGroupRow:(int)aRow
+{
+    return aRow === 0;
+}
 
 - (BOOL)tableView:(CPTableView)aTableView writeRowsWithIndexes:(CPIndexSet)rowIndexes toPasteboard:(CPPasteboard)pboard
 {
-    if(aTableView === sourcesListView)
+    if(aTableView === sourcesListView && ![rowIndexes containsIndex:0])
     {
         // encode the index(es)being dragged
         var encodedData = [CPKeyedArchiver archivedDataWithRootObject:rowIndexes];
@@ -225,8 +256,8 @@
 {
     if(aTableView === sourcesListView)
     {
-        if([info draggingSource] !== sourcesListView && row >= [sortedRepos count] || row < 0)
-            row = [sortedRepos count] - 1;
+        if([info draggingSource] !== sourcesListView && row >= [sortedRepos count] || row < 1)
+            row = [sortedRepos count];
 
         if([info draggingSource] === sourcesListView)
         {
@@ -249,18 +280,25 @@
 
             rowData = [CPKeyedUnarchiver unarchiveObjectWithData:rowData];
 
-            //row data contains an index set
-            //move the object at the first index to the row...
+            // if we drop below the drag point we must subtract one
             if([rowData firstIndex] < row)
-                var dropRow = row - 1;
+                var dropRow = row -1;
+            // otherwise we're on the correct index
             else
                 var dropRow = row;
 
-            var movedObject = [sortedRepos objectAtIndex:[rowData firstIndex]];
-            [sortedRepos removeObjectAtIndex:[rowData firstIndex]];
+            // remember that we must take into account that the first row is always the group row
+            dropRow--;
+
+            var movedObject = [sortedRepos objectAtIndex:[rowData firstIndex] - 1];
+            [sortedRepos removeObjectAtIndex:[rowData firstIndex] - 1];
             [sortedRepos insertObject:movedObject atIndex:dropRow];
+
+            // select the new row before we reload the data
             [sourcesListView reloadData];
-            [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:dropRow] byExtendingSelection:NO];
+            [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:dropRow + 1] byExtendingSelection:NO];
+            // select the row (index + 1 to account for the first group row)
+
 
             [aTableView _noteSelectionDidChange];
             return YES;

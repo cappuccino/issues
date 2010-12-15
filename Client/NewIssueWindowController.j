@@ -12,8 +12,11 @@
     @outlet CPImageView          progressView;
     @outlet CPButton             okButton;
     @outlet CPButton             cancelButton;
+    @outlet CPButton             previewButton;
 
     id delegate @accessors;
+    BOOL shouldEdit @accessors;
+    id selectedIssue @accessors;
 }
 
 - (void)awakeFromCib
@@ -23,7 +26,7 @@
 
     [bodyLabel setAlignment:CPRightTextAlignment];
     [repoLabel setAlignment:CPRightTextAlignment];
-    [errorField setAlignment:CPRightTextAlignment]
+
     [bodyLabel setVerticalAlignment:CPCenterVerticalTextAlignment];
     [repoLabel setVerticalAlignment:CPCenterVerticalTextAlignment];
     [errorField setVerticalAlignment:CPCenterVerticalTextAlignment];
@@ -37,15 +40,40 @@
 
     [[self window] setShowsResizeIndicator:YES];
     [[[self window] contentView] setBackgroundColor:[CPColor colorWithWhite:244/255 alpha:1.0]];
+    [[self window] setDelegate:self];
 
     if ([CPPlatform isBrowser] && [CPPlatformWindow supportsMultipleInstances])
     {
         var platformWindow = [[CPPlatformWindow alloc] initWithContentRect:CGRectMake(100, 100, 500, 450)];
         [[self window] setFullBridge:YES];
         [[self window] setPlatformWindow:platformWindow];
+
+        // timeout here because we can't talk to the DOM window until we open it... 
+        window.setTimeout(function(){
+            platformWindow._DOMWindow.onbeforeunload = function() {
+                if (delegate)
+                    delegate._openIssueWindows--;
+            }
+        },0);
     }
 
     [bodyField setBackgroundColor:[CPColor whiteColor]];
+
+    if (selectedIssue)
+    {
+        [bodyField setStringValue:[selectedIssue objectForKey:"body"]];
+        [titleField setStringValue:[selectedIssue objectForKey:"title"]];
+        [selectedRepo setEnabled:NO];
+    }
+}
+
+- (void)setSelectedIssue:(id)anIssue
+{
+    selectedIssue = anIssue;
+
+    [bodyField setStringValue:[selectedIssue objectForKey:"body"]];
+    [titleField setStringValue:[selectedIssue objectForKey:"title"]];
+    [selectedRepo setEnabled:NO];
 }
 
 - (void)setRepos:(CPArray)anArray
@@ -78,24 +106,48 @@
 - (@action)submitNewIssue:(id)sender
 {
     if (![titleField stringValue])
-        [errorField setStringValue:@"Enter a title before submitting this issue."];
+        [errorField setStringValue:@"You must enter a title."];
     else if (![bodyField stringValue])
-        [errorField setStringValue:@"Enter a description before submitting this issue."];
+        [errorField setStringValue:@"You must enter a description."];
     else 
     {
         [errorField setStringValue:""];
         [progressView setHidden:NO];
         [okButton setEnabled:NO];
         [cancelButton setEnabled:NO];
+        [previewButton setEnabled:NO];
 
-        [[GithubAPIController sharedController] openNewIssueWithTitle:[titleField stringValue]
-                                                                 body:[bodyField stringValue]
-                                                           repository:[[selectedRepo selectedItem] tag]
-                                                             callback:function(issue, repo)
+        if (shouldEdit)
         {
+            [[GithubAPIController sharedController] editIsssue:selectedIssue
+                                                        title:[titleField stringValue]
+                                                         body:[bodyField stringValue]
+                                                   repository:[[selectedRepo selectedItem] tag]
+                                                     callback:function(issue, repo)
+            {
             [progressView setHidden:YES];
             [okButton setEnabled:YES];
             [cancelButton setEnabled:YES];
+            [previewButton setEnabled:YES];
+
+            if (!issue)
+                [errorField setStringValue:@"Problem editing issue. Try again."];
+
+            if (issue)
+                [self cancel:nil];
+            }];
+        }
+        else
+        {
+            [[GithubAPIController sharedController] openNewIssueWithTitle:[titleField stringValue]
+                                                                 body:[bodyField stringValue]
+                                                           repository:[[selectedRepo selectedItem] tag]
+                                                             callback:function(issue, repo)
+            {
+            [progressView setHidden:YES];
+            [okButton setEnabled:YES];
+            [cancelButton setEnabled:YES];
+            [previewButton setEnabled:YES];
 
             if (issue && [delegate respondsToSelector:@selector(newIssueWindowController:didAddIssue:toRepo:)])
                 [delegate newIssueWindowController:self didAddIssue:issue toRepo:repo];
@@ -104,8 +156,46 @@
 
             if (issue)
                 [self cancel:nil];
-        }];
+            }];
+        }
     }
+}
+
+- (@action)previewIssue:(id)sender
+{
+    // create a mock issue
+    var issue = [CPDictionary dictionaryWithObjects:[[titleField stringValue], [bodyField stringValue], "You", "open", "#", 0] 
+                                             forKeys:[@"title", @"body", "user", "state", "repo_identifier", "votes"]];
+
+    try {
+        [issue setObject:Markdown.makeHtml([issue objectForKey:"body"] || "") forKey:"body_html"];
+    } catch (e) {
+        [issue setObject:"" forKey:"body_html"];
+    }
+
+    var newWindow = [[CPWindow alloc] initWithContentRect:CGRectMake(100, 100, 800, 600) styleMask:CPTitledWindowMask|CPClosableWindowMask|CPMiniaturizableWindowMask|CPResizableWindowMask];
+    [newWindow setMinSize:CGSizeMake(300, 300)];
+
+    if ([CPPlatform isBrowser] && [CPPlatformWindow supportsMultipleInstances])
+    {
+        var platformWindow = [[CPPlatformWindow alloc] initWithContentRect:CGRectMake(100, 100, 800, 600)];
+        [newWindow setPlatformWindow:platformWindow];
+        [newWindow setFullBridge:YES];
+
+    }
+
+    var contentView = [newWindow contentView],
+        webView = [[IssueWebView alloc] initWithFrame:[contentView bounds]];
+    [webView setAutoresizingMask:CPViewWidthSizable|CPViewHeightSizable];
+
+    [contentView addSubview:webView];
+    [newWindow setTitle:[issue objectForKey:"title"]];
+    [newWindow orderFront:self];
+
+    [newWindow setDelegate:nil];
+    [webView setIssue:issue];
+    [webView setRepo:nil];
+    [webView loadIssue];
 }
 
 - (@action)cancel:(id)sender
@@ -114,9 +204,18 @@
     [progressView setHidden:YES];
     [okButton setEnabled:YES];
     [cancelButton setEnabled:YES];
+    [previewButton setEnabled:YES];
 
     [[self window] close];
-    [[[self window] platformWindow] orderOut:nil];
+
+    if ([CPPlatform isBrowser] && [CPPlatformWindow supportsMultipleInstances])
+        [[[self window] platformWindow] orderOut:nil];
+}
+
+- (BOOL)windowShouldClose:(CPWindow)aWin
+{
+    if ((![CPPlatform isBrowser] || ![CPPlatformWindow supportsMultipleInstances]) && delegate)
+        delegate._openIssueWindows--;
 }
 
 @end

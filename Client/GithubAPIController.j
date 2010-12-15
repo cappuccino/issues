@@ -12,6 +12,7 @@ var SharedController = nil,
 
 // Sent whenever an issue changes
 GitHubAPIIssueDidChangeNotification = @"GitHubAPIIssueDidChangeNotification";
+GitHubAPIRepoDidChangeNotification  = "GitHubAPIRepoDidChangeNotification";
 
 
 CFHTTPRequest.AuthenticationDelegate = function(aRequest)
@@ -26,6 +27,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 {
     CPString        username @accessors;
     CPString        authenticationToken @accessors;
+    CPString        oauthAccessToken @accessors;
 
     CPString        website @accessors;
     CPString        emailAddress @accessors;
@@ -76,6 +78,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
     authenticationToken = nil;
     userImage = nil;
     userThumbnailImage = nil;
+    oauthAccessToken = nil;
     [[CPUserSessionManager defaultManager] setStatus:CPUserSessionLoggedOutStatus];
 }
 
@@ -83,7 +86,12 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 {
     var authString = "?app_id=280issues";
     if ([self isAuthenticated])
-        authString += "&login="+encodeURIComponent(username)+"&token="+encodeURIComponent(authenticationToken);
+    {
+        if (oauthAccessToken)
+            authString += "&access_token="+encodeURIComponent(oauthAccessToken);
+        else
+            authString += "&login="+encodeURIComponent(username)+"&token="+encodeURIComponent(authenticationToken);
+    }
 
     return authString;
 }
@@ -91,7 +99,11 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 - (void)authenticateWithCallback:(Function)aCallback
 {
     var request = new CFHTTPRequest();
-    request.open("GET", BASE_URL+"user/show?login="+encodeURIComponent(username)+"&token="+encodeURIComponent(authenticationToken), true);
+
+    if (oauthAccessToken)
+        request.open("GET", BASE_URL+"user/show?access_token="+encodeURIComponent(oauthAccessToken), true);
+    else
+        request.open("GET", BASE_URL+"user/show?login="+encodeURIComponent(username)+"&token="+encodeURIComponent(authenticationToken), true);
 
     request.oncomplete = function()
     {
@@ -99,6 +111,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
         {
             var response = JSON.parse(request.responseText()).user;
 
+            username = response.login;
             emailAddress = response.email;
             emailAddressHashed = response.gravatar_id || (response.email ? hex_md5(emailAddress) : "");
             website = response.blog;
@@ -116,10 +129,12 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
         }
         else
         {
+            username = nil;
             emailAddress = nil;
             emailAddressHashed = nil;
             website = nil;
             userImage = nil;
+            oauthAccessToken = nil;
 
             [[CPUserSessionManager defaultManager] setStatus:CPUserSessionLoggedOutStatus];
         }
@@ -135,8 +150,17 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 
 - (void)promptForAuthentication:(id)sender
 {
-    var loginWindow = [LoginWindow sharedLoginWindow];
-    [loginWindow makeKeyAndOrderFront:self];
+    // because oauth relies on the server and multiple windows
+    if ([CPPlatform isBrowser] && [CPPlatformWindow supportsMultipleInstances] && BASE_URL === "/github/")
+    {
+        var loginController = [[OAuthController alloc] init];
+        [loginController go];
+    }
+    else
+    {
+        var loginWindow = [LoginWindow sharedLoginWindow];
+        [loginWindow makeKeyAndOrderFront:self];
+    }
 }
 
 - (CPDictionary)repositoryForIdentifier:(CPString)anIdentifier
@@ -202,6 +226,9 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
         {
             try {
                 var issues = [[CPDictionary dictionaryWithJSObject:JSON.parse(openRequest.responseText()) recursively:YES] objectForKey:"issues"];
+
+                [self _noteRepoChanged:aRepo];
+
                 aRepo.openIssues = issues;
 
                 var maxPosition = 0,
@@ -288,6 +315,69 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
     request.send("");
 }
 
+- (void)loadLabelsForRepository:(Repository)aRepo
+{
+    var request = new CFHTTPRequest();
+    request.open(@"GET", [CPString stringWithFormat:@"%@issues/labels/%@/%@", BASE_URL, aRepo.identifier, [self _credentialsString]], YES);
+
+    request.oncomplete = function()
+    {
+        var labels = [];
+        if (request.success())
+        {
+            try
+            {
+                labels = JSON.parse(request.responseText()).labels || [];
+            }
+            catch (e)
+            {
+                CPLog.error(@"Unable to load labels for issue: " + anIssue + @" -- " + e);
+            }
+        }
+
+        aRepo.labels = labels;
+        [[CPRunLoop currentRunLoop] performSelectors];
+    };
+
+    request.send(@"");
+}
+
+- (void)label:(CPString)aLabel forIssue:(Issue)anIssue repository:(Repository)aRepo shouldRemove:(BOOL)shouldRemove
+{
+    var request = new CFHTTPRequest(),
+        addOrRemove = shouldRemove ? @"remove" : @"add";
+
+    request.open(@"GET", [CPString stringWithFormat:@"%@issues/label/%@/%@/%@/%@%@", BASE_URL, addOrRemove, aRepo.identifier, encodeURIComponent(aLabel), [anIssue objectForKey:@"number"], [self _credentialsString]], YES);
+
+    request.oncomplete = function()
+    {
+        [self _checkGithubResponse:request];
+        var labels;
+        if (request.success())
+        {
+            try
+            {
+                // returns all the labels for the issue it was assigned to
+                labels = JSON.parse(request.responseText()).labels || [];
+                [anIssue setObject:labels forKey:@"labels"];
+                [self _noteIssueChanged:anIssue];
+
+                // now that we know it worked add the label to the repo if it's new
+                if (![aRepo.labels containsObject:aLabel])
+                    aRepo.labels.push(aLabel);
+            }
+            catch (e)
+            {
+                CPLog.error(@"Unable to set labels for issue: " + anIssue + @" -- " + e);
+            }
+        }
+
+        [[CPRunLoop currentRunLoop] performSelectors];
+    };
+
+    request.send(@"");
+}
+
 - (void)closeIssue:(id)anIssue repository:(id)aRepo callback:(Function)aCallback
 {
     var request = new CFHTTPRequest();
@@ -295,6 +385,8 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 
     request.oncomplete = function()
     {
+        [self _checkGithubResponse:request];
+
         if (request.success())
         {
             [anIssue setObject:"closed" forKey:"state"];
@@ -302,6 +394,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
             aRepo.closedIssues.unshift(anIssue);
 
             [self _noteIssueChanged:anIssue];
+            [self _noteRepoChanged:aRepo];
         }
 
         if (aCallback)
@@ -320,6 +413,8 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 
     request.oncomplete = function()
     {
+        [self _checkGithubResponse:request];
+
         if (request.success())
         {
             [anIssue setObject:"open" forKey:"state"];
@@ -327,6 +422,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
             aRepo.openIssues.unshift(anIssue);
 
             [self _noteIssueChanged:anIssue];
+            [self _noteRepoChanged:aRepo];
         }
 
         if (aCallback)
@@ -347,6 +443,8 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 
     request.oncomplete = function()
     {
+        [self _checkGithubResponse:request];
+
         if (request.success())
         {
             var issue = nil;
@@ -359,6 +457,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
                 
                 aRepo.openIssuesMax = MAX([issue objectForKey:"position"], aRepo.openIssuesMax);
                 aRepo.openIssuesMin = MIN([issue objectForKey:"position"], aRepo.openIssuesMin);
+                [self _noteRepoChanged:aRepo];
             }
             catch (e) {
                 CPLog.error("Unable to open new issue: "+aTitle+" -- "+e);
@@ -383,7 +482,10 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 
     request.oncomplete = function()
     {
+        [self _checkGithubResponse:request];
+
         var comment = nil;
+
         if (request.success())
         {
             try {
@@ -412,6 +514,47 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
     request.send("");
 }
 
+- (void)editIsssue:(Issue)anIssue title:(CPString)aTitle body:(CPString)aBody repository:(id)aRepo callback:(Function)aCallback
+{
+    // we've got to make two calls one for the title and one for the body
+    var request = new CFHTTPRequest();
+    request.open("POST", BASE_URL+"issues/edit/"+aRepo.identifier+"/"+[anIssue objectForKey:"number"]+[self _credentialsString]+
+                                                 "&title="+encodeURIComponent(aTitle)+
+                                                 "&body="+encodeURIComponent(aBody), true);
+    
+    request.oncomplete = function()
+    {
+        [self _checkGithubResponse:request];
+
+        if (request.success())
+        {
+            var issue = nil;
+            try {
+                issue = [CPDictionary dictionaryWithJSObject:JSON.parse(request.responseText()).issue];
+
+                [anIssue setObject:[issue objectForKey:"title"] forKey:"title"];
+                [anIssue setObject:[issue objectForKey:"body"] forKey:"body"];
+                [anIssue setObject:[issue objectForKey:"updated_at"] forKey:"updated_at"];
+
+                [self _noteIssueChanged:anIssue];
+            }
+            catch (e) {
+                CPLog.error("Unable to open new issue: "+aTitle+" -- "+e);
+            }
+        }
+    
+        if (aCallback)
+            aCallback(issue, aRepo, request);
+    
+        [[CPRunLoop currentRunLoop] performSelectors];
+    }
+    
+    request.send("");
+
+}
+
+/*
+because one day maybe GitHub will give this to me... :) 
 - (void)setPositionForIssue:(id)anIssue inRepository:(id)aRepo to:(int)aPosition callback:(Function)aCallback
 {
     var request = new CFHTTPRequest();
@@ -432,13 +575,57 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
     }
 
     request.send("");
-}
+}*/
 
 - (void)_noteIssueChanged:(id)anIssue
 {
     [[CPNotificationCenter defaultCenter] postNotificationName:GitHubAPIIssueDidChangeNotification
                                                         object:anIssue
                                                       userInfo:nil];
+}
+
+- (void)_noteRepoChanged:(id)aRepo
+{
+    [[CPNotificationCenter defaultCenter] postNotificationName:GitHubAPIRepoDidChangeNotification
+                                                        object:nil
+                                                      userInfo:nil];
+}
+
+- (void)_checkGithubResponse:(CFHTTPRequest)aRequest
+{
+    if (aRequest.status() === 401)
+    {
+        try
+        {
+            // we got a 401 from something else... o.0 
+            if (JSON.parse(aRequest.responseText()).error !== "not authorized")
+                return;
+            else
+            {
+                var auth = [self isAuthenticated],
+                    text = (auth) ? "Make sure your account has sufficiant privalies to modify an issue or reposotory. " : "The action you tried to perfom requires you to be authenticated. Please login.";
+
+                var warn = [[CPAlert alloc] init];
+                [warn setTitle:"Not Authorized"];
+                [warn setMessageText:"Unauthorized Request"];
+                [warn setInformativeText:text];
+                [warn setAlertStyle:CPInformationalAlertStyle];
+                [warn addButtonWithTitle:"Okay"];
+                [warn setDelegate:self];
+
+                if (!auth)
+                    [warn addButtonWithTitle:"Login"];
+
+                [warn runModal];
+            }
+        }catch(e){}
+    }
+}
+
+- (void)alertDidEnd:(id)sender returnCode:(int)returnCode
+{
+    if (returnCode === 1)
+        [self promptForAuthentication:self];
 }
 @end
 
@@ -464,5 +651,20 @@ GitHubAPI = {
         [SharedController reopenIssue:anIssue 
                            repository:aRepo
                             callback:callback];
+    },
+
+    openEditWindow: function(anIssue, aRepo)
+    {
+        [[[CPApp delegate] issuesController] editIssue:anIssue repo:aRepo];
     }
 }
+
+@implementation CPNull (compare)
+- (CPComparisonResult)compare:(id)anObj
+{
+    if (self === anObj){
+        return CPOrderedSame;
+
+    return CPOrderedAscending;
+}
+@end

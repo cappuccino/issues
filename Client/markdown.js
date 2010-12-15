@@ -157,10 +157,14 @@ this.makeHtml = function(text) {
 
   // ** GFM **  Auto-link URLs and emails
   text = text.replace(/https?\:\/\/[^"\s\<\>]*[^.,;'">\:\s\<\>\)\]\!]/g, function(wholeMatch){
-    var left = RegExp.leftContext
-    var right = RegExp.rightContext
-    if (left.match(/<[^>]+$/) && right.match(/^[^>]*>/)) {return wholeMatch}
-    return "<a target=\"_blank\" href='" + wholeMatch + "'>" + wholeMatch + "</a>";
+    // FIX ME: Chrome throughs and "access error" with this, but it appears to be internal to chrome
+    // I'm open to ideas on how to fix it.
+    try {
+        var left = RegExp.leftContext,
+            right = RegExp.rightContext;
+        if (left.match(/<[^>]+$/) && right.match(/^[^>]*>/)) {return wholeMatch}
+        return "<a target=\"_blank\" href='" + wholeMatch + "'>" + wholeMatch + "</a>";
+    }catch (e){return wholeMatch;}
   });
   text = text.replace(/[a-z0-9_\-+=.]+@[a-z0-9\-]+(\.[a-z0-9-]+)+/ig, function(wholeMatch){return "<a href='mailto:" + wholeMatch + "'>" + wholeMatch + "</a>";});
 

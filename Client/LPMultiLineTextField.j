@@ -33,13 +33,12 @@ var CPTextFieldInputOwner = nil;
 @implementation LPMultiLineTextField : CPTextField
 {
     id _DOMTextareaElement;
-    CPString oldValue;
     CPString _stringValue;
 }
- 
-- (id)initWithFrame:(CGRect)aFrame
+
+- (DOMElement)_DOMTextareaElement
 {
-    if (self = [super initWithFrame:aFrame])
+    if (!_DOMTextareaElement)
     {
         _DOMTextareaElement = document.createElement("textarea");
         _DOMTextareaElement.style.position = @"absolute";
@@ -48,6 +47,8 @@ var CPTextFieldInputOwner = nil;
         _DOMTextareaElement.style.outline = @"0";
         _DOMTextareaElement.style.zIndex = @"100";
         _DOMTextareaElement.style.resize = @"none";
+        _DOMTextareaElement.style.padding = @"0";
+        _DOMTextareaElement.style.margin = @"0";
         
         _DOMTextareaElement.onblur = function(){
                 [[CPTextFieldInputOwner window] makeFirstResponder:nil];
@@ -56,14 +57,27 @@ var CPTextFieldInputOwner = nil;
         
         self._DOMElement.appendChild(_DOMTextareaElement);
     }
+    
+    return _DOMTextareaElement;
+}
+
+- (id)initWithFrame:(CGRect)aFrame
+{
+    if (self = [super initWithFrame:aFrame])
+    {
+    }
     return self;
 }
 
 - (void)setEditable:(BOOL)shouldBeEditable
 {
+    [self _DOMTextareaElement].style.cursor = shouldBeEditable ? @"cursor" : @"default";
     [super setEditable:shouldBeEditable];
-    
-    _DOMTextareaElement.style.cursor = shouldBeEditable ? @"cursor" : @"default";
+}
+
+- (void)selectText:(id)sender
+{
+    [self _DOMTextareaElement].select();
 }
 
 - (void)layoutSubviews
@@ -75,16 +89,21 @@ var CPTextFieldInputOwner = nil;
                         relativeToEphemeralSubviewNamed:@"bezel-view"];
     [contentView setHidden:YES];
     
-    var contentInset = [self currentValueForThemeAttribute:@"content-inset"];
+    var DOMElement = [self _DOMTextareaElement],
+        contentInset = [self currentValueForThemeAttribute:@"content-inset"],
+        bounds = [self bounds];
     
-    _DOMTextareaElement.style.color = [[self currentValueForThemeAttribute:@"text-color"] cssString];
-    _DOMTextareaElement.style.font = [[self currentValueForThemeAttribute:@"font"] cssString];
-    _DOMTextareaElement.style.top = contentInset.top / 2 + @"px";
-    _DOMTextareaElement.style.bottom = contentInset.bottom / 2 + @"px";
-    _DOMTextareaElement.style.left = contentInset.left / 2 + @"px";
-    _DOMTextareaElement.style.right = contentInset.right / 2 + @"px";
+    DOMElement.style.top = contentInset.top + @"px";
+    DOMElement.style.bottom = contentInset.bottom + @"px";
+    DOMElement.style.left = contentInset.left + @"px";
+    DOMElement.style.right = contentInset.right + @"px";
     
-    _DOMTextareaElement.value = _stringValue || @"";
+    DOMElement.style.width = (CGRectGetWidth(bounds) - contentInset.left - contentInset.right) + @"px";
+    DOMElement.style.height = (CGRectGetHeight(bounds) - contentInset.top - contentInset.bottom) + @"px";
+        
+    DOMElement.style.color = [[self currentValueForThemeAttribute:@"text-color"] cssString];
+    DOMElement.style.font = [[self currentValueForThemeAttribute:@"font"] cssString];
+    DOMElement.value = _stringValue || @"";
 }
 
 - (void)mouseDown:(CPEvent)anEvent
@@ -93,6 +112,11 @@ var CPTextFieldInputOwner = nil;
         [[[self window] platformWindow] _propagateCurrentDOMEvent:YES];
     else
         [super mouseDown:anEvent];
+}
+
+ - (void)mouseDragged:(CPEvent)anEvent
+{
+    return [[[anEvent window] platformWindow] _propagateCurrentDOMEvent:YES];
 }
 
 - (void)keyDown:(CPEvent)anEvent
@@ -115,16 +139,11 @@ var CPTextFieldInputOwner = nil;
     [[CPRunLoop currentRunLoop] limitDateForMode:CPDefaultRunLoopMode];
 }
 
-- (void)selectText:(id)sender
-{
-    _DOMTextareaElement.select();
-}
-
 - (void)keyUp:(CPEvent)anEvent
 {
-    if (oldValue !== [self stringValue])
+    if (_stringValue !== [self stringValue])
     {
-        _stringValue = _DOMTextareaElement.value;
+        _stringValue = [self stringValue];
         
         if (!_isEditing)
         {
@@ -138,14 +157,20 @@ var CPTextFieldInputOwner = nil;
     [[[self window] platformWindow] _propagateCurrentDOMEvent:YES];
 }
 
+- (BOOL)performKeyEquivalent:(CPEvent)anEvent
+{
+    [[[self window] platformWindow] _propagateCurrentDOMEvent:YES];
+    return YES;
+}
+
 - (BOOL)becomeFirstResponder
 {
-    oldValue = [self stringValue];
+    _stringValue = [self stringValue];
     
     [self setThemeState:CPThemeStateEditing];
     
     setTimeout(function(){
-        _DOMTextareaElement.focus();
+        [self _DOMTextareaElement].focus();
         CPTextFieldInputOwner = self;
     }, 0.0);
     
@@ -158,7 +183,9 @@ var CPTextFieldInputOwner = nil;
 {
     [self unsetThemeState:CPThemeStateEditing];
     
-    _DOMTextareaElement.blur();
+    [self setStringValue:[self stringValue]];
+    
+    [self _DOMTextareaElement].blur();
 
     //post CPControlTextDidEndEditingNotification
     if (_isEditing)
@@ -177,7 +204,7 @@ var CPTextFieldInputOwner = nil;
 
 - (CPString)stringValue
 {
-    return (_DOMTextareaElement) ? _DOMTextareaElement.value : @"";
+    return (!!_DOMTextareaElement) ? _DOMTextareaElement.value : @"";
 }
 
 - (void)setStringValue:(CPString)aString
