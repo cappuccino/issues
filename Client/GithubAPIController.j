@@ -40,6 +40,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
     OAuthController loginController @accessors;
 
     CPAlert         warnAlert;
+    CPAlert         logoutWarn;
 }
 
 + (id)sharedController
@@ -74,6 +75,26 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
         [self logout:sender];
     else
         [self promptForAuthentication:sender];
+}
+
+- (void)logoutPrompt:(id)sender
+{
+    // if we're not using OAuth it's a pain to find the
+    // API token... so just ask them to make sure
+
+    if (oauthAccessToken)
+        return [self logout:nil];
+
+    logoutWarn= [[CPAlert alloc] init];
+    [logoutWarn setTitle:"Are You Sure?"];
+    [logoutWarn setMessageText:"Are you sure you want to logout?"];
+    [logoutWarn setInformativeText:text];
+    [logoutWarn setAlertStyle:CPInformationalAlertStyle];
+    [logoutWarn addButtonWithTitle:"Cancel"];
+    [logoutWarn setDelegate:self];
+    [logoutWarn addButtonWithTitle:"Logout"];
+
+    [logoutWarn runModal];
 }
 
 - (void)logout:(id)sender
@@ -631,8 +652,10 @@ because one day maybe GitHub will give this to me... :)
 
 - (void)alertDidEnd:(id)sender returnCode:(int)returnCode
 {
-    if (returnCode === 1)
+    if (sender === warnAlert && returnCode === 1)
         [self promptForAuthentication:self];
+    else if(sender === logoutWarn && returnCode === 1)
+        [self logout:nil];
 }
 @end
 
