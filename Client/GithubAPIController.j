@@ -36,6 +36,8 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
     CPImage         userThumbnailImage @accessors;
     
     CPDictionary    repositoriesByIdentifier @accessors(readonly);
+
+    OAuthController loginController @accessors;
 }
 
 + (id)sharedController
@@ -153,8 +155,8 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
     // because oauth relies on the server and multiple windows
     if ([CPPlatform isBrowser] && [CPPlatformWindow supportsMultipleInstances] && BASE_URL === "/github/")
     {
-        var loginController = [[OAuthController alloc] init];
-        [loginController go];
+        loginController = [[OAuthController alloc] init];
+        //[loginController go];
     }
     else
     {
@@ -393,7 +395,6 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
             [aRepo.openIssues removeObject:anIssue];
             aRepo.closedIssues.unshift(anIssue);
 
-            [self _noteIssueChanged:anIssue];
             [self _noteRepoChanged:aRepo];
         }
 
