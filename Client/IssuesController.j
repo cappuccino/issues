@@ -245,10 +245,9 @@
 {
     var rows = [issuesTableView selectedRowIndexes],
         count = [rows count],
-        items = [ ],
-        item = nil;
+        items = [ ];
 
-    if ([rows count] >= 0 && repo)
+    if (count > 0 && repo)
     {
         if ([filteredIssues count])
             items = [filteredIssues objectsAtIndexes:rows];    

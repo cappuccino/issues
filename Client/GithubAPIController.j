@@ -416,7 +416,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
         {
             [anIssue setObject:"closed" forKey:"state"];
             [aRepo.openIssues removeObject:anIssue];
-            aRepo.closedIssues.unshift(anIssue);
+            [aRepo.closedIssues addObject:anIssue];
 
             [self _noteRepoChanged:aRepo];
         }
@@ -443,9 +443,8 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
         {
             [anIssue setObject:"open" forKey:"state"];
             [aRepo.closedIssues removeObject:anIssue];
-            aRepo.openIssues.unshift(anIssue);
+            [aRepo.openIssues addObject:anIssue];
 
-            [self _noteIssueChanged:anIssue];
             [self _noteRepoChanged:aRepo];
         }
 
