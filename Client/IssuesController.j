@@ -232,9 +232,9 @@
 
     if (row >= 0 && repo)
     {
-        if ([filteredIssues count])
+        if ([filteredIssues count] && [filteredIssues count] > row)
             item = [filteredIssues objectAtIndex:row];    
-        else if ([repo[displayedIssuesKey] count])
+        else if ([repo[displayedIssuesKey] count] && [repo[displayedIssuesKey] count] > row)
             item = [repo[displayedIssuesKey] objectAtIndex:row];
     }
 
