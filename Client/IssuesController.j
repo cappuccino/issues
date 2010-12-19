@@ -27,6 +27,10 @@
     CPString    searchString;
     unsigned    searchFilter;
 
+    CPAlert     unsavedWarn;
+    CPAlert     closeWarn;
+    CPAlert     reopenWarn;
+
     id          _ephemeralSelectedIssue;
     int         _openIssueWindows;
     Function   _callbackIfReturnYes;
@@ -321,12 +325,38 @@
     [webView loadIssue];
 }
 
+/*
+    If the user has a bunch of issues selected we want to make sure 
+    they're sure they want to close the issues before we actually do it
+    hence an intermediate method...
+*/
 - (@action)closeIssue:(id)sender
 {
     var issues = [self selectedIssues],
         count = [issues count];
 
-    [issuesTableView selectRowIndexes:[CPIndexSet indexSet] byExtendingSelection:NO]
+    if (count > 1)
+    {
+        closeWarn = [[CPAlert alloc] init];
+        [closeWarn setTitle:"Are You Sure?"];
+        [closeWarn setMessageText:"Are you sure you want to close " + count + " issues?"];
+        [closeWarn setAlertStyle:CPInformationalAlertStyle];
+        [closeWarn addButtonWithTitle:"Cancel"];
+        [closeWarn setDelegate:self];
+        [closeWarn addButtonWithTitle:"Close Issues"];
+        [closeWarn runModal];
+    }
+    else
+        [self _closeIssue];
+}
+
+/*
+    This method actually closes the issues
+*/
+- (void)_closeIssue
+{
+    var issues = [self selectedIssues],
+        count = [issues count];
     while(count--)
     {
         var issue = issues[count];
@@ -334,14 +364,45 @@
         if (issue && [issue objectForKey:"state"] === "open")
             [[GithubAPIController sharedController] closeIssue:issue repository:repo callback:function(){[issuesTableView reloadData];}];
     }
+
+    [issuesTableView selectRowIndexes:[CPIndexSet indexSet] byExtendingSelection:NO];
 }
 
+/*
+    If the user has a bunch of issues selected we want to make sure 
+    they're sure they want to reopen the issues before we actually do it
+    hence an intermediate method...
+*/
 - (@action)reopenIssue:(id)sender
 {
     var issues = [self selectedIssues],
         count = [issues count];
 
-    [issuesTableView selectRowIndexes:[CPIndexSet indexSet] byExtendingSelection:NO]
+    if (count > 1)
+    {
+        reopenWarn = [[CPAlert alloc] init];
+        [reopenWarn setTitle:"Are You Sure?"];
+        [reopenWarn setMessageText:"Are you sure you want to reopen " + count + " issues?"];
+        [reopenWarn setAlertStyle:CPInformationalAlertStyle];
+        [reopenWarn addButtonWithTitle:"Cancel"];
+        [reopenWarn setDelegate:self];
+        [reopenWarn addButtonWithTitle:"Reopen Issues"];
+        [reopenWarn runModal];
+    }
+    else
+       [self _reopenIssue]; 
+}
+
+/*
+    This method actually reopens the issues
+*/
+- (void)_reopenIssue
+{
+    var issues = [self selectedIssues],
+        count = [issues count];
+
+    [issuesTableView selectRowIndexes:[CPIndexSet indexSet] byExtendingSelection:NO];
+
     while(count--)
     {
         var issue = issues[count];
@@ -551,10 +612,17 @@
 
 - (void)alertDidEnd:(CPAlert)anAlert returnCode:(int)tag
 {
-    if (tag === 0 && _callbackIfReturnYes)
-        _callbackIfReturnYes();
+    if (anAlert === unsavedWarn)
+    {
+        if (tag === 0 && _callbackIfReturnYes)
+            _callbackIfReturnYes();
 
-    _callbackIfReturnYes = nil;
+        _callbackIfReturnYes = nil;
+    }
+    else if(anAlert === closeWarn)
+        [self _closeIssue];
+    else if(anAlert === reopenWarn)
+        [self _reopenIssue];
 }
 
 /*
@@ -571,15 +639,15 @@
      try {
         if ([issueWebView DOMWindow].hasUnsubmittedComment())
         {
-            var shouldClose = [[CPAlert alloc] init];
-            [shouldClose setTitle:"Unsubmitted Comment"];
-            [shouldClose setDelegate:self];
-            [shouldClose setAlertStyle:CPWarningAlertStyle];
-            [shouldClose setMessageText:"You have an unsubmitted comment. This comment will be lost if you switch issues."]
-            [shouldClose addButtonWithTitle:"Switch Issue"];
-            [shouldClose addButtonWithTitle:"Stay Here"];
-            [shouldClose._buttons[1] setKeyEquivalent:CPEscapeFunctionKey];
-            [shouldClose runModal];
+            unsavedWarn = [[CPAlert alloc] init];
+            [unsavedWarn setTitle:"Unsubmitted Comment"];
+            [unsavedWarn setDelegate:self];
+            [unsavedWarn setAlertStyle:CPWarningAlertStyle];
+            [unsavedWarn setMessageText:"You have an unsubmitted comment. This comment will be lost if you switch issues."]
+            [unsavedWarn addButtonWithTitle:"Switch Issue"];
+            [unsavedWarn addButtonWithTitle:"Stay Here"];
+            [unsavedWarn._buttons[1] setKeyEquivalent:CPEscapeFunctionKey];
+            [unsavedWarn runModal];
             _callbackIfReturnYes = aCallback;
 
             return NO;
