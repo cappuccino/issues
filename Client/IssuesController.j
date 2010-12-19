@@ -340,7 +340,7 @@
         closeWarn = [[CPAlert alloc] init];
         [closeWarn setTitle:"Are You Sure?"];
         [closeWarn setMessageText:"Are you sure you want to close " + count + " issues?"];
-        [closeWarn setAlertStyle:CPInformationalAlertStyle];
+        [closeWarn setAlertStyle:CPWarningAlertStyle];
         [closeWarn addButtonWithTitle:"Cancel"];
         [closeWarn setDelegate:self];
         [closeWarn addButtonWithTitle:"Close Issues"];
@@ -383,7 +383,7 @@
         reopenWarn = [[CPAlert alloc] init];
         [reopenWarn setTitle:"Are You Sure?"];
         [reopenWarn setMessageText:"Are you sure you want to reopen " + count + " issues?"];
-        [reopenWarn setAlertStyle:CPInformationalAlertStyle];
+        [reopenWarn setAlertStyle:CPWarningAlertStyle];
         [reopenWarn addButtonWithTitle:"Cancel"];
         [reopenWarn setDelegate:self];
         [reopenWarn addButtonWithTitle:"Reopen Issues"];
@@ -619,9 +619,9 @@
 
         _callbackIfReturnYes = nil;
     }
-    else if(anAlert === closeWarn)
+    else if(anAlert === closeWarn && tag === 1)
         [self _closeIssue];
-    else if(anAlert === reopenWarn)
+    else if(anAlert === reopenWarn && tag === 1)
         [self _reopenIssue];
 }
 
