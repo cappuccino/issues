@@ -38,6 +38,8 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
     CPDictionary    repositoriesByIdentifier @accessors(readonly);
 
     OAuthController loginController @accessors;
+
+    CPAlert         warnAlert;
 }
 
 + (id)sharedController
@@ -606,18 +608,22 @@ because one day maybe GitHub will give this to me... :)
                 var auth = [self isAuthenticated],
                     text = (auth) ? "Make sure your account has sufficiant privalies to modify an issue or reposotory. " : "The action you tried to perfom requires you to be authenticated. Please login.";
 
-                var warn = [[CPAlert alloc] init];
-                [warn setTitle:"Not Authorized"];
-                [warn setMessageText:"Unauthorized Request"];
-                [warn setInformativeText:text];
-                [warn setAlertStyle:CPInformationalAlertStyle];
-                [warn addButtonWithTitle:"Okay"];
-                [warn setDelegate:self];
+                // this way we only get one alert at a time
+                if (!warnAlert)
+                {
+                    warnAlert = [[CPAlert alloc] init];
+                    [warnAlert setTitle:"Not Authorized"];
+                    [warnAlert setMessageText:"Unauthorized Request"];
+                    [warnAlert setInformativeText:text];
+                    [warnAlert setAlertStyle:CPInformationalAlertStyle];
+                    [warnAlert addButtonWithTitle:"Okay"];
+                    [warnAlert setDelegate:self];
+                    
+                    if (!auth)
+                        [warnAlert addButtonWithTitle:"Login"];
+                }
 
-                if (!auth)
-                    [warn addButtonWithTitle:"Login"];
-
-                [warn runModal];
+                [warnAlert runModal];
             }
         }catch(e){}
     }
