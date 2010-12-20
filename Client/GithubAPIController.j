@@ -4,7 +4,7 @@
 @import "md5-min.js"
 
 BASE_URL = "/github/";
-if(window.location && window.location.protocol === "file:")
+if (window.location && window.location.protocol === "file:")
     BASE_URL = "https://github.com/api/v2/json/";
 
 var SharedController = nil,
@@ -34,7 +34,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
     CPString        emailAddressHashed;
     CPImage         userImage @accessors;
     CPImage         userThumbnailImage @accessors;
-    
+
     CPDictionary    repositoriesByIdentifier @accessors(readonly);
 
     OAuthController loginController @accessors;
@@ -126,9 +126,9 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
     var request = new CFHTTPRequest();
 
     if (oauthAccessToken)
-        request.open("GET", BASE_URL+"user/show?access_token="+encodeURIComponent(oauthAccessToken), true);
+        request.open("GET", BASE_URL + "user/show?access_token=" + encodeURIComponent(oauthAccessToken), true);
     else
-        request.open("GET", BASE_URL+"user/show?login="+encodeURIComponent(username)+"&token="+encodeURIComponent(authenticationToken), true);
+        request.open("GET", BASE_URL + "user/show?login=" + encodeURIComponent(username) + "&token=" + encodeURIComponent(authenticationToken), true);
 
     request.oncomplete = function()
     {
@@ -143,10 +143,10 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 
             if (emailAddressHashed)
             {
-                var gravatarURL = GravatarBaseURL+emailAddressHashed;
-                userImage = [[CPImage alloc] initWithContentsOfFile:gravatarURL+"?s=68&d=identicon"
+                var gravatarURL = GravatarBaseURL + emailAddressHashed;
+                userImage = [[CPImage alloc] initWithContentsOfFile:gravatarURL + "?s=68&d=identicon"
                                                                size:CGSizeMake(68, 68)];
-                userThumbnailImage = [[CPImage alloc] initWithContentsOfFile:gravatarURL+"?s=22&d=identicon"
+                userThumbnailImage = [[CPImage alloc] initWithContentsOfFile:gravatarURL + "?s=22&d=identicon"
                                                                         size:CGSizeMake(24, 24)];
             }
 
@@ -163,7 +163,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 
             [[CPUserSessionManager defaultManager] setStatus:CPUserSessionLoggedOutStatus];
         }
-        
+
         if (aCallback)
             aCallback(request.success());
 
@@ -283,7 +283,8 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
     {
         if (closedRequest.success())
         {
-            try {
+            try
+            {
                 var issues = [[CPDictionary dictionaryWithJSObject:JSON.parse(closedRequest.responseText()) recursively:YES] objectForKey:"issues"];
                 aRepo.closedIssues = issues;
 
@@ -306,7 +307,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
         closedIssuesLoaded = YES;
         waitForBoth();
     }
-    
+
     openRequest.send("");
     closedRequest.send("");
 }
@@ -419,6 +420,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
             [aRepo.closedIssues addObject:anIssue];
 
             [self _noteRepoChanged:aRepo];
+            [self _noteIssueChanged:anIssue];
         }
 
         if (aCallback)
@@ -426,7 +428,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 
         [[CPRunLoop currentRunLoop] performSelectors];
     }
-    
+
     request.send("");
 }
 
@@ -446,6 +448,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
             [aRepo.openIssues addObject:anIssue];
 
             [self _noteRepoChanged:aRepo];
+            [self _noteIssueChanged:anIssue];
         }
 
         if (aCallback)
@@ -474,10 +477,10 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
             try {
                 issue = [CPDictionary dictionaryWithJSObject:JSON.parse(request.responseText()).issue];
                 aRepo.openIssues.push(issue);
-                
+
                 if (![issue containsKey:"position"])
                     [issue setObject:aRepo.minPosition forKey:"position"];
-                
+
                 aRepo.openIssuesMax = MAX([issue objectForKey:"position"], aRepo.openIssuesMax);
                 aRepo.openIssuesMin = MIN([issue objectForKey:"position"], aRepo.openIssuesMin);
                 [self _noteRepoChanged:aRepo];
@@ -499,8 +502,8 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 - (void)addComment:(CPString)commentBody onIssue:(id)anIssue inRepository:(id)aRepo callback:(Function)aCallback
 {
     var request = new CFHTTPRequest();
-    request.open("POST", BASE_URL+"issues/comment/"+aRepo.identifier+"/"+
-                [anIssue objectForKey:"number"]+[self _credentialsString]+
+    request.open("POST", BASE_URL + "issues/comment/"+aRepo.identifier+"/" +
+                [anIssue objectForKey:"number"] + [self _credentialsString] +
                 "&comment="+encodeURIComponent(commentBody), true);
 
     request.oncomplete = function()
@@ -541,10 +544,10 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 {
     // we've got to make two calls one for the title and one for the body
     var request = new CFHTTPRequest();
-    request.open("POST", BASE_URL+"issues/edit/"+aRepo.identifier+"/"+[anIssue objectForKey:"number"]+[self _credentialsString]+
-                                                 "&title="+encodeURIComponent(aTitle)+
-                                                 "&body="+encodeURIComponent(aBody), true);
-    
+    request.open("POST", BASE_URL + "issues/edit/" + aRepo.identifier + "/" + [anIssue objectForKey:"number"] + [self _credentialsString] +
+                                                 "&title=" + encodeURIComponent(aTitle) +
+                                                 "&body=" + encodeURIComponent(aBody), true);
+
     request.oncomplete = function()
     {
         [self _checkGithubResponse:request];
@@ -565,15 +568,14 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
                 CPLog.error("Unable to open new issue: "+aTitle+" -- "+e);
             }
         }
-    
+
         if (aCallback)
             aCallback(issue, aRepo, request);
-    
+
         [[CPRunLoop currentRunLoop] performSelectors];
     }
-    
-    request.send("");
 
+    request.send("");
 }
 
 /*
@@ -620,7 +622,7 @@ because one day maybe GitHub will give this to me... :)
     {
         try
         {
-            // we got a 401 from something else... o.0 
+            // we got a 401 from something else... o.0
             if (JSON.parse(aRequest.responseText()).error !== "not authorized")
                 return;
             else
@@ -638,7 +640,7 @@ because one day maybe GitHub will give this to me... :)
                     [warnAlert setAlertStyle:CPInformationalAlertStyle];
                     [warnAlert addButtonWithTitle:"Okay"];
                     [warnAlert setDelegate:self];
-                    
+
                     if (!auth)
                         [warnAlert addButtonWithTitle:"Login"];
                 }
@@ -653,7 +655,7 @@ because one day maybe GitHub will give this to me... :)
 {
     if (sender === warnAlert && returnCode === 1)
         [self promptForAuthentication:self];
-    else if(sender === logoutWarn && returnCode === 1)
+    else if (sender === logoutWarn && returnCode === 1)
         [self logout:nil];
 }
 @end
@@ -662,22 +664,22 @@ because one day maybe GitHub will give this to me... :)
 GitHubAPI = {
     addComment: function(commentBody, anIssue, aRepo, callback)
     {
-        [SharedController addComment:commentBody 
-                             onIssue:anIssue 
+        [SharedController addComment:commentBody
+                             onIssue:anIssue
                         inRepository:aRepo
                             callback:callback];
     },
-    
+
     closeIssue: function(anIssue, aRepo, callback)
     {
-        [SharedController closeIssue:anIssue 
+        [SharedController closeIssue:anIssue
                           repository:aRepo
                             callback:callback];
     },
-    
+
     reopenIssue: function(anIssue, aRepo, callback)
     {
-        [SharedController reopenIssue:anIssue 
+        [SharedController reopenIssue:anIssue
                            repository:aRepo
                             callback:callback];
     },
@@ -691,7 +693,7 @@ GitHubAPI = {
 @implementation CPNull (compare)
 - (CPComparisonResult)compare:(id)anObj
 {
-    if (self === anObj){
+    if (self === anObj)
         return CPOrderedSame;
 
     return CPOrderedAscending;
