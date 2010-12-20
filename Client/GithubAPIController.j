@@ -227,12 +227,11 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
     request.send("");
 }
 
-- (void)loadIssuesForRepository:(Repository)aRepo callback:(Function)aCallback
+- (void)loadIssuesForRepository:(Repository)aRepo callback:(id)aCallback
 {
     var openIssuesLoaded = NO,
         closedIssuesLoaded = NO,
-        waitForBoth = function()
-        {
+        waitForBoth = function () {
             if (!openIssuesLoaded || !closedIssuesLoaded)
                 return;
 
@@ -245,11 +244,11 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
     var openRequest = new CFHTTPRequest();
     openRequest.open("GET", BASE_URL+"issues/list/"+aRepo.identifier+"/open"+[self _credentialsString], true);
 
-    openRequest.oncomplete = function()
-    {
+    openRequest.oncomplete = function() {
         if (openRequest.success())
         {
-            try {
+            try
+            {
                 var issues = [[CPDictionary dictionaryWithJSObject:JSON.parse(openRequest.responseText()) recursively:YES] objectForKey:"issues"];
 
                 [self _noteRepoChanged:aRepo];
@@ -267,7 +266,8 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
                 aRepo.openIssuesMax = maxPosition;
                 aRepo.openIssuesMin = minPosition;
             }
-            catch (e) {
+            catch (e)
+            {
                 CPLog.error("Unable to load issues for repo: "+aRepo+" -- "+e);
             }
         }
@@ -277,10 +277,9 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
     }
 
     var closedRequest = new CFHTTPRequest();
-    closedRequest.open("GET", BASE_URL+"issues/list/"+aRepo.identifier+"/closed"+[self _credentialsString], true);
+    closedRequest.open("GET", BASE_URL + "issues/list/" + aRepo.identifier + "/closed" + [self _credentialsString], true);
 
-    closedRequest.oncomplete = function()
-    {
+    closedRequest.oncomplete = function() {
         if (closedRequest.success())
         {
             try
@@ -299,8 +298,9 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
                 aRepo.closedIssuesMax = maxPosition;
                 aRepo.closedIssuesMin = minPosition;
             }
-            catch (e) {
-                CPLog.error("Unable to load repositority with identifier: "+anIdentifier+" -- "+e);
+            catch (e)
+            {
+                CPLog.error("Unable to load repositority with identifier: " + anIdentifier + " -- " + e);
             }
         }
 
