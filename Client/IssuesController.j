@@ -825,7 +825,7 @@
 
     // if we have more than one issue selected and the user right clicks
     // on a different issue we should just select the issue he right clicked
-    if ((numberOfSelectedIssues > 1 && ![[issuesTableView selectedRowIndexes] containsIndex:aRow]) || numberOfSelectedIssues === 1)
+    if (![[issuesTableView selectedRowIndexes] containsIndex:aRow])
         [self selectIssueAtIndex:aRow];
 
     // this might have just changed... recalculate
