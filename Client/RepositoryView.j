@@ -111,6 +111,7 @@
     nameField = [aCoder decodeObjectForKey:"nameField"];
     openIssuesBadge = [aCoder decodeObjectForKey:"openBadge"];
     backgroundColor = [aCoder decodeObjectForKey:"backgroundColor"];
+    [self setNeedsLayout];
     return self;
 }
 
