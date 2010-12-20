@@ -45,6 +45,7 @@
 
     // custom headerview so we can show/hide columns
     [issuesTableView setHeaderView:[[RLTableHeaderView alloc] initWithFrame:[[issuesTableView headerView] frame]]];
+    [issuesTableView setBackgroundColor:[CPColor whiteColor]];
 
     var desc = [CPSortDescriptor sortDescriptorWithKey:@"number" ascending:YES],
         ID = [[CPTableColumn alloc] initWithIdentifier:"number"],
@@ -76,7 +77,7 @@
     [title setMinWidth:50.0];
     [title setEditable:YES];
     [title setSortDescriptorPrototype:desc];
-    [title setResizingMask:CPTableColumnAutoresizingMask|CPTableColumnUserResizingMask];
+    [title setResizingMask:CPTableColumnAutoresizingMask | CPTableColumnUserResizingMask];
 
     [issuesTableView addTableColumn:title];
 
@@ -233,7 +234,7 @@
     if (row >= 0 && repo)
     {
         if ([filteredIssues count] && [filteredIssues count] > row)
-            item = [filteredIssues objectAtIndex:row];    
+            item = [filteredIssues objectAtIndex:row];
         else if ([repo[displayedIssuesKey] count] && [repo[displayedIssuesKey] count] > row)
             item = [repo[displayedIssuesKey] objectAtIndex:row];
     }
@@ -250,7 +251,7 @@
     if (count > 0 && repo)
     {
         if ([filteredIssues count])
-            items = [filteredIssues objectsAtIndexes:rows];    
+            items = [filteredIssues objectsAtIndexes:rows];
         else if ([repo[displayedIssuesKey] count])
             items = [repo[displayedIssuesKey] objectsAtIndexes:rows];
     }
@@ -268,14 +269,14 @@
         [self tableView:issuesTableView sortDescriptorsDidChange:nil];
 
         var newIndex = [(filteredIssues || repo[displayedIssuesKey]) indexOfObject:issue];
-        [self selectIssueAtIndex:newIndex];        
+        [self selectIssueAtIndex:newIndex];
     }
 }
 
 - (void)validateToolbarItem:(CPToolbarItem)anItem
 {
     var hasSelection = [self selectedIssue] !== nil,
-        hasMultipleSelection = [[issuesTableView selectedRowIndexes] count] > 1;
+        hasMultipleSelection = [[issuesTableView selectedRowIndexes] count] > 1,
         identifier = [anItem itemIdentifier];
 
     if (identifier === "openissue")
@@ -286,7 +287,7 @@
         return hasSelection;
     else if (identifier === "tagissue")
         return hasSelection;
-    else 
+    else
         return !!repo;
 }
 
@@ -299,7 +300,7 @@
     if (issue === nil)
         return;
 
-    var newWindow = [[CPWindow alloc] initWithContentRect:CGRectMake(100, 100, 800, 600) styleMask:CPTitledWindowMask|CPClosableWindowMask|CPMiniaturizableWindowMask|CPResizableWindowMask];
+    var newWindow = [[CPWindow alloc] initWithContentRect:CGRectMake(100, 100, 800, 600) styleMask:CPTitledWindowMask | CPClosableWindowMask | CPMiniaturizableWindowMask | CPResizableWindowMask];
     [newWindow setMinSize:CGSizeMake(300, 300)];
 
     if ([CPPlatform isBrowser])
@@ -312,7 +313,7 @@
     var contentView = [newWindow contentView],
         webView = [[IssueWebView alloc] initWithFrame:[contentView bounds]];
 
-    [webView setAutoresizingMask:CPViewWidthSizable|CPViewHeightSizable];
+    [webView setAutoresizingMask:CPViewWidthSizable | CPViewHeightSizable];
     [contentView addSubview:webView];
     [newWindow setTitle:[issue objectForKey:"title"]];
 
@@ -356,7 +357,7 @@
 {
     var issues = [self selectedIssues],
         count = [issues count];
-    while(count--)
+    while (count--)
     {
         var issue = issues[count];
 
@@ -389,7 +390,7 @@
         [reopenWarn runModal];
     }
     else
-       [self _reopenIssue]; 
+       [self _reopenIssue];
 }
 
 /*
@@ -402,7 +403,7 @@
 
     [issuesTableView selectRowIndexes:[CPIndexSet indexSet] byExtendingSelection:NO];
 
-    while(count--)
+    while (count--)
     {
         var issue = issues[count];
 
@@ -427,9 +428,9 @@
 
 - (@action)tag:(id)aSender
 {
-    var menu = [[CPMenu alloc] init];
+    var menu = [[CPMenu alloc] init],
+        newItem = [[CPMenuItem alloc] initWithTitle:@"New Tag" action:@selector(newTag:) keyEquivalent:nil];
 
-    var newItem = [[CPMenuItem alloc] initWithTitle:@"New Tag" action:@selector(newTag:) keyEquivalent:nil];
     [newItem setTarget:self];
 
     [menu addItem:newItem];
@@ -478,7 +479,7 @@
         count = [visiableIssues count],
         index = CPNotFound;
 
-    while(count--)
+    while (count--)
     {
         var sig = repo.identifier + "---" + [visiableIssues[count] objectForKey:"number"];
 
@@ -512,7 +513,7 @@
 - (@action)reload:(id)sender
 {
     var issue = [self selectedIssue];
-        
+
     _ephemeralSelectedIssue = [issue objectForKey:"repo_identifier"] + "---" + [issue objectForKey:"number"];
 
     delete repo.openIssues;
@@ -618,9 +619,9 @@
 
         _callbackIfReturnYes = nil;
     }
-    else if(anAlert === closeWarn && tag === 1)
+    else if (anAlert === closeWarn && tag === 1)
         [self _closeIssue];
-    else if(anAlert === reopenWarn && tag === 1)
+    else if (anAlert === reopenWarn && tag === 1)
         [self _reopenIssue];
 }
 
@@ -651,7 +652,7 @@
 
             return NO;
         }
-            
+
     } catch(e) { }
 
     return YES;
@@ -680,7 +681,7 @@
             [issueWebView setIssue:item];
             [issueWebView setRepo:repo];
             [issueWebView loadIssue];
-        
+
             [CPApp setArguments:[repo.owner, repo.name, [item objectForKey:"number"]]];
         }
     }
@@ -703,15 +704,15 @@
         value = "";
 
     //special cases
-    if(columnIdentifier === @"created_at" || columnIdentifier === @"updated_at")
+    if (columnIdentifier === @"created_at" || columnIdentifier === @"updated_at")
         value = [CPDate simpleDate:value];
     else if ((columnIdentifier === @"votes" && value === 0) || columnIdentifier === @"comments" && value === 0)
         value = @"-";
-    else if (columnIdentifier === @"position") 
+    else if (columnIdentifier === @"position")
     {
-        var min = repo[displayedIssuesKey+"Min"],
-            max = repo[displayedIssuesKey+"Max"];
-        value = (max - value)/(max - min);
+        var min = repo[displayedIssuesKey + "Min"],
+            max = repo[displayedIssuesKey + "Max"];
+        value = (max - value) / (max - min);
     }
     else if (columnIdentifier === @"closed_at")
     {
@@ -734,7 +735,7 @@
 }
 
 - (void)tableView:(CPTableView)aTableView sortDescriptorsDidChange:(CPArray)oldDescriptors
-{   
+{
     var newDescriptors = [aTableView sortDescriptors],
         issues = filteredIssues || repo[displayedIssuesKey],
         currentIssue = issues[[aTableView selectedRow]];
@@ -766,12 +767,12 @@
     return YES;
 }
 
-- (CPDragOperation)tableView:(CPTableView)aTableView 
-                   validateDrop:(id)info 
-                   proposedRow:(CPInteger)row 
+- (CPDragOperation)tableView:(CPTableView)aTableView
+                   validateDrop:(id)info
+                   proposedRow:(CPInteger)row
                    proposedDropOperation:(CPTableViewDropOperation)operation
 {
-    if([[[info draggingPasteboard] types] containsObject:@"RepositionIssueDragType"])
+    if ([[[info draggingPasteboard] types] containsObject:@"RepositionIssueDragType"])
     {
         [aTableView setDropRow:row dropOperation:CPTableViewDropAbove];
         return CPDragOperationMove;
@@ -782,13 +783,11 @@
 
 - (BOOL)tableView:(CPTableView)aTableView acceptDrop:(id)info row:(int)row dropOperation:(CPTableViewDropOperation)operation
 {
-    if([[[info draggingPasteboard] types] containsObject:@"RepositionIssueDragType"])
+    if ([[[info draggingPasteboard] types] containsObject:@"RepositionIssueDragType"])
     {
 
         var pboard = [info draggingPasteboard],
-            dragData = [pboard dataForType:@"RepositionIssueDragType"];
-
-            dragData = [CPKeyedUnarchiver unarchiveObjectWithData:dragData];
+            dragData = [CPKeyedUnarchiver unarchiveObjectWithData:[pboard dataForType:@"RepositionIssueDragType"]];
 
         [self moveIssueWithNumber:dragData toPosition:row];
 
@@ -814,7 +813,7 @@
         {
             var item = [theIssues objectAtIndex:i];
 
-            if ((searchFilter === IssuesFilterAll || searchFilter === IssuesFilterTitle) && 
+            if ((searchFilter === IssuesFilterAll || searchFilter === IssuesFilterTitle) &&
                 [[item valueForKey:@"title"] lowercaseString].match(searchString))
             {
                 [filteredIssues addObject:[theIssues objectAtIndex:i]];
@@ -828,7 +827,7 @@
                 continue;
             }
 
-            if ((searchFilter === IssuesFilterAll || searchFilter === IssuesFilterBody) && 
+            if ((searchFilter === IssuesFilterAll || searchFilter === IssuesFilterBody) &&
                 [[item valueForKey:@"body"] lowercaseString].match(searchString))
             {
                 [filteredIssues addObject:[theIssues objectAtIndex:i]];
@@ -836,7 +835,7 @@
             }
 
             var tags = [[item objectForKey:@"labels"] componentsJoinedByString:@" "];
-            if ((searchFilter === IssuesFilterAll || searchFilter === IssuesFilterLabels) && 
+            if ((searchFilter === IssuesFilterAll || searchFilter === IssuesFilterLabels) &&
                 [tags lowercaseString].match(searchString))
             {
                 [filteredIssues addObject:[theIssues objectAtIndex:i]];
@@ -852,7 +851,7 @@
 
         [self hideFilterBar];
         filteredIssues = nil;
-        
+
         // reload the table
         [issuesTableView reloadData];
         //select the index of found data to keep the correct selection
@@ -931,7 +930,7 @@
 - (void)editIssue:(Issue)anIssue repo:(Repository)aRepo
 {
     var controller = [[NewIssueWindowController alloc] initWithWindowCibName:"NewIssueWindow"];
-    
+
     [controller showWindow:self];
     [controller setRepos:[[[CPApp delegate] reposController] sortedRepos]];
     [controller selectRepo:repo];
@@ -952,7 +951,7 @@
         keyEnumerator = [self keyEnumerator],
         key = nil;
 
-    while((key = [keyEnumerator nextObject]) !== nil)
+    while ((key = [keyEnumerator nextObject]) !== nil)
         object[key] = [self objectForKey:key];
 
     return object;
