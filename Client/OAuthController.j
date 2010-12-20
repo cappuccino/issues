@@ -32,19 +32,19 @@ window.auth = function(key, theWindow){
 
 
         // callback uses a blank url to regain reference... 
-        chromeBugCallback = function() {
-            chromeBugWindowRef = window.open("", "IssuesOAuth");
+        //chromeBugCallback = function() {
+        //    chromeBugWindowRef = window.open("", "IssuesOAuth");
 
-            if(chromeBugWindowRef && chromeBugWindowRef.sendAuth)
-                chromeBugWindowRef.sendAuth();
-        }
+        //    if(chromeBugWindowRef && chromeBugWindowRef.sendAuth)
+        //        chromeBugWindowRef.sendAuth();
+        //}
 
-        chromeBugTimer = [CPTimer scheduledTimerWithTimeInterval:1 callback:chromeBugCallback repeats:YES];
+        //chromeBugTimer = [CPTimer scheduledTimerWithTimeInterval:1 callback:chromeBugCallback repeats:YES];
 
         // first
         chromeBugWindowRef = window.open(url, "IssuesOAuth", "menubar=no,location=no,resizable=yes,scrollbars=no,status=no,left= 10,top=10,width=980,height=600");
 
-        [chromeBugTimer invalidate];
+        //[chromeBugTimer invalidate];
     }
 
     return self;

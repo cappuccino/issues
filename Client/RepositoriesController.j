@@ -61,7 +61,7 @@
     [column setMinWidth:50.0];
     [column setEditable:YES];
     [column setDataView:repositoryView];
-    
+
     [sourcesListView addTableColumn:column];
     [sourcesListView setColumnAutoresizingStyle:CPTableViewLastColumnOnlyAutoresizingStyle];
     [sourcesListView setRowHeight:26.0];
@@ -251,30 +251,30 @@
 
 - (BOOL)tableView:(CPTableView)aTableView writeRowsWithIndexes:(CPIndexSet)rowIndexes toPasteboard:(CPPasteboard)pboard
 {
-    if(aTableView === sourcesListView && ![rowIndexes containsIndex:0])
+    if (aTableView === sourcesListView && ![rowIndexes containsIndex:0])
     {
         // encode the index(es)being dragged
         var encodedData = [CPKeyedArchiver archivedDataWithRootObject:rowIndexes];
         [pboard declareTypes:[CPArray arrayWithObject:@"GitHubIssuesRepoSourceListDragType"] owner:self];
         [pboard setData:encodedData forType:@"GitHubIssuesRepoSourceListDragType"];
-    
+
         return YES;
     }
 
     return NO;
 }
 
-- (CPDragOperation)tableView:(CPTableView)aTableView 
-                   validateDrop:(id)info 
-                   proposedRow:(CPInteger)row 
+- (CPDragOperation)tableView:(CPTableView)aTableView
+                   validateDrop:(id)info
+                   proposedRow:(CPInteger)row
                    proposedDropOperation:(CPTableViewDropOperation)operation
 {
-    if(aTableView === sourcesListView)
+    if (aTableView === sourcesListView)
     {
-        if([info draggingSource] !== sourcesListView && row >= [sortedRepos count] || row < 1)
+        if ([info draggingSource] !== sourcesListView && row >= [sortedRepos count] || row < 1)
             row = [sortedRepos count];
 
-        if([info draggingSource] === sourcesListView)
+        if ([info draggingSource] === sourcesListView)
         {
             [aTableView setDropRow:row dropOperation:CPTableViewDropAbove];
             return CPDragOperationMove;
@@ -286,17 +286,17 @@
 - (BOOL)tableView:(CPTableView)aTableView acceptDrop:(id)info row:(int)row dropOperation:(CPTableViewDropOperation)operation
 {
     //remember to check the operation/info
-    if(aTableView === sourcesListView)
+    if (aTableView === sourcesListView)
     {
-        if([info draggingSource] === sourcesListView)
+        if ([info draggingSource] === sourcesListView)
         {
             var pboard = [info draggingPasteboard],
-                rowData = [pboard dataForType:@"GitHubIssuesRepoSourceListDragType"];    
+                rowData = [pboard dataForType:@"GitHubIssuesRepoSourceListDragType"];
 
             rowData = [CPKeyedUnarchiver unarchiveObjectWithData:rowData];
 
             // if we drop below the drag point we must subtract one
-            if([rowData firstIndex] < row)
+            if ([rowData firstIndex] < row)
                 var dropRow = row -1;
             // otherwise we're on the correct index
             else

@@ -157,10 +157,10 @@
 
     // special DOM hook if you have unsubmitted issues or comments.
     window.onbeforeunload = function() {
-        if(issuesController._openIssueWindows > 0)
+        if (issuesController._openIssueWindows > 0)
             return "You have unsubmitted issues. Reloading or quitting the application will prevent you from submitting these issues. You have Are you sure you want to quit?";
         try {
-            if([[issuesController issueWebView] DOMWindow].hasUnsubmittedComment())
+            if ([[issuesController issueWebView] DOMWindow].hasUnsubmittedComment())
                 return "You have an unsubmitted comment. This comment will be lost if you reload or quit the application. Are you sure you want to quit?";
         }catch (e){}
     }
@@ -197,9 +197,9 @@
 
     var toolbarColor = [CPColor colorWithPatternImage:
                             [[CPImage alloc] initWithContentsOfFile:
-                                [[CPBundle mainBundle] pathForResource:"toolbarBackgroundColor.png"] 
+                                [[CPBundle mainBundle] pathForResource:"toolbarBackgroundColor.png"]
                                                                size:CGSizeMake(1, 59)]];
-    
+
     if ([CPPlatform isBrowser])
         [[toolbar _toolbarView] setBackgroundColor:toolbarColor];
 
@@ -224,12 +224,12 @@
 
 @implementation AppController (ToolbarDelegate)
 
--(CPArray)toolbarAllowedItemIdentifiers:(CPToolbar)toolbar
+- (CPArray)toolbarAllowedItemIdentifiers:(CPToolbar)toolbar
 {
     return [CPToolbarFlexibleSpaceItemIdentifier, CPToolbarSpaceItemIdentifier, "searchfield", "newissue", "switchViewStatus", "commentissue", "tagissue", "openissue", "reload", "closeissue", "logo"];
 }
 
--(CPArray)toolbarDefaultItemIdentifiers:(CPToolbar)toolbar
+- (CPArray)toolbarDefaultItemIdentifiers:(CPToolbar)toolbar
 {
     var items = ["switchViewStatus", CPToolbarFlexibleSpaceItemIdentifier, "newissue", "commentissue", "tagissue", "closeissue", "openissue", "reload", CPToolbarFlexibleSpaceItemIdentifier, @"searchfield"];
 
@@ -246,7 +246,7 @@
 
     [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityUser];
 
-    switch(itemIdentifier)
+    switch (itemIdentifier)
     {
         case @"logo":
             [toolbarItem setView:logoView];
@@ -257,7 +257,7 @@
             window.setTimeout(function(){
                 var toolbarView = [toolbar _toolbarView],
                     superview = [[toolbar items][0] view]; //FIXME
-                
+
                 while (superview && superview !== toolbarView)
                 {
                     [superview setClipsToBounds:NO];
@@ -265,11 +265,11 @@
                 }
             }, 0);
         break;
-        
+
         case @"newissue":
             var image = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"newIssueIcon.png"] size:CPSizeMake(26, 27)],
                 highlighted = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"newIssueIconHighlighted.png"] size:CPSizeMake(26, 27)];
-                
+
             [toolbarItem setImage:image];
             [toolbarItem setAlternateImage:highlighted];
 
@@ -277,7 +277,7 @@
             [toolbarItem setAction:@selector(newIssue:)];
             [toolbarItem setLabel:"New"];
             [toolbarItem setTag:@"NewIssue"];
-            
+
             [toolbarItem setMinSize:CGSizeMake(32, 32)];
             [toolbarItem setMaxSize:CGSizeMake(32, 32)];
             [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityHigh];
@@ -286,15 +286,15 @@
         case @"openissue":
             var image = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"reopenIcon.png"] size:CPSizeMake(28, 27)],
                 highlighted = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"reopenIconHighlighted.png"] size:CPSizeMake(28, 27)];
-                
+
             [toolbarItem setImage:image];
             [toolbarItem setAlternateImage:highlighted];
-            
+
             [toolbarItem setTarget:issuesController];
             [toolbarItem setAction:@selector(reopenIssue:)];
             [toolbarItem setLabel:"Re-open"];
             [toolbarItem setTag:@"Open"];
-            
+
             [toolbarItem setMinSize:CGSizeMake(32, 32)];
             [toolbarItem setMaxSize:CGSizeMake(32, 32)];
             [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityHigh];
@@ -303,16 +303,16 @@
         case @"closeissue":
             var image = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"closeIcon.png"] size:CPSizeMake(28, 27)],
                 highlighted = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"closeIconHighlighted.png"] size:CPSizeMake(28, 27)];
-                
+
             [toolbarItem setImage:image];
             [toolbarItem setAlternateImage:highlighted];
-            
+
             [toolbarItem setTarget:issuesController];
             [toolbarItem setAction:@selector(closeIssue:)];
             [toolbarItem setLabel:"Close"];
             [toolbarItem setTag:@"Close"];
             [toolbarItem setEnabled:NO];
-            
+
             [toolbarItem setMinSize:CGSizeMake(38, 32)];
             [toolbarItem setMaxSize:CGSizeMake(38, 32)];
             [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityHigh];
@@ -339,15 +339,15 @@
         case @"commentissue":
             var image = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"commentIcon.png"] size:CPSizeMake(27, 26)],
                 highlighted = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"commentIconHighlighted.png"] size:CPSizeMake(27, 26)];
-                
+
             [toolbarItem setImage:image];
             [toolbarItem setAlternateImage:highlighted];
-            
+
             [toolbarItem setTarget:issuesController];
             [toolbarItem setAction:@selector(comment:)];
             [toolbarItem setLabel:"Add Comment"];
             [toolbarItem setTag:@"Comment"];
-            
+
             [toolbarItem setMinSize:CGSizeMake(32, 32)];
             [toolbarItem setMaxSize:CGSizeMake(32, 32)];
             [toolbarItem setVisibilityPriority:CPToolbarItemVisibilityPriorityHigh];
@@ -381,7 +381,7 @@
             [toolbarItem setLabel:"Search Issues"];
             [toolbarItem setView:searchField];
             [toolbarItem setTag:@"SearchIssues"];
-            
+
             [toolbarItem setMinSize:CGSizeMake([CPPlatform isBrowser] ? 180 : 220, 30)];
             [toolbarItem setMaxSize:CGSizeMake([CPPlatform isBrowser] ? 180 : 220, 30)];
 
@@ -406,10 +406,10 @@
             [toolbarItem setView:aSwitch];
             [toolbarItem setTag:@"changeViewStatus"];
             [toolbarItem setLabel:"View Issues in State"];
-            
+
             [toolbarItem setMinSize:CGSizeMake([CPPlatform isBrowser] ? 130 : 160, 24)];
             [toolbarItem setMaxSize:CGSizeMake([CPPlatform isBrowser] ? 130 : 160, 24)];
-            
+
             [self addCustomSegmentedAttributes:aSwitch];
         break;
     }
@@ -440,19 +440,19 @@
     [aControl setValue:centerBezelHighlighted forThemeAttribute:"center-segment-bezel-color" inState:CPThemeStateHighlighted];
     [aControl setValue:centerBezelSelected forThemeAttribute:"center-segment-bezel-color" inState:CPThemeStateSelected];
     [aControl setValue:centerBezelDisabled forThemeAttribute:"center-segment-bezel-color" inState:CPThemeStateDisabled];
-    [aControl setValue:centerBezelSelectedDisabled forThemeAttribute:"center-segment-bezel-color" inState:CPThemeStateSelected|CPThemeStateDisabled];
+    [aControl setValue:centerBezelSelectedDisabled forThemeAttribute:"center-segment-bezel-color" inState:CPThemeStateSelected | CPThemeStateDisabled];
 
     [aControl setValue:leftBezel forThemeAttribute:"left-segment-bezel-color"];
     [aControl setValue:leftBezelHighlighted forThemeAttribute:"left-segment-bezel-color" inState:CPThemeStateHighlighted];
     [aControl setValue:leftBezelSelected forThemeAttribute:"left-segment-bezel-color" inState:CPThemeStateSelected];
     [aControl setValue:leftBezelDisabled forThemeAttribute:"left-segment-bezel-color" inState:CPThemeStateDisabled];
-    [aControl setValue:leftBezelSelectedDisabled forThemeAttribute:"left-segment-bezel-color" inState:CPThemeStateSelected|CPThemeStateDisabled];
+    [aControl setValue:leftBezelSelectedDisabled forThemeAttribute:"left-segment-bezel-color" inState:CPThemeStateSelected | CPThemeStateDisabled];
 
     [aControl setValue:rightBezel forThemeAttribute:"right-segment-bezel-color"];
     [aControl setValue:rightBezelHighlighted forThemeAttribute:"right-segment-bezel-color" inState:CPThemeStateHighlighted];
     [aControl setValue:rightBezelSelected forThemeAttribute:"right-segment-bezel-color" inState:CPThemeStateSelected];
     [aControl setValue:rightBezelDisabled forThemeAttribute:"right-segment-bezel-color" inState:CPThemeStateDisabled];
-    [aControl setValue:rightBezelSelectedDisabled forThemeAttribute:"right-segment-bezel-color" inState:CPThemeStateSelected|CPThemeStateDisabled];
+    [aControl setValue:rightBezelSelectedDisabled forThemeAttribute:"right-segment-bezel-color" inState:CPThemeStateSelected | CPThemeStateDisabled];
 
     [aControl setValue:dividerColor forThemeAttribute:@"divider-bezel-color"];
 
@@ -462,7 +462,7 @@
     [aControl setValue:CGSizeMake(0.0, 1.0) forThemeAttribute:@"text-shadow-offset"];
 
     [aControl setValue:[CPColor colorWithCalibratedWhite:1.0 alpha:1.0] forThemeAttribute:@"text-color" inState:CPThemeStateSelected];
-    [aControl setValue:[CPColor colorWithCalibratedWhite:0.8 alpha:1.0] forThemeAttribute:@"text-color" inState:CPThemeStateSelected|CPThemeStateDisabled];
+    [aControl setValue:[CPColor colorWithCalibratedWhite:0.8 alpha:1.0] forThemeAttribute:@"text-color" inState:CPThemeStateSelected | CPThemeStateDisabled];
     [aControl setValue:[CPColor colorWithCalibratedWhite:0.0/255.0 alpha:1.0] forThemeAttribute:@"text-shadow-color" inState:CPThemeStateSelected];
 }
 
@@ -488,8 +488,8 @@
     [textfield setValue:[CPFont systemFontOfSize:12.0] forThemeAttribute:@"font"];
     [textfield setValue:CGInsetMake(9.0, 14.0, 6.0, 14.0) forThemeAttribute:@"content-inset" inState:CPThemeStateBezeled | CPTextFieldStateRounded];
 
-    [textfield setValue:CGInsetMake(3.0, 3.0, 3.0, 3.0) forThemeAttribute:@"bezel-inset" inState:CPThemeStateBezeled|CPTextFieldStateRounded];
-    [textfield setValue:CGInsetMake(0.0, 0.0, 0.0, 0.0) forThemeAttribute:@"bezel-inset" inState:CPThemeStateBezeled|CPTextFieldStateRounded|CPThemeStateEditing];
+    [textfield setValue:CGInsetMake(3.0, 3.0, 3.0, 3.0) forThemeAttribute:@"bezel-inset" inState:CPThemeStateBezeled | CPTextFieldStateRounded];
+    [textfield setValue:CGInsetMake(0.0, 0.0, 0.0, 0.0) forThemeAttribute:@"bezel-inset" inState:CPThemeStateBezeled | CPTextFieldStateRounded | CPThemeStateEditing];
 }
 
 - (void)swapMainWindowOrientation:(id)sender
@@ -504,7 +504,7 @@
         [cachedAboutPanel orderFront:nil];
         return;
     }
-    
+
     var aboutPanelController = [[AboutPanelController alloc] initWithWindowCibName:@"AboutPanel"],
         aboutPanel = [aboutPanelController window];
 
