@@ -89,7 +89,8 @@
         contentView = [theWindow contentView],
         subviews = [contentView subviews];
 
-    [subviews makeObjectsPerformSelector:@selector(setHidden:) withObject:YES];
+    // hiding the views caused an infinate loop... still investigating
+    //[subviews makeObjectsPerformSelector:@selector(setHidden:) withObject:YES];
 
     [noReposView setFrame:[contentView bounds]];
     [contentView addSubview:noReposView];
@@ -176,12 +177,25 @@
 
     if (sortedRepos.length === 0)
     {
-        [self showNoReposView];        
+        [self showNoReposView];
         [sourcesListView selectRowIndexes:[CPIndexSet indexSet] byExtendingSelection:NO];
+        [self tableViewSelectionDidChange:nil];
+    }
+    else
+    {
+        [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:MAX(selectedRow, 1)] byExtendingSelection:NO];
         [self tableViewSelectionDidChange:nil];
     }
 
     [sourcesListView reloadData];
+}
+
+- (void)viewOnGithub:(id)sender
+{
+    var selectedRow = [sourcesListView selectedRow] - 1,
+        repo = [sortedRepos objectAtIndex:selectedRow];
+
+    OPEN_LINK(repo.url);
 }
 
 - (BOOL)tableView:(CPTableView)aTableView shouldSelectRow:(int)aRow
@@ -199,6 +213,7 @@
 
 - (void)tableViewSelectionDidChange:(CPNotification)aNotification
 {
+
     var selectedRow = MAX([sourcesListView selectedRow] - 1, CPNotFound);
 
     if (selectedRow === CPNotFound)
@@ -306,5 +321,37 @@
     }
 
     return NO;
+}
+
+- (CPMenu)tableView:(CPTableView)aTableView menuForTableColumn:(CPTableColumn)aColumn row:(int)aRow
+{
+    // select it first
+    if (aRow >= 0)
+    {
+        [sourcesListView selectRowIndexes:[CPIndexSet indexSetWithIndex:aRow] byExtendingSelection:NO];
+        [self tableViewSelectionDidChange:nil];
+    }
+
+    var menu = [[CPMenu alloc] initWithTitle:""],
+        newRepo = [[CPMenuItem alloc] initWithTitle:"Add Repository" action:@selector(promptForNewRepository:) keyEquivalent:nil],
+        removeRepo = [[CPMenuItem alloc] initWithTitle:"Remove Repository" action:@selector(removeRepository:) keyEquivalent:nil],
+        showOnGithub = [[CPMenuItem alloc] initWithTitle:"View On GitHub" action:@selector(viewOnGithub:) keyEquivalent:nil];
+
+    [newRepo setTarget:self];
+    [removeRepo setTarget:self];
+    [showOnGithub setTarget:self];
+
+    if (aRow === CPNotFound)
+    {
+        [removeRepo setEnabled:NO];
+        [showOnGithub setEnabled:NO];
+    }
+
+    [menu addItem:newRepo];
+    [menu addItem:removeRepo];
+    [menu addItem:[CPMenuItem separatorItem]];
+    [menu addItem:showOnGithub];
+
+    return menu;
 }
 @end

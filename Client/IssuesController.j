@@ -33,7 +33,7 @@
 
     id          _ephemeralSelectedIssue;
     int         _openIssueWindows;
-    Function   _callbackIfReturnYes;
+    Function    _callbackIfReturnYes;
 }
 
 - (void)awakeFromCib
@@ -426,7 +426,7 @@
     [scriptObject callWebScriptMethod:"showCommentForm" withArguments:nil];
 }
 
-- (@action)tag:(id)aSender
+- (CPMenu)_tagsMenu
 {
     var menu = [[CPMenu alloc] init],
         newItem = [[CPMenuItem alloc] initWithTitle:@"New Tag" action:@selector(newTag:) keyEquivalent:nil];
@@ -454,10 +454,15 @@
         [menu addItem:item];
     }
 
+    return menu;
+}
+
+- (@action)tag:(id)aSender
+{
     var toolbarView = [[aSender toolbar] _toolbarView],
         view = [toolbarView viewForItem:aSender];
 
-    [CPMenu popUpContextMenu:menu withEvent:[CPApp currentEvent] forView:view];
+    [CPMenu popUpContextMenu:_tagsMenu withEvent:[CPApp currentEvent] forView:view];
 }
 
 - (@action)newTag:(id)aSender
@@ -538,6 +543,14 @@
             _ephemeralSelectedIssue = nil;
         }
     }];
+}
+
+- (void)viewOnGithub:(id)sender
+{
+    var issue = [self selectedIssue],
+        link = "http://github.com/"+ [issue objectForKey:"repo_identifier"] +"/issues/"+[issue objectForKey:"number"];
+
+    OPEN_LINK(link);
 }
 
 - (void)showView:(CPView)aView
@@ -797,10 +810,81 @@
     return NO;
 }
 
-/*- (CPMenu)tableView:(CPTableView)aTableView menuForTableColumn:(CPTableColumn)aColumn row:(int)aRow
+- (CPMenu)tableView:(CPTableView)aTableView menuForTableColumn:(CPTableColumn)aColumn row:(int)aRow
 {
-    return [CPMenu new];
-}*/
+    // menu should open/close
+    // comment
+    // tag
+    var menu = [[CPMenu alloc] initWithTitle:""],
+        menuItems = ["Re-open Issue", "Close Issue", "Tag", "Comment", "View On GitHub"],
+        menuActions = [@selector(reopenIssue:), @selector(closeIssue:), nil, @selector(comment:), @selector(viewOnGithub:)],
+        isOpen = displayedIssuesKey === "openIssues",
+        numberOfSelectedIssues = [[self selectedIssues] count],
+        count = menuItems.length,
+        i = 0;
+
+    // if we have more than one issue selected and the user right clicks
+    // on a different issue we should just select the issue he right clicked
+    if ((numberOfSelectedIssues > 1 && ![[issuesTableView selectedRowIndexes] containsIndex:aRow]) || numberOfSelectedIssues === 1)
+        [self selectIssueAtIndex:aRow];
+
+    // this might have just changed... recalculate
+    numberOfSelectedIssues = [[self selectedIssues] count],
+
+        for (; i < count; i++)
+        {
+            var title = menuItems[i],
+                newMenuItem = [[CPMenuItem alloc] initWithTitle:title action:menuActions[i] keyEquivalent:nil];
+
+            [newMenuItem setTarget:self];
+
+            switch (title)
+            {
+                case "Re-open Issue":
+                    if (numberOfSelectedIssues > 1)
+                        [newMenuItem setTitle:"Re-open (" + numberOfSelectedIssues + ") Issues" ];
+
+                    [newMenuItem setEnabled:!isOpen];
+                    break;
+
+                case "Close Issue":
+                    if (numberOfSelectedIssues > 1)
+                        [newMenuItem setTitle:"Close (" + numberOfSelectedIssues + ") Issues"];
+
+
+                    [newMenuItem setEnabled:isOpen];
+                    break;
+
+                case "Tag":
+                    var shouldTag = numberOfSelectedIssues === 1;
+
+                    [newMenuItem setEnabled:shouldTag];
+
+                    if (shouldTag)
+                        [newMenuItem setSubmenu:[self _tagsMenu]];
+                    break;
+                case "Comment":
+                    [newMenuItem setEnabled:(numberOfSelectedIssues === 1)];
+                    break;
+                // we want a seperator so just skip it for now
+                case "View On GitHub":
+                    [newMenuItem setEnabled:(numberOfSelectedIssues === 1 || aRow !== CPNotFound)];
+                    continue;
+                    break;
+            }
+
+            if (aRow === CPNotFound)
+                [newMenuItem setEnabled:NO];
+
+            [menu addItem:newMenuItem];
+        }
+
+        // add the seperator and the last item
+        [menu addItem:[CPMenuItem separatorItem]];
+        [menu addItem:newMenuItem];
+
+    return menu;
+}
 
 
 - (void)searchFieldDidChange:(id)sender

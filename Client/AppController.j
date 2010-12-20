@@ -544,3 +544,12 @@ window.GitHubIssuesToggleVertical = function()
     [splitView setNeedsDisplay:YES];
     [[CPRunLoop mainRunLoop] performSelectors];
 }
+
+
+OPEN_LINK = function(link)
+{
+    if ([CPPlatform isBrowser])
+        window.open(link);
+    else
+        window.location = link;
+}

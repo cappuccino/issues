@@ -107,11 +107,3 @@
 }
 
 @end
-
-var OPEN_LINK = function(link)
-{
-    if ([CPPlatform isBrowser])
-        window.open(link);
-    else
-        window.location = link;
-}
