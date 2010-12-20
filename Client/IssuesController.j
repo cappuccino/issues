@@ -829,7 +829,7 @@
         [self selectIssueAtIndex:aRow];
 
     // this might have just changed... recalculate
-    numberOfSelectedIssues = [[self selectedIssues] count],
+    numberOfSelectedIssues = [[self selectedIssues] count];
 
         for (; i < count; i++)
         {
