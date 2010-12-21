@@ -199,7 +199,7 @@
     var selectedRow = [sourcesListView selectedRow] - 1,
         repo = [sortedRepos objectAtIndex:selectedRow];
 
-    OPEN_LINK(repo.url);
+    OPEN_LINK("https://github.com/" + repo.identifier);
 }
 
 - (BOOL)tableView:(CPTableView)aTableView shouldSelectRow:(int)aRow
