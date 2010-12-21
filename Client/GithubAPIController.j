@@ -221,6 +221,8 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
         if (aCallback)
             aCallback(repo, request);
 
+        [self loadLabelsForRepository:repo];
+
         [[CPRunLoop currentRunLoop] performSelectors];
     }
 

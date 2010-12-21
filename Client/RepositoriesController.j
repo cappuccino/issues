@@ -119,8 +119,6 @@
     var count = sortedRepos.length,
         repoIdentifier = aRepo.identifier;
 
-    [[GithubAPIController sharedController] loadLabelsForRepository:aRepo];
-
     for (var index = 0; index < count; index++)
     {
         if (sortedRepos[index].identifier === repoIdentifier)
@@ -149,6 +147,12 @@
 
 - (void)setSortedRepos:(CPArray)repos
 {
+    // go ahead and load the tags for each repo since we bypass that on a normal load
+    var c = repos.length;
+
+    while(c--)
+        [[GithubAPIController sharedController] loadLabelsForRepository:repos[c]];
+
     if (!repos || !repos.length)
         return;
 
