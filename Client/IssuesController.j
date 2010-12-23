@@ -462,7 +462,7 @@
     var toolbarView = [[aSender toolbar] _toolbarView],
         view = [toolbarView viewForItem:aSender];
 
-    [CPMenu popUpContextMenu:_tagsMenu withEvent:[CPApp currentEvent] forView:view];
+    [CPMenu popUpContextMenu:[self _tagsMenu] withEvent:[CPApp currentEvent] forView:view];
 }
 
 - (@action)newTag:(id)aSender
