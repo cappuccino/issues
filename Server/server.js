@@ -52,8 +52,9 @@ function getAccessKey(request, response, code) {
 
         });
         askForAccessToken_response.addListener("end", function() {
+            var trimmed = askForAccessToken_response.body.slice(askForAccessToken_response.body.indexOf("=")+1);
 
-            var newBody = "<html><head><title>Authenticated</title><script>function sendAuth(){ if(window.opener) {window.opener.auth('"+askForAccessToken_response.body+"', this);} } sendAuth(); function token(){ return '"+askForAccessToken_response.body+"'; }; document.cookie='github."+ askForAccessToken_response.body +"';</script></head><body>Chrome 8 shipped with a regression that broke OAuth support. We are working on it. Sorry for the inconvenience.</body></html>";
+            var newBody = "<html><head><style>body{background:rgb(237, 241, 244);}</style><title>Authenticated</title><script>function sendAuth(){ if(window.opener) {window.opener.auth('"+askForAccessToken_response.body+"', this);}else{} } sendAuth(); function token(){ return '"+askForAccessToken_response.body+"'; }; document.cookie='github."+ askForAccessToken_response.body +"';</script></head><body><div style='margin-top:100px; text-align:center;'>Due to a bug in Chrome you need to paste the PIN code below into the main window:</div><div style='background:#F6F8DE; width:620px; padding:15px; margin-top:10px; border:2px solid black; margin:auto; text-align:center; font-size:24px;'>" + trimmed + "</div></body></html>";
 
             response.writeHead(askForAccessToken_response.statusCode, askForAccessToken_response.headers["content-length"] = newBody.length);
             response.write(newBody);

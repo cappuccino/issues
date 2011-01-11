@@ -7,11 +7,15 @@ window.auth = function(key, theWindow){
                                domain:nil];
 
     [[[controller loginController] chromeBugTimer] invalidate];
-    theWindow.close();
+
+    if (theWindow)
+        theWindow.close();
 
     var controller = [GithubAPIController sharedController];
     [controller setOauthAccessToken:value];
     [controller authenticateWithCallback:nil];
+    [CPApp abortModal];
+    [[controller chromePINWindow]._window close];
 }
 
 @implementation OAuthController : CPObject
@@ -19,6 +23,9 @@ window.auth = function(key, theWindow){
     CPTimer chromeBugTimer @accessors;
     Function chromeBugCallback;
     DOMWindow chromeBugWindowRef;
+
+    CPWindow chromePINWindow @accessors;
+    CPTextField chromePINField;
 }
 - (void)init
 {
@@ -44,10 +51,35 @@ window.auth = function(key, theWindow){
         // first
         chromeBugWindowRef = window.open(url, "IssuesOAuth", "menubar=no,location=no,resizable=yes,scrollbars=no,status=no,left= 10,top=10,width=980,height=600");
 
+        chromePINWindow = [CPAlert alertWithMessageText:"If you are using Chrome you will be asked to paste a PIN in the text field below:" defaultButton:"Authenticate" alternateButton:"Cancel" otherButton:nil informativeTextWithFormat:nil];
+        [chromePINWindow setDelegate:self];
+
+        chromePINField = [[CPTextField alloc] initWithFrame:CGRectMake(0,0, 235, 28)];
+        [chromePINField setEditable:YES];
+        [chromePINField setBezeled:YES];
+
+        [chromePINWindow setAccessoryView:chromePINField];
+
+        [chromePINWindow runModal];
+
+//        [[chromePINField window] makeFirstResponder:chromePINField];
         //[chromeBugTimer invalidate];
     }
 
     return self;
+}
+
+- (void)alertDidEnd:(id)sender returnCode:(int)returnCode
+{
+    // if the "Authenticate" button was clicked
+    if (returnCode === 0)
+    {
+        var value = [chromePINField stringValue];
+        if (!value)
+            alert("You must enter a PIN to login.");
+        else
+            window.auth(value, nil);
+    }
 }
 
 @end
