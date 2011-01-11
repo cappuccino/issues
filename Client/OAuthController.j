@@ -14,8 +14,9 @@ window.auth = function(key, theWindow){
     var controller = [GithubAPIController sharedController];
     [controller setOauthAccessToken:value];
     [controller authenticateWithCallback:nil];
+
     [CPApp abortModal];
-    [[controller chromePINWindow]._window close];
+    [[[controller  loginController] chromePINWindow]._window close];
 }
 
 @implementation OAuthController : CPObject
@@ -49,7 +50,6 @@ window.auth = function(key, theWindow){
         //chromeBugTimer = [CPTimer scheduledTimerWithTimeInterval:1 callback:chromeBugCallback repeats:YES];
 
         // first
-        chromeBugWindowRef = window.open(url, "IssuesOAuth", "menubar=no,location=no,resizable=yes,scrollbars=no,status=no,left= 10,top=10,width=980,height=600");
 
         chromePINWindow = [CPAlert alertWithMessageText:"If you are using Chrome you will be asked to paste a PIN in the text field below:" defaultButton:"Authenticate" alternateButton:"Cancel" otherButton:nil informativeTextWithFormat:nil];
         [chromePINWindow setDelegate:self];
@@ -62,7 +62,9 @@ window.auth = function(key, theWindow){
 
         [chromePINWindow runModal];
 
-//        [[chromePINField window] makeFirstResponder:chromePINField];
+        [[chromePINField window] makeFirstResponder:chromePINField];
+
+        chromeBugWindowRef = window.open(url, "IssuesOAuth", "menubar=no,location=no,resizable=yes,scrollbars=no,status=no,left= 10,top=10,width=980,height=600");
         //[chromeBugTimer invalidate];
     }
 
