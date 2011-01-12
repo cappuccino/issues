@@ -46,7 +46,7 @@ JAKE.task("zip", function() {
         BUILD_PATH.join(zipName).remove();
 
     OS.system("cd Client && jake desktop");
-    OS.system("cd Client/Build/Desktop/Issues && zip -r ../../../../Build/"+zipName+" Issues.app");
+    OS.system("cd Client/Build/Desktop/Issues && zip -r ../../../Build/"+zipName+" Issues.app");
 });
 
 function getGitSHA(directory) {
