@@ -46,8 +46,6 @@
     var value = unreadCount + "";
     var size = [value sizeWithFont:[CPFont boldSystemFontOfSize:11]].width + 15;
 
-    console.log("size:"+size);
-
     return size;
 }
 
