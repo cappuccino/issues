@@ -43,7 +43,7 @@
 
 - (@action)downloadNativeClient:(id)sender
 {
-    OPEN_LINK("http://download.cappuccino.org/Issues-2_1.zip");
+    OPEN_LINK("http://cl.ly/44R7");
 }
 
 - (@action)downloadSafariExtention:(id)sender

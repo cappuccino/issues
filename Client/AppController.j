@@ -6,6 +6,8 @@
  * Copyright 2010, 280 North All rights reserved.
  */
 
+APPLICATION_VERSION_NUMBER = 1.6;
+
 @import <Foundation/CPObject.j>
 @import <AppKit/CPScrollView.j>
 @import <AppKit/CPTableColumn.j>
@@ -36,10 +38,48 @@
     @outlet RepositoriesController reposController @accessors;
     @outlet IssuesController issuesController @accessors;
             CPPanel     cachedAboutPanel;
+            CPString    updateLink;
+            float       updateNumber;
 }
 
 - (void)applicationDidFinishLaunching:(CPNotification)aNotification
 {
+    // check for updates on NativeHost
+    if (![CPPlatform isBrowser])
+    {
+        var request = new CFHTTPRequest();
+
+        request.open("GET", "http://githubissues.heroku.com/Resources/desktopUpdate.json", true);
+
+        request.oncomplete = function()
+        {
+            if (request.success())
+            {
+                try
+                {
+
+                    var versionToSkip = localStorage["githubissues.ignoreVersion"],
+                        desktopInfo = JSON.parse(request.responseText());
+
+                    if (desktopInfo.version <= APPLICATION_VERSION_NUMBER || desktopInfo.version == versionToSkip)
+                        return;
+
+                    updateLink = desktopInfo.link;
+                    updateNumber = desktopInfo.version;
+
+                    // otherwise make an alert window thingy
+                    var update = [CPAlert alertWithMessageText:"Update Available" defaultButton:"Update" alternateButton:"Not Now" otherButton:"Skip This Version" informativeTextWithFormat:"This application has an update. Would you like to download it now?"];
+                    [update setAlertStyle:CPInformationalAlertStyle];
+                    [update setDelegate:self];
+                    [update runModal];
+                }
+                catch(e){}
+            }
+        }
+
+        request.send();
+    }
+
     // parse the url arguments here. i.e. load a repo/issue on startup.
     var args = [CPApp arguments],
         argCount = [args count];
@@ -218,6 +258,14 @@
 - (CGFloat)splitView:(CPSplitView)splitView constrainMaxCoordinate:(float)proposedMax ofSubviewAt:(int)dividerIndex
 {
     return 500;
+}
+
+- (void)alertDidEnd:(CPAlert)anAlert returnCode:(int)returnCode
+{
+    if (returnCode === 0)
+        OPEN_LINK(updateLink);
+    else if (returnCode === 2)
+        localStorage.setItem("githubissues.ignoreVersion", updateNumber);
 }
 
 @end
