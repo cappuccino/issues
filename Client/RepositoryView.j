@@ -7,6 +7,8 @@
     @outlet CPTextField nameField;
     @outlet CPTextField openIssuesBadge;
             CPColor     backgroundColor;
+
+            int         unreadCount;
 }
 
 - (void)awakeFromCib
@@ -34,44 +36,32 @@
     [nameField setValue:[CPColor colorWithCalibratedWhite:1 alpha:1]           forThemeAttribute:"text-shadow-color"  inState:CPThemeStateTableDataView | CPThemeStateGroupRow];
     [nameField setValue:CGSizeMake(0,1)                                        forThemeAttribute:"text-shadow-offset" inState:CPThemeStateTableDataView | CPThemeStateGroupRow];
     [nameField setValue:CGInsetMake(1.0, 0.0, 0.0, 2.0)                        forThemeAttribute:"content-inset"      inState:CPThemeStateTableDataView | CPThemeStateGroupRow];
+}
 
-    [openIssuesBadge setValue:CGInsetMake(2.0, 10.0, 4.0, 10.0) forThemeAttribute:"content-inset"];
-    [openIssuesBadge setValue:[[CPTheme defaultTheme] valueForAttributeWithName:"bezel-color" 
-                                                                        inState:CPThemeStateBezeled 
-                                                                       forClass:[_CPTokenFieldToken class]]
-            forThemeAttribute:"bezel-color"];
+- (int)widthOfBadge
+{
+    if (!unreadCount)
+        return 0;
 
-    [openIssuesBadge setValue:[CPFont systemFontOfSize:11] forThemeAttribute:"font"];
-    [openIssuesBadge setValue:CGSizeMake(0,1) forThemeAttribute:"text-shadow-offset"];
-    [openIssuesBadge setValue:[CPColor colorWithCalibratedWhite:1 alpha:0.5] forThemeAttribute:"text-shadow-color"];
+    var value = unreadCount + "";
+    var size = [value sizeWithFont:[CPFont boldSystemFontOfSize:11]].width + 15;
+
+    console.log("size:"+size);
+
+    return size;
 }
 
 - (void)setObjectValue:(Object)anObject
 {
     [nameField setStringValue:anObject.identifier];
+    unreadCount = anObject.openIssues ? anObject.openIssues.length : anObject.open_issues;
     [lockView setHidden:!anObject["private"]];
-
-    // since we don't update the issue count on the object if the actual issues are loaded
-    // we can just pull that value from the array of issues.
-    var count = anObject.openIssues ? anObject.openIssues.length : anObject.open_issues;
-
-    if (count > 0)
-    {
-        [openIssuesBadge setStringValue:count];
-        [openIssuesBadge sizeToFit];
-        [openIssuesBadge setHidden:NO]
-    }
-    else
-        [openIssuesBadge setHidden:YES];
 }
 
 - (void)setThemeState:(CPThemeState)aState
 {
     [super setThemeState:aState];
     [nameField setThemeState:aState];
-
-    if (aState === CPThemeStateSelectedDataView)
-        [self setBackgroundColor:backgroundColor];
        
 }
 
@@ -79,9 +69,6 @@
 {
     [super unsetThemeState:aState];
     [nameField unsetThemeState:aState];
-
-    if (aState === CPThemeStateSelectedDataView)
-        [self setBackgroundColor:nil];
 }
 
 - (void)layoutSubviews
@@ -89,8 +76,7 @@
     [super layoutSubviews];
 
     var width = CGRectGetWidth([self frame]),
-        tokenWidth = CGRectGetWidth([openIssuesBadge frame]) + 5,
-        maxWidth = width - CGRectGetMinX([nameField frame]) - ([openIssuesBadge isHidden] ? 3 : tokenWidth) - ([lockView isHidden] ? 0 : 16);
+        maxWidth = width - CGRectGetMinX([nameField frame]) - [self widthOfBadge] - ([lockView isHidden] ? 0 : 16);
 
     [nameField sizeToFit];
 
@@ -100,7 +86,6 @@
 
 
     [nameField setFrameSize:nameFrameSize];
-    [openIssuesBadge setFrameOrigin:CGPointMake(width - tokenWidth, 4)];
     [lockView setFrameOrigin:lockOrigin];        
 }
 
@@ -109,7 +94,7 @@
     self = [super initWithCoder:aCoder];
     lockView = [aCoder decodeObjectForKey:"lockView"];
     nameField = [aCoder decodeObjectForKey:"nameField"];
-    openIssuesBadge = [aCoder decodeObjectForKey:"openBadge"];
+    unreadCount = [aCoder decodeObjectForKey:"open"];
     backgroundColor = [aCoder decodeObjectForKey:"backgroundColor"];
     [self setNeedsLayout];
     return self;
@@ -120,7 +105,7 @@
     [super encodeWithCoder:aCoder];
     [aCoder encodeObject:lockView forKey:"lockView"];
     [aCoder encodeObject:nameField forKey:"nameField"];
-    [aCoder encodeObject:openIssuesBadge forKey:"openBadge"];
+    [aCoder encodeInt:unreadCount forKey:"open"];
     [aCoder encodeObject:backgroundColor forKey:"backgroundColor"];
 }
 

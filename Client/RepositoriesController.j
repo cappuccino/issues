@@ -65,7 +65,7 @@
     [sourcesListView addTableColumn:column];
     [sourcesListView setColumnAutoresizingStyle:CPTableViewLastColumnOnlyAutoresizingStyle];
     [sourcesListView setRowHeight:26.0];
-    [sourcesListView setSelectionHighlightStyle:CPTableViewSelectionHighlightStyleNone];
+    [sourcesListView setSelectionHighlightStyle:CPTableViewSelectionHighlightStyleSourceList];
     [sourcesListView setVerticalMotionCanBeginDrag:YES];
     [sourcesListView setDraggingDestinationFeedbackStyle:CPTableViewDropAbove];
     [sourcesListView registerForDraggedTypes:[@"GitHubIssuesRepoSourceListDragType"]];
@@ -243,6 +243,16 @@
     return sortedRepos[aRow - 1];
 }
 
+- (id)tableView:(CPTableView)aTableView badgeValueForRow:(int)aRow
+{
+    if (aRow === 0)
+        return 0;
+    var anObject = sortedRepos[aRow -1],
+        value = anObject.openIssues ? anObject.openIssues.length : anObject.open_issues;
+
+    return value;
+}
+
 - (int)numberOfRowsInTableView:(CPTableView)aTableView
 {
     return sortedRepos.length + 1;
@@ -359,3 +369,93 @@
     return menu;
 }
 @end
+
+
+@implementation RepositorySourceListView : CPTableView
+- (void)drawRow:(CPInteger)rowIndex clipRect:(CGRect)clipRect
+{
+    var count = [[self delegate] tableView:self badgeValueForRow:rowIndex];
+
+    if (!count)
+        return;
+
+    var columnIndex = [self columnWithIdentifier:@"sourcelist"],
+        viewRect = [self frameOfDataViewAtColumn:columnIndex row:rowIndex],
+        value = count + "",
+        badgeSize = [value sizeWithFont:[CPFont boldSystemFontOfSize:11]];
+
+        badgeSize.height = 16;
+        badgeSize.width = MAX(badgeSize.width + 10, 22);
+
+        badgeFrame = CGRectMake(CGRectGetMaxX(viewRect) - badgeSize.width - 8,
+                                   CGRectGetMidY(viewRect) - (badgeSize.height/2.0),
+                                   badgeSize.width,
+                                   badgeSize.height);
+
+    [self drawBadgeForRow:rowIndex inRect:badgeFrame];
+}
+
+- (void)drawBadgeForRow:(CPInteger)rowIndex inRect:(CGRect)badgeFrame
+{
+
+    var badgePath = [CPBezierPath bezierPath];
+    
+    [badgePath appendBezierPathWithRoundedRect:badgeFrame xRadius:8 yRadius:8];
+
+    //Get window and control state to determine colours used
+    var isFocused = [[[self window] firstResponder] isEqual:self],
+        rowBeingEdited = -1 // uninplemented [self editedRow];
+
+    //Set the attributes based on the row state
+    var backgroundColor,
+        textColor;
+
+    if ([[self selectedRowIndexes] containsIndex:rowIndex])
+    {
+        //Set the text color based on window and control state
+        backgroundColor = [CPColor whiteColor];
+        textColor = [CPColor colorWithCalibratedRed:(75/255.0) green:(137/255.0) blue:(208/255.0) alpha:1];
+    }
+    else
+    {
+        //Set the text colour based on window and control state
+        textColor = [CPColor whiteColor];
+        backgroundColor = [CPColor colorWithCalibratedRed:(152/255.0) green:(168/255.0) blue:(202/255.0) alpha:1];
+    }
+
+    [backgroundColor set];
+    [badgePath fill];
+
+    //Draw the badge text
+    var badgeString = [CPString stringWithFormat:@"%d", [[self delegate] tableView:self badgeValueForRow:rowIndex]],
+        stringSize = [badgeString sizeWithFont:[CPFont systemFontOfSize:11]],
+        badgeTextPoint = CGPointMake(CGRectGetMidX(badgeFrame) - (stringSize.width/2.0),        //Center in the badge frame
+                                         CGRectGetMidY(badgeFrame) + (stringSize.height/4.0) + 1);  //Center in the badge frame
+    [textColor setFill];
+    [badgeString drawAtPoint:badgeTextPoint withFont:[CPFont boldSystemFontOfSize:11]];
+}
+@end
+
+@implementation CPString (DrawingAdditions)
+
+- (CGSize)drawAtPoint:(CGPoint)point withFont:(CPFont)font
+{
+    var ctx = [[CPGraphicsContext currentContext] graphicsPort];
+    CGContextSaveGState(ctx);
+    CGContextSetFont(ctx, font);
+    CGContextShowTextAtPoint(ctx, point.x, point.y, self, 0);
+    CGContextRestoreGState(ctx);
+    return [self sizeWithFont:font];
+}
+
+@end
+
+function CGContextShowTextAtPoint(aContext, x, y, aString,/* unused */ aStringLength)
+{
+    aContext.fillText(aString, x, y);
+}
+
+function CGContextSetFont(aContext, aFont)
+{
+    aContext.font = [aFont cssString];
+}
