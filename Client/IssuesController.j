@@ -79,6 +79,10 @@
     [title setSortDescriptorPrototype:desc];
     [title setResizingMask:CPTableColumnAutoresizingMask | CPTableColumnUserResizingMask];
 
+    var dv = [[CPTextField alloc] initWithFrame:CGRectMakeZero()];
+    [dv setLineBreakMode:CPLineBreakByTruncatingTail];
+    [title setDataView:dv];
+
     [issuesTableView addTableColumn:title];
 
     var desc = [CPSortDescriptor sortDescriptorWithKey:@"votes" ascending:YES],
@@ -888,6 +892,18 @@
 
     return menu;
 }
+
+/*- (BOOL)tableView:(CPTableView)aTableView shouldEditTableColumn:(CPTableColumn)tableColumn row:(int)row
+{
+    // also check to see if the user is logged in.
+    return ([tableColumn identifier] === "title");
+}
+
+- (void)tableView:(CPTableView)aTableView setObjectValue:(id)aValue forTableColumn:(CPTableColumn)tableColumn row:(int)row
+{
+    // go ahead and set the value
+    // query github inside callback reload data with github's new title.
+}*/
 
 
 - (void)searchFieldDidChange:(id)sender
