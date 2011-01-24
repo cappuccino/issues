@@ -906,9 +906,8 @@
     // go ahead and set the value
     var issue = [(filteredIssues || repo[displayedIssuesKey]) objectAtIndex:row];
     [issue setObject:aValue forKey:"title"];
-
     // query github inside callback reload data with github's new title.
-    [[GithubAPIController sharedController] editIsssue:issue title:aValue body:[issue setObject:aValue forKey:"body"] repository:repo callback:function(){
+    [[GithubAPIController sharedController] editIsssue:issue title:aValue body:[issue objectForKey:"body"] repository:repo callback:function(){
         // FIX ME: only a couple columns and rows instead of everything...
         [aTableView reloadData];
     }];
