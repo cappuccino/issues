@@ -217,7 +217,6 @@
 
 - (void)tableViewSelectionDidChange:(CPNotification)aNotification
 {
-
     var selectedRow = MAX([sourcesListView selectedRow] - 1, CPNotFound);
 
     if (selectedRow === CPNotFound)
