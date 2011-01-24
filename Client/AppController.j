@@ -458,7 +458,7 @@ APPLICATION_VERSION_NUMBER = 1.6;
             [searchField setTarget:issuesController];
             [searchField setAction:@selector(searchFieldDidChange:)];
             [searchField setSendsSearchStringImmediately:YES];
-            [searchField setPlaceholderString:"title / body / labels"];
+            [searchField setPlaceholderString:"Search Issues"];
 
             [toolbarItem setLabel:"Search Issues"];
             [toolbarItem setView:searchField];
