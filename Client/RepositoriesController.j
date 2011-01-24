@@ -402,6 +402,9 @@
 
 - (void)drawBadgeForRow:(CPInteger)rowIndex inRect:(CGRect)badgeFrame
 {
+    // IE can't draw text so just return early.
+    if (!CPFeatureIsCompatible(CPHTMLCanvasFeature))
+        return;
 
     var badgePath = [CPBezierPath bezierPath];
     
