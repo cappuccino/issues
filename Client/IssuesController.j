@@ -904,7 +904,13 @@
 - (void)tableView:(CPTableView)aTableView setObjectValue:(id)aValue forTableColumn:(CPTableColumn)tableColumn row:(int)row
 {
     // go ahead and set the value
-    var issue = [(filteredIssues || repo[displayedIssuesKey]) objectAtIndex:row];
+    var issue = [(filteredIssues || repo[displayedIssuesKey]) objectAtIndex:row],
+        curr = [issue objectValueForKey:"title"];
+
+    // Dont update if there's nothing to change...
+    if (curr === aValue)
+        return;
+
     [issue setObject:aValue forKey:"title"];
     // query github inside callback reload data with github's new title.
     [[GithubAPIController sharedController] editIsssue:issue title:aValue body:[issue objectForKey:"body"] repository:repo callback:function(){
