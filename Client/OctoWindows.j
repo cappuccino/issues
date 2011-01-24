@@ -77,7 +77,9 @@ var SharedLoginWindow = nil;
     [super orderFront:sender];
     [usernameField setStringValue:""];
     [apiTokenField setStringValue:""];
-    [defaultButton setEnabled:NO];
+
+    if ([CPPlatform isBrowser])
+        [defaultButton setEnabled:NO];
 }
 
 - (@action)login:(id)sender
@@ -108,7 +110,7 @@ var SharedLoginWindow = nil;
 
 - (void)controlTextDidChange:(CPNotification)aNote
 {
-    if ([aNote object] !== apiTokenField && [aNote object] !== usernameField)
+    if (![CPPlatform isBrowser] || ([aNote object] !== apiTokenField && [aNote object] !== usernameField))
         return;
 
     if (![usernameField stringValue] || ![apiTokenField stringValue])
