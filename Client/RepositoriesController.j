@@ -199,7 +199,7 @@
     var selectedRow = [sourcesListView selectedRow] - 1,
         repo = [sortedRepos objectAtIndex:selectedRow];
 
-    OPEN_LINK("https://github.com/" + repo.identifier);
+    OPEN_LINK(BASE_URL + repo.identifier);
 }
 
 - (BOOL)tableView:(CPTableView)aTableView shouldSelectRow:(int)aRow
@@ -374,6 +374,11 @@
 @implementation RepositorySourceListView : CPTableView
 - (void)drawRow:(CPInteger)rowIndex clipRect:(CGRect)clipRect
 {
+    // IE can't draw text so just return early.
+    if (!CPFeatureIsCompatible(CPHTMLCanvasFeature))
+        return;
+
+
     var count = [[self delegate] tableView:self badgeValueForRow:rowIndex];
 
     if (!count)

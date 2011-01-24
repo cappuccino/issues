@@ -507,6 +507,9 @@
     [controller setDelegate:self];
 
     _openIssueWindows++;
+
+    // YUCKKKKKKK!!!
+    [[[[CPApp delegate] mainWindow] platformWindow] _propagateCurrentDOMEvent:NO];
 }
 
 - (void)newIssueWindowController:(CPWindowController)aController didAddIssue:(id)anIssue toRepo:(id)aRepo
@@ -548,7 +551,7 @@
 - (void)viewOnGithub:(id)sender
 {
     var issue = [self selectedIssue],
-        link = "http://github.com/"+ [issue objectForKey:"repo_identifier"] +"/issues/"+[issue objectForKey:"number"];
+        link = BASE_URL + [issue objectForKey:"repo_identifier"] +"/issues/"+[issue objectForKey:"number"];
 
     OPEN_LINK(link);
 }

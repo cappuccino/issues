@@ -3,9 +3,11 @@
 @import <AppKit/CPImage.j>
 @import "md5-min.js"
 
-BASE_URL = "/github/";
+BASE_API = "/github/";
+BASE_URL = "https://github.com/";
+
 if (window.location && window.location.protocol === "file:")
-    BASE_URL = "https://github.com/api/v2/json/";
+    BASE_API = BASE_URL + "api/v2/json/";
 
 var SharedController = nil,
     GravatarBaseURL = "http://www.gravatar.com/avatar/";
@@ -126,9 +128,9 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
     var request = new CFHTTPRequest();
 
     if (oauthAccessToken)
-        request.open("GET", BASE_URL + "user/show?access_token=" + encodeURIComponent(oauthAccessToken), true);
+        request.open("GET", BASE_API + "user/show?access_token=" + encodeURIComponent(oauthAccessToken), true);
     else
-        request.open("GET", BASE_URL + "user/show?login=" + encodeURIComponent(username) + "&token=" + encodeURIComponent(authenticationToken), true);
+        request.open("GET", BASE_API + "user/show?login=" + encodeURIComponent(username) + "&token=" + encodeURIComponent(authenticationToken), true);
 
     request.oncomplete = function()
     {
@@ -176,7 +178,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 - (void)promptForAuthentication:(id)sender
 {
     // because oauth relies on the server and multiple windows
-    if ([CPPlatform isBrowser] && [CPPlatformWindow supportsMultipleInstances] && BASE_URL === "/github/")
+    if ([CPPlatform isBrowser] && [CPPlatformWindow supportsMultipleInstances] && BASE_API === "/github/")
     {
         loginController = [[OAuthController alloc] init];
         //[loginController go];
@@ -200,7 +202,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
         anIdentifier = parts.slice(0, 2).join("/");
 
     var request = new CFHTTPRequest();
-    request.open("GET", BASE_URL+"repos/show/"+anIdentifier+[self _credentialsString], true);
+    request.open("GET", BASE_API+"repos/show/"+anIdentifier+[self _credentialsString], true);
 
     request.oncomplete = function()
     {
@@ -244,7 +246,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
         };
 
     var openRequest = new CFHTTPRequest();
-    openRequest.open("GET", BASE_URL+"issues/list/"+aRepo.identifier+"/open"+[self _credentialsString], true);
+    openRequest.open("GET", BASE_API+"issues/list/"+aRepo.identifier+"/open"+[self _credentialsString], true);
 
     openRequest.oncomplete = function() {
         if (openRequest.success())
@@ -279,7 +281,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
     }
 
     var closedRequest = new CFHTTPRequest();
-    closedRequest.open("GET", BASE_URL + "issues/list/" + aRepo.identifier + "/closed" + [self _credentialsString], true);
+    closedRequest.open("GET", BASE_API + "issues/list/" + aRepo.identifier + "/closed" + [self _credentialsString], true);
 
     closedRequest.oncomplete = function() {
         if (closedRequest.success())
@@ -317,7 +319,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 - (void)loadCommentsForIssue:(Issue)anIssue repository:(Repository)aRepo callback:(Function)aCallback
 {
     var request = new CFHTTPRequest();
-    request.open("GET", BASE_URL+"issues/comments/"+aRepo.identifier+"/"+[anIssue objectForKey:"number"]+[self _credentialsString], true);
+    request.open("GET", BASE_API+"issues/comments/"+aRepo.identifier+"/"+[anIssue objectForKey:"number"]+[self _credentialsString], true);
 
     request.oncomplete = function()
     {
@@ -346,7 +348,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 - (void)loadLabelsForRepository:(Repository)aRepo
 {
     var request = new CFHTTPRequest();
-    request.open(@"GET", [CPString stringWithFormat:@"%@issues/labels/%@/%@", BASE_URL, aRepo.identifier, [self _credentialsString]], YES);
+    request.open(@"GET", [CPString stringWithFormat:@"%@issues/labels/%@/%@", BASE_API, aRepo.identifier, [self _credentialsString]], YES);
 
     request.oncomplete = function()
     {
@@ -375,7 +377,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
     var request = new CFHTTPRequest(),
         addOrRemove = shouldRemove ? @"remove" : @"add";
 
-    request.open(@"GET", [CPString stringWithFormat:@"%@issues/label/%@/%@/%@/%@%@", BASE_URL, addOrRemove, aRepo.identifier, encodeURIComponent(aLabel), [anIssue objectForKey:@"number"], [self _credentialsString]], YES);
+    request.open(@"GET", [CPString stringWithFormat:@"%@issues/label/%@/%@/%@/%@%@", BASE_API, addOrRemove, aRepo.identifier, encodeURIComponent(aLabel), [anIssue objectForKey:@"number"], [self _credentialsString]], YES);
 
     request.oncomplete = function()
     {
@@ -409,7 +411,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 - (void)closeIssue:(id)anIssue repository:(id)aRepo callback:(Function)aCallback
 {
     var request = new CFHTTPRequest();
-    request.open("POST", BASE_URL+"issues/close/"+aRepo.identifier+"/"+[anIssue objectForKey:"number"]+[self _credentialsString], true);
+    request.open("POST", BASE_API+"issues/close/"+aRepo.identifier+"/"+[anIssue objectForKey:"number"]+[self _credentialsString], true);
 
     request.oncomplete = function()
     {
@@ -437,7 +439,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 - (void)reopenIssue:(id)anIssue repository:(id)aRepo callback:(Function)aCallback
 {
     var request = new CFHTTPRequest();
-    request.open("POST", BASE_URL+"issues/reopen/"+aRepo.identifier+"/"+[anIssue objectForKey:"number"]+[self _credentialsString], true);
+    request.open("POST", BASE_API+"issues/reopen/"+aRepo.identifier+"/"+[anIssue objectForKey:"number"]+[self _credentialsString], true);
 
     request.oncomplete = function()
     {
@@ -465,7 +467,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 - (void)openNewIssueWithTitle:(CPString)aTitle body:(CPString)aBody repository:(id)aRepo callback:(Function)aCallback
 {
     var request = new CFHTTPRequest();
-    request.open("POST", BASE_URL+"issues/open/"+aRepo.identifier+[self _credentialsString]+
+    request.open("POST", BASE_API+"issues/open/"+aRepo.identifier+[self _credentialsString]+
                                                  "&title="+encodeURIComponent(aTitle)+
                                                  "&body="+encodeURIComponent(aBody), true);
 
@@ -504,7 +506,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 - (void)addComment:(CPString)commentBody onIssue:(id)anIssue inRepository:(id)aRepo callback:(Function)aCallback
 {
     var request = new CFHTTPRequest();
-    request.open("POST", BASE_URL + "issues/comment/"+aRepo.identifier+"/" +
+    request.open("POST", BASE_API + "issues/comment/"+aRepo.identifier+"/" +
                 [anIssue objectForKey:"number"] + [self _credentialsString] +
                 "&comment="+encodeURIComponent(commentBody), true);
 
@@ -546,7 +548,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 {
     // we've got to make two calls one for the title and one for the body
     var request = new CFHTTPRequest();
-    request.open("POST", BASE_URL + "issues/edit/" + aRepo.identifier + "/" + [anIssue objectForKey:"number"] + [self _credentialsString] +
+    request.open("POST", BASE_API + "issues/edit/" + aRepo.identifier + "/" + [anIssue objectForKey:"number"] + [self _credentialsString] +
                                                  "&title=" + encodeURIComponent(aTitle) +
                                                  "&body=" + encodeURIComponent(aBody), true);
 
@@ -585,7 +587,7 @@ because one day maybe GitHub will give this to me... :)
 - (void)setPositionForIssue:(id)anIssue inRepository:(id)aRepo to:(int)aPosition callback:(Function)aCallback
 {
     var request = new CFHTTPRequest();
-    request.open("POST", BASE_URL+"issues/edit/"+aRepo.identifier+"/"+[anIssue objectForKey:"number"]+[self _credentialsString]+"&position="+encodeURIComponent(aPosition), true);
+    request.open("POST", BASE_API+"issues/edit/"+aRepo.identifier+"/"+[anIssue objectForKey:"number"]+[self _credentialsString]+"&position="+encodeURIComponent(aPosition), true);
 
     request.oncomplete = function()
     {

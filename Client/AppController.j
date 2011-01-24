@@ -26,6 +26,7 @@ APPLICATION_VERSION_NUMBER = 1.6;
 @import "AboutPanelController.j"
 @import "RLTableHeaderView.j"
 @import "OAuthController.j"
+@import "PreferencesController.j"
 
 @implementation AppController : CPObject
 {
@@ -84,7 +85,17 @@ APPLICATION_VERSION_NUMBER = 1.6;
     var args = [CPApp arguments],
         argCount = [args count];
 
+    // set the target for the "about" menu items
     [[[[[CPApp mainMenu] itemAtIndex:0] submenu] itemAtIndex:0] setTarget:self];
+
+    // FIX ME: this doesnt work on NH.
+    var newMenuItem = [[CPMenuItem alloc] initWithTitle:"Preferences..." action:@selector(showPrefs:) keyEquivalent:","];
+    [newMenuItem setTarget:self];
+    [[[[CPApp mainMenu] itemAtIndex:0] submenu] insertItem:newMenuItem atIndex:2];
+
+    var newMenuItem = [[CPMenuItem alloc] initWithTitle:"New Issue..." action:@selector(newIssue:) keyEquivalent:"n"];
+    [newMenuItem setTarget:issuesController];
+    [[[[CPApp mainMenu] itemAtIndex:0] submenu] insertItem:newMenuItem atIndex:3];
 
     if (argCount >= 2)
     {
@@ -175,21 +186,39 @@ APPLICATION_VERSION_NUMBER = 1.6;
             [reposController setSortedRepos:cookieRepos];
     }
 
-    var usernameCookie = [[CPCookie alloc] initWithName:@"github.username"],
-        apiTokenCookie = [[CPCookie alloc] initWithName:@"github.apiToken"],
-        oauthAccessCookie = [[CPCookie alloc] initWithName:@"github.access_token"];
+    // first, check to see if there is an override in localstorage for GitHub:FI
+    // if that is the case we dont care about the rest...
+    var enableFI = localStorage["github.fiEnabled"];
+    if (enableFI == "yes")
+    {
+        console.log("ENABLED");
+        console.log(enableFI);
 
-    if ([oauthAccessCookie value])
+        BASE_URL = localStorage["github.fiURL"];
+        BASE_API = BASE_URL + "api/v2/json/";
+
+        var usernameValue = localStorage["github.fiUser"],
+            apiTokenValue = localStorage["github.fiToken"];
+    }
+    else
+    {
+        var usernameValue = [[[CPCookie alloc] initWithName:@"github.username"] value],
+            apiTokenValue = [[[CPCookie alloc] initWithName:@"github.apiToken"] value],
+            oauthAccessValue = [[[CPCookie alloc] initWithName:@"github.access_token"] value];
+    }
+
+    // if there is value login...
+    if (oauthAccessValue)
     {
         var controller = [GithubAPIController sharedController];
-        [controller setOauthAccessToken:[oauthAccessCookie value]];
+        [controller setOauthAccessToken:oauthAccessValue];
         [controller authenticateWithCallback:initializationFunction];
     }
-    else if ([usernameCookie value] && [apiTokenCookie value])
+    else if (usernameValue && apiTokenValue)
     {
         var controller = [GithubAPIController sharedController];
-        [controller setUsername:[usernameCookie value]];
-        [controller setAuthenticationToken:[apiTokenCookie value]];
+        [controller setUsername:usernameValue];
+        [controller setAuthenticationToken:apiTokenValue];
         [controller authenticateWithCallback:initializationFunction];
     }
     else
@@ -268,9 +297,14 @@ APPLICATION_VERSION_NUMBER = 1.6;
         localStorage.setItem("githubissues.ignoreVersion", updateNumber);
 }
 
-@end
+- (void)showPrefs:(id)sender
+{
+    var controller = [PreferencesController sharedController];
 
-@implementation AppController (ToolbarDelegate)
+    [[controller window] center];
+
+    [controller showWindow:self];
+}
 
 - (CPArray)toolbarAllowedItemIdentifiers:(CPToolbar)toolbar
 {

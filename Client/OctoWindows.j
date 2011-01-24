@@ -69,7 +69,7 @@ var SharedLoginWindow = nil;
 
 - (@action)openAPIKeyPage:(id)sender
 {
-    window.open("https://github.com/account#admin_bucket");
+    OPEN_LINK(BASE_URL + "account#admin_bucket");
 }
 
 - (@action)orderFront:(id)sender

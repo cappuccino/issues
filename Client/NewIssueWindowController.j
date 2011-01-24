@@ -227,7 +227,7 @@
 
 - (id)initWithContentRect:(CGRect)aRect styleMask:(unsigned)aMask
 {
-    return [super initWithContentRect:aRect styleMask:aMask|CPResizableWindowMask|CPMiniaturizableWindowMask];
+    return [super initWithContentRect:aRect styleMask:aMask|CPClosableWindowMask|CPResizableWindowMask|CPMiniaturizableWindowMask];
 }
 
 @end
