@@ -339,8 +339,6 @@
     var issues = [self selectedIssues],
         count = [issues count];
 
-    if (count > 1)
-    {
         closeWarn = [[CPAlert alloc] init];
         [closeWarn setTitle:"Are You Sure?"];
         [closeWarn setMessageText:"Are you sure you want to close " + count + " issues?"];
@@ -350,9 +348,6 @@
         [closeWarn setDelegate:self];
         [closeWarn addButtonWithTitle:"Close Issues"];
         [closeWarn runModal];
-    }
-    else
-        [self _closeIssue];
 }
 
 /*
