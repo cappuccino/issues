@@ -6,7 +6,7 @@
  * Copyright 2010, 280 North All rights reserved.
  */
 
-APPLICATION_VERSION_NUMBER = 1.6;
+APPLICATION_VERSION_NUMBER = 1.8;
 
 @import <Foundation/CPObject.j>
 @import <AppKit/CPScrollView.j>
