@@ -344,6 +344,7 @@
         closeWarn = [[CPAlert alloc] init];
         [closeWarn setTitle:"Are You Sure?"];
         [closeWarn setMessageText:"Are you sure you want to close " + count + " issues?"];
+        [closeWarn setInformativeText:"Remeber, closed issues can always be reopened by browsing the 'closed issues' tab."];
         [closeWarn setAlertStyle:CPWarningAlertStyle];
         [closeWarn addButtonWithTitle:"Cancel"];
         [closeWarn setDelegate:self];
@@ -919,6 +920,10 @@
     }];
 }
 
+- (void)tableViewDeleteKeyPressed:(CPTableView)aTableView
+{
+    [self closeIssue:self];
+}
 
 - (void)searchFieldDidChange:(id)sender
 {

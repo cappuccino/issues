@@ -367,6 +367,11 @@
 
     return menu;
 }
+
+- (void)tableViewDeleteKeyPressed:(CPTableView)aTableView
+{
+    [self removeRepository:self];
+}
 @end
 
 
