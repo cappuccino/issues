@@ -51,6 +51,11 @@
     OPEN_LINK("http://github.com/downloads/Me1000/PrettyIssues/PrettyIssues.safariextz.zip");
 }
 
+- (@action)downloadChromeExtention:(id)sender
+{
+    OPEN_LINK("https://chrome.google.com/webstore/detail/mlphmcafjfbcoagfoanfaljdmkcimhmi");
+}
+
 - (@action)openGithub:(id)sender
 {
     OPEN_LINK("http://github.com");
