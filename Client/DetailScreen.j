@@ -30,8 +30,27 @@
 @implementation NoReposView : DetailScreen
 {
     @outlet CPImageView             repoNotFoundIndicator;
+            CPButton                repoIsProtectedButton;
     @outlet CPView                  containerView;
     @outlet RepositoriesController  repositoriesController;
+    @outlet RepoEntryField          repoField;
+}
+
+- (void)awakeFromCib
+{
+    [super awakeFromCib];
+
+    var frame = [repoNotFoundIndicator frame];
+    frame.size.width  = 16;
+    frame.size.height = 16;
+    frame.origin.y = frame.origin.y - 2;
+    repoIsProtectedButton = [[CPButton alloc] initWithFrame:frame];
+    [repoIsProtectedButton setTarget:self];
+    [repoIsProtectedButton setAction:@selector(promptForPrivateRepo:)];
+    [repoIsProtectedButton setBordered:NO];
+    [repoIsProtectedButton setImage:[[CPImage alloc] initWithContentsOfFile:[[CPBundle mainBundle] pathForResource:"private.png"] size:CGSizeMake(16, 16)]];
+    [[repoNotFoundIndicator superview] addSubview:repoIsProtectedButton];
+    [repoIsProtectedButton setHidden:YES];
 }
 
 - (@action)takeRepoFromButton:(id)aSender
@@ -47,6 +66,7 @@
 - (void)controlTextDidChange:(CPNotification)aNotification
 {
     [repoNotFoundIndicator setHidden:YES];
+    [repoIsProtectedButton setHidden:YES];
 }
 
 - (void)loadRepositoryWithIdentifier:(CPString)aString
@@ -62,16 +82,29 @@
     [self setHitTests:NO];
     [containerView setAlphaValue:0.8];
 
-    [[GithubAPIController sharedController] loadRepositoryWithIdentifier:aString callback:function(repo)
+    [[GithubAPIController sharedController] loadRepositoryWithIdentifier:aString callback:function(repo, request)
     {
         if (repo)
             [repositoriesController addRepository:repo];
+        else if (request.status() === 401)
+            [repoIsProtectedButton setHidden:NO];
         else
             [repoNotFoundIndicator setHidden:NO];
 
         [self setHitTests:YES];
         [containerView setAlphaValue:1.0];
     }];
+}
+
+- (void)promptForPrivateRepo:(id)sender
+{
+    var api = [GithubAPIController sharedController];
+
+    [api setNextAuthCallback:function(){
+        [self takeRepoFromTextField:repoField];
+    }];
+
+    [[GithubAPIController sharedController] promptForAuthentication:self];
 }
 
 @end
@@ -143,7 +176,6 @@
     [self setFont:[CPFont boldSystemFontOfSize:12.0]];
     [self setValue:[CPColor colorWithWhite:0.6 alpha:1.0] forThemeAttribute:@"text-color" inState:CPTextFieldStatePlaceholder];
     [self setValue:CGInsetMakeZero() forThemeAttribute:@"bezel-inset" inState:CPThemeStateNormal];
-    [self setValue:CGInsetMake(0.0, 22.0, 0.0, 22.0) forThemeAttribute:@"content-inset" inState:CPThemeStateNormal];
     [self setVerticalAlignment:CPCenterVerticalTextAlignment];
 
     [self setValue:[[self class] bezelColor] forThemeAttribute:@"bezel-color" inState:CPThemeStateNormal];

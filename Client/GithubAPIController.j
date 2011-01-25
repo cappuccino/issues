@@ -43,6 +43,8 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 
     CPAlert         warnAlert;
     CPAlert         logoutWarn;
+
+    Function        nextAuthCallback @accessors;
 }
 
 + (id)sharedController
@@ -153,6 +155,9 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
             }
 
             [[CPUserSessionManager defaultManager] setStatus:CPUserSessionLoggedInStatus];
+
+            if (nextAuthCallback)
+                nextAuthCallback();
         }
         else
         {
@@ -179,10 +184,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 {
     // because oauth relies on the server and multiple windows
     if ([CPPlatform isBrowser] && [CPPlatformWindow supportsMultipleInstances] && BASE_API === "/github/")
-    {
         loginController = [[OAuthController alloc] init];
-        //[loginController go];
-    }
     else
     {
         var loginWindow = [LoginWindow sharedLoginWindow];
