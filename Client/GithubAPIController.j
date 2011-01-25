@@ -225,7 +225,8 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
         if (aCallback)
             aCallback(repo, request);
 
-        [self loadLabelsForRepository:repo];
+        if (repo)
+            [self loadLabelsForRepository:repo];
 
         [[CPRunLoop currentRunLoop] performSelectors];
     }
@@ -654,6 +655,16 @@ because one day maybe GitHub will give this to me... :)
                 [warnAlert runModal];
             }
         }catch(e){}
+    }
+    else if (aRequest.status() === 503)
+    {
+        var noteAlert = [[CPAlert alloc] init];
+
+        [noteAlert setTitle:"Service Unavailable"];
+        [noteAlert setMessageText:"Service Unavailable"];
+        [noteAlert setInformativeText:"It appears the GitHub API is down at the moment. Check back in a few minutes to see if it is back online."];
+        [noteAlert setAlertStyle:CPWarningAlertStyle];
+        [noteAlert addButtonWithTitle:"Okay"];
     }
 }
 
