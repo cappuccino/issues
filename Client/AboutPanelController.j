@@ -43,7 +43,7 @@
 
 - (@action)downloadNativeClient:(id)sender
 {
-    OPEN_LINK("http://cl.ly/44R7");
+    OPEN_LINK("http://cl.ly/4CUu");
 }
 
 - (@action)downloadSafariExtention:(id)sender

@@ -58,7 +58,6 @@ APPLICATION_VERSION_NUMBER = 1.8;
             {
                 try
                 {
-
                     var versionToSkip = localStorage["githubissues.ignoreVersion"],
                         desktopInfo = JSON.parse(request.responseText());
 
