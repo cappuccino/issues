@@ -635,7 +635,7 @@ because one day maybe GitHub will give this to me... :)
             else
             {
                 var auth = [self isAuthenticated],
-                    text = (auth) ? "Make sure your account has sufficiant privalies to modify an issue or reposotory. " : "The action you tried to perfom requires you to be authenticated. Please login.";
+                    text = (auth) ? "Make sure your account has sufficient privileges to modify an issue or reposotory. " : "The action you tried to perfom requires you to be authenticated. Please login.";
 
                 // this way we only get one alert at a time
                 if (!warnAlert)
