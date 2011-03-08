@@ -109,6 +109,16 @@
         [errorField setStringValue:@"You must enter a title."];
     else if (![bodyField stringValue])
         [errorField setStringValue:@"You must enter a description."];
+    else if ([[titleField stringValue] length] + [[bodyField stringValue] length] < 30 &&
+             [[selectedRepo selectedItem] tag].identifier === @"280north/cappuccino")
+    {
+        var alert = [CPAlert alertWithMessageText:@"This bug report doesn't pass muster."
+                                    defaultButton:@"My bad."
+                                  alternateButton:nil
+                                      otherButton:nil
+                        informativeTextWithFormat:@"Please add more information about how and where you encountered the bug. Also, please don't file bug reports on the Cappuccino project just to test out the GitHub Issues app. Cappuccino is a real, live project, and having to devote effort to closing bogus issues makes the maintainers die just a tiny bit inside every time."];
+        [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:nil contextInfo:nil];
+    }
     else 
     {
         [errorField setStringValue:""];
