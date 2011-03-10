@@ -23,11 +23,13 @@ var SubmitHelpHTMLString;
     request.send("");
 }
 
-- (void)windowDidLoad
+- (void)loadWindow
 {
+    [super loadWindow];
+
     if ([CPPlatform isBrowser] && [CPPlatformWindow supportsMultipleInstances])
     {
-        var platformWindow = [[CPPlatformWindow alloc] initWithContentRect:CGRectMake(200, 50, 630, 550)];
+        var platformWindow = [[CPPlatformWindow alloc] initWithContentRect:[[self window] frame]];
         [[self window] setFullBridge:YES];
         [[self window] setPlatformWindow:platformWindow];
     }
@@ -35,13 +37,16 @@ var SubmitHelpHTMLString;
     if (!SubmitHelpHTMLString)
             [[CPNotificationCenter defaultCenter] addObserver:self selector:@selector(_loadString:) name:"SubmitHelpHTMLStringDidLoad" object:nil];
     else
-        [helpWebView loadHTMLString:SubmitHelpHTMLString];
+        [self _loadString:nil];
 }
 
 - (void)_loadString:(CPNotification)aNote
 {
-    [helpWebView loadHTMLString:[aNote object]];
-    [[CPNotificationCenter defaultCenter] removeObserver:self];
+    // give the iframe a chance to set up... :(
+    window.setTimeout(function(){
+        [helpWebView loadHTMLString:SubmitHelpHTMLString];
+        [[CPNotificationCenter defaultCenter] removeObserver:self];
+    },0);
 }
 
 @end
