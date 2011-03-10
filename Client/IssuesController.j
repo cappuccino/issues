@@ -44,7 +44,12 @@
     [self showView:noRepoView];
 
     // custom headerview so we can show/hide columns
-    [issuesTableView setHeaderView:[[RLTableHeaderView alloc] initWithFrame:[[issuesTableView headerView] frame]]];
+    var newHeader = [[RLTableHeaderView alloc] initWithFrame:[[issuesTableView headerView] frame]];
+    [issuesTableView setHeaderView:newHeader];
+
+    // FIX ME: when atlas has a table we wont need this... 
+    [issuesTableView setCornerView:[[_CPCornerView alloc] initWithFrame:CGRectMake(0, 0, [CPScroller scrollerWidth], CGRectGetHeight([newHeader frame]))]];
+
     [issuesTableView setBackgroundColor:[CPColor whiteColor]];
 
     var desc = [CPSortDescriptor sortDescriptorWithKey:@"number" ascending:YES],
