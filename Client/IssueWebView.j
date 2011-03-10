@@ -41,6 +41,7 @@ var IssuesHTMLTemplate = nil;
 
     [self setFrameLoadDelegate:self];
     [self setDrawsBackground:YES];
+    [_scrollView setAutohidesScrollers:NO];
 }
 
 - (id)initWithFrame:(CGRect)aFrame
