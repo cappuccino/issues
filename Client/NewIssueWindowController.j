@@ -1,5 +1,6 @@
 
 @import <AppKit/CPWindowController.j>
+@import "SubmitHelpWindowController.j"
 
 @implementation NewIssueWindowController : CPWindowController
 {
@@ -17,6 +18,8 @@
     id delegate @accessors;
     BOOL shouldEdit @accessors;
     id selectedIssue @accessors;
+
+    CPAlert submitHelpAlert;
 }
 
 - (void)awakeFromCib
@@ -109,15 +112,21 @@
         [errorField setStringValue:@"You must enter a title."];
     else if (![bodyField stringValue])
         [errorField setStringValue:@"You must enter a description."];
-    else if ([[titleField stringValue] length] + [[bodyField stringValue] length] < 30 &&
-             [[selectedRepo selectedItem] tag].identifier === @"280north/cappuccino")
+    else if ([[titleField stringValue] length] + [[bodyField stringValue] length] < 30)
     {
-        var alert = [CPAlert alertWithMessageText:@"This bug report doesn't pass muster."
-                                    defaultButton:@"My bad."
+        var submitHelpAlert = [CPAlert alertWithMessageText:@"This bug report doesn't pass muster."
+                                    defaultButton:@"Cancel."
                                   alternateButton:nil
                                       otherButton:nil
-                        informativeTextWithFormat:@"Please add more information about how and where you encountered the bug. Also, please don't file bug reports on the Cappuccino project just to test out the GitHub Issues app. Cappuccino is a real, live project, and having to devote effort to closing bogus issues makes the maintainers die just a tiny bit inside every time."];
-        [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:nil contextInfo:nil];
+                        informativeTextWithFormat:@"This issue doesn't seem very descriptive. Please add more information to it before submitting. Also, please refrain from submit \"test\" issues unless this is your project."];
+
+        [submitHelpAlert setShowsHelp:YES];
+        [submitHelpAlert setDelegate:self];
+
+        if ([CPPlatform isBrowser])
+            [submitHelpAlert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:nil contextInfo:nil];
+        else
+            [submitHelpAlert runModal];
     }
     else 
     {
@@ -226,6 +235,13 @@
 {
     if ((![CPPlatform isBrowser] || ![CPPlatformWindow supportsMultipleInstances]) && delegate)
         delegate._openIssueWindows--;
+}
+
+- (void)alertShowHelp:(id)sender
+{
+    [submitHelpAlert _takeReturnCodeFrom:nil];
+    var controller = [[SubmitHelpWindowController alloc] initWithWindowCibName:"SubmitHelpWindow"];
+    [controller showWindow:self];
 }
 
 @end
