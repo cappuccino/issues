@@ -764,16 +764,7 @@
             value = [CPDate simpleDate:value];
     }
     else if (columnIdentifier === "pull")
-    {
-        if ([issue containsKey:"has_pull_request"])
-            value = [issue objectForKey:"has_pull_request"] ? _cachedHasPullRequestsImage : nil;
-        else
-        {
-            var hasReq = [repo.pullRequestsNumbers containsObject:[issue objectForKey:"number"]];
-            value = hasReq ? _cachedHasPullRequestsImage : nil;
-            [issue setObject:hasReq forKey:"has_pull_request"];
-        }
-    }
+        value = [issue objectForKey:"has_pull_request"] ? _cachedHasPullRequestsImage : nil;
 
     return value;
 }

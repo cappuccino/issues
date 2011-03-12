@@ -374,7 +374,16 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
             aRepo.pullRequests = [];
 
         // cache the numbers fo a much faster lookup.
-        aRepo.pullRequestsNumbers = [aRepo.pullRequests pluckForKey:"number"];
+        var issueNumbers = [aRepo.pullRequests pluckForKey:"number"],
+            c = [aRepo.openIssues count];
+
+        while(c--)
+        {
+            var issue = aRepo.openIssues[c],
+                hasRequest = [issueNumbers containsObject:[issue objectForKey:"number"]];
+
+            [issue setValue:hasRequest forKey:"has_pull_request"];
+        }
 
         [self _noteRepoChanged:aRepo];
     }
