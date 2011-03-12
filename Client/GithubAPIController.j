@@ -226,7 +226,10 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
             aCallback(repo, request);
 
         if (repo)
+        {
             [self loadLabelsForRepository:repo];
+            [self loadPullRequestsForRepository:repo];
+        }
 
         [[CPRunLoop currentRunLoop] performSelectors];
     }
@@ -346,6 +349,37 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
     }
 
     request.send("");
+}
+
+- (void)loadPullRequestsForRepository:(Repository)aRepo
+{
+    // FIX ME: perhaps we should consider doing something with the closed requests too?
+    var request = new CFHTTPRequest();
+    request.open("GET", BASE_API + "pulls/"+ aRepo.identifier +"/open/" + [self _credentialsString], true);
+    request.oncomplete = function()
+    {
+        if (request.success())
+        {
+            try
+            {
+                aRepo.pullRequests = JSON.parse(request.responseText()).pulls || [];
+            }
+            catch (e)
+            {
+                CPLog.error(@"Unable to load pull requests for repo: " + aRepo + @" -- " + e);
+                aRepo.pullRequests = [];
+            }
+        }
+        else
+            aRepo.pullRequests = [];
+
+        // cache the numbers fo a much faster lookup.
+        aRepo.pullRequestsNumbers = [aRepo.pullRequests pluckForKey:"number"];
+
+        [self _noteRepoChanged:aRepo];
+    }
+    request.send("");
+
 }
 
 - (void)loadLabelsForRepository:(Repository)aRepo

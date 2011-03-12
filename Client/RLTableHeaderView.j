@@ -14,7 +14,7 @@
     for (var i = 0; i < [columns count]; i++)
     {
         var columnIsHidden = [columns[i] isHidden],
-            title = [[columns[i] headerView] stringValue],
+            title = [[columns[i] headerView] stringValue] || "Pull Requests",
             newMenuItem = [[CPMenuItem alloc] initWithTitle:title action:@selector(toggleColumnVisibility:) keyEquivalent:nil],
             stateToUse = (columnIsHidden) ? CPOffState : CPOnState;
 

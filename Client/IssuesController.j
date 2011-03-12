@@ -34,6 +34,8 @@
     id          _ephemeralSelectedIssue;
     int         _openIssueWindows;
     Function    _callbackIfReturnYes;
+
+    CPImage     _cachedHasPullRequestsImage;
 }
 
 - (void)awakeFromCib
@@ -51,6 +53,25 @@
     [issuesTableView setCornerView:[[_CPCornerView alloc] initWithFrame:CGRectMake(0, 0, [CPScroller scrollerWidth], CGRectGetHeight([newHeader frame]))]];
 
     [issuesTableView setBackgroundColor:[CPColor whiteColor]];
+
+    var desc = [CPSortDescriptor sortDescriptorWithKey:@"has_pull_request" ascending:YES],
+        pull = [[CPTableColumn alloc] initWithIdentifier:"pull"];
+
+    var headerview = [pull headerView],
+        imageview = [[CPImageView alloc] initWithFrame:CGRectMake(0,5,CGRectGetWidth([headerview bounds]),13)];
+        [imageview setImage:[[CPImage alloc] initWithContentsOfFile:[[CPBundle mainBundle] pathForResource:"pull_request_icon.png"] size:CGSizeMake(13, 13)]];
+        [imageview setAutoresizingMask:CPViewWidthSizable];
+        [imageview setImageScaling:CPScaleNone];
+        [headerview addSubview:imageview];
+
+    [pull setWidth:40.0];
+    [pull setMinWidth:40.0];
+    [pull setSortDescriptorPrototype:desc];
+
+    _cachedHasPullRequestsImage = [[CPImage alloc] initWithContentsOfFile:[[CPBundle mainBundle] pathForResource:"has-pull-request-marker.png"] size:CGSizeMake(11, 12)]
+    [pull setDataView:imageview];
+
+    [issuesTableView addTableColumn:pull];
 
     var desc = [CPSortDescriptor sortDescriptorWithKey:@"number" ascending:YES],
         ID = [[CPTableColumn alloc] initWithIdentifier:"number"],
@@ -742,6 +763,19 @@
         else
             value = [CPDate simpleDate:value];
     }
+    else if (columnIdentifier === "pull")
+    {
+        if ([issue containsKey:"has_pull_request"])
+            value = [issue objectForKey:"has_pull_request"] ? _cachedHasPullRequestsImage : nil;
+        else
+        {
+            var hasReq = [repo.pullRequestsNumbers containsObject:[issue objectForKey:"number"]];
+            value = hasReq ? _cachedHasPullRequestsImage : nil;
+            [issue setObject:hasReq forKey:"has_pull_request"];
+            console.log(repo);
+        }
+    }
+
     return value;
 }
 
@@ -1084,4 +1118,28 @@
     return object;
 }
 
+@end
+
+@implementation CPArray (pluck)
+- (CPArray)pluckForKey:(CPString)aString
+{
+    var i = 0,
+        count = [self count],
+        pluckedValues = [];
+
+    for (; i < count; i++)
+    {
+        var obj = self[i];
+
+        if (obj.isa)
+            var value = [obj objectForKey:aString];
+        else
+            var value = obj[aString];
+
+        if (value)
+            pluckedValues.push(value)
+    }
+
+    return pluckedValues;
+}
 @end

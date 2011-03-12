@@ -205,6 +205,10 @@ img.issue-author-image {
 .wantsclosed-open {
     display: none;
 }
+
+.hasPullRequest-false, .hasPullRequest- {
+    display: none;
+}
 .comment {
     margin: 2em 1em 1em 4em;
 }
@@ -408,6 +412,10 @@ function toggleIssueState() {
         GitHubAPI.reopenIssue(ISSUE, REPO);
 }
 
+function showPullRequest() {
+    alert();
+}
+
 function showCommentForm() {
     var textarea = document.getElementById("add-comment-textarea");
     textarea.focus();
@@ -500,6 +508,7 @@ function hasUnsubmittedComment() {
                             <div class="issue-meta-action-wrapper">
                                 <a href="#" id="close-button" onclick="toggleIssueState(); return false;" class="action-state-button wantsopen-{{state}}">Close Issue</a>
                                 <a href="#" id="open-button" onclick="toggleIssueState(); return false;" class="action-state-button wantsclosed-{{state}}">Re-open Issue</a>
+                                <a href="{{pref_base_url}}{{repo_identifier}}/pull/{{number}}" target="_blank" id="show-pull-request" class="action-state-button hasPullRequest-{{has_pull_request}}">View Pull Request</a>
                             </div>
                         </div>
                     </div>
