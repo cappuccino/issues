@@ -6,18 +6,12 @@
     @outlet CPImageView lockView;
     @outlet CPTextField nameField;
     @outlet CPTextField openIssuesBadge;
-            CPColor     backgroundColor;
 
             int         unreadCount;
 }
 
 - (void)awakeFromCib
 {
-    var path = [[CPBundle mainBundle] pathForResource:"sourceListSelectionBackground.png"],
-        image = [[CPImage alloc] initWithContentsOfFile:path size:CGSizeMake(1, 26)];
-
-    backgroundColor = [CPColor colorWithPatternImage:image];
-
     [nameField setLineBreakMode:CPLineBreakByTruncatingTail];
     [nameField setFont:[CPFont boldSystemFontOfSize:11.0]];
     [nameField setVerticalAlignment:CPCenterVerticalTextAlignment];
@@ -93,7 +87,6 @@
     lockView = [aCoder decodeObjectForKey:"lockView"];
     nameField = [aCoder decodeObjectForKey:"nameField"];
     unreadCount = [aCoder decodeObjectForKey:"open"];
-    backgroundColor = [aCoder decodeObjectForKey:"backgroundColor"];
     [self setNeedsLayout];
     return self;
 }
@@ -104,7 +97,6 @@
     [aCoder encodeObject:lockView forKey:"lockView"];
     [aCoder encodeObject:nameField forKey:"nameField"];
     [aCoder encodeInt:unreadCount forKey:"open"];
-    [aCoder encodeObject:backgroundColor forKey:"backgroundColor"];
 }
 
 @end
