@@ -772,7 +772,6 @@
             var hasReq = [repo.pullRequestsNumbers containsObject:[issue objectForKey:"number"]];
             value = hasReq ? _cachedHasPullRequestsImage : nil;
             [issue setObject:hasReq forKey:"has_pull_request"];
-            console.log(repo);
         }
     }
 

@@ -240,6 +240,7 @@
 - (void)alertShowHelp:(id)sender
 {
     [submitHelpAlert _takeReturnCodeFrom:nil];
+	
     var controller = [[SubmitHelpWindowController alloc] initWithWindowCibName:"SubmitHelpWindow"];
     [controller showWindow:self];
 }

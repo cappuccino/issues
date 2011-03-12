@@ -27,6 +27,7 @@ APPLICATION_VERSION_NUMBER = 1.8;
 @import "RLTableHeaderView.j"
 @import "OAuthController.j"
 @import "PreferencesController.j"
+@import "RLIndeterminateProgressIndicator.j"
 
 @implementation AppController : CPObject
 {
