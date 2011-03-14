@@ -2,6 +2,8 @@
 @import "markdown.js"
 @import "mustache.js"
 
+@import "PullRequestWindowController.j"
+
 var IssuesHTMLTemplate = nil;
 
 @implementation IssueWebView : CPWebView
@@ -147,6 +149,14 @@ var IssuesHTMLTemplate = nil;
 
     if (scrollRect)
         [_frameView scrollRectToVisible:scrollRect];
+
+    domWindow.showPullRequest = function()
+    {
+        var controller = [[PullRequestWindowController alloc] initWithWindowCibName:"PullRequestWindow"];
+
+        [controller showWindow:self];
+        [controller setPullRequest:repo.pullRequests[[issue objectForKey:"number"]]];
+    }
 }
 
 @end

@@ -241,9 +241,18 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 {
     var openIssuesLoaded = NO,
         closedIssuesLoaded = NO,
-        waitForBoth = function () {
-            if (!openIssuesLoaded || !closedIssuesLoaded)
+        pullRequestsLoaded = NO,
+        waitForAll = function () {
+            if (!openIssuesLoaded || !closedIssuesLoaded || !pullRequestsLoaded)
                 return;
+
+            // Now, for sorting purposes each issue should know if it has a pull request
+            var c = aRepo.openIssues.length;
+            while (c--)
+            {
+                var issue = aRepo.openIssues[c];
+                [issue setValue:([issue objectForKey:"number"] in aRepo.pullRequests) forKey:"has_pull_request"];
+            }
 
             if (aCallback)
                 aCallback(openRequest.success() && closedRequest.success(), aRepo, openRequest, closedRequest);
@@ -283,7 +292,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
         }
 
         openIssuesLoaded = YES;
-        waitForBoth();
+        waitForAll();
     }
 
     var closedRequest = new CFHTTPRequest();
@@ -315,9 +324,45 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
         }
 
         closedIssuesLoaded = YES;
-        waitForBoth();
+        waitForAll();
     }
 
+    // FIX ME: perhaps we should consider doing something with the closed requests too?
+    var pullRequestsRequest = new CFHTTPRequest();
+    pullRequestsRequest.open("GET", BASE_API + "pulls/"+ aRepo.identifier +"/open/" + [self _credentialsString], true);
+    pullRequestsRequest.oncomplete = function()
+    {
+        if (pullRequestsRequest.success())
+        {
+            var requests;
+
+            try
+            {
+                requests = JSON.parse(pullRequestsRequest.responseText()).pulls || [];
+            }
+            catch (e)
+            {
+                CPLog.error(@"Unable to load pull requests for repo: " + aRepo + @" -- " + e);
+                requests = [];
+            }
+        }
+        else
+            requests = [];
+
+        // Cache the numbers fo a much faster lookup by hashing the issue number.
+        var c = requests.length;
+        aRepo.pullRequests = { };
+        while (c--)
+        {
+            var pull = requests[c];
+            aRepo.pullRequests[pull.number] = pull;
+        }
+
+        pullRequestsLoaded = YES;
+        waitForAll();
+    }
+
+    pullRequestsRequest.send("");
     openRequest.send("");
     closedRequest.send("");
 }
@@ -353,41 +398,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 
 - (void)loadPullRequestsForRepository:(Repository)aRepo
 {
-    // FIX ME: perhaps we should consider doing something with the closed requests too?
-    var request = new CFHTTPRequest();
-    request.open("GET", BASE_API + "pulls/"+ aRepo.identifier +"/open/" + [self _credentialsString], true);
-    request.oncomplete = function()
-    {
-        if (request.success())
-        {
-            try
-            {
-                aRepo.pullRequests = JSON.parse(request.responseText()).pulls || [];
-            }
-            catch (e)
-            {
-                CPLog.error(@"Unable to load pull requests for repo: " + aRepo + @" -- " + e);
-                aRepo.pullRequests = [];
-            }
-        }
-        else
-            aRepo.pullRequests = [];
 
-        // cache the numbers fo a much faster lookup.
-        var issueNumbers = [aRepo.pullRequests pluckForKey:"number"],
-            c = [aRepo.openIssues count];
-
-        while(c--)
-        {
-            var issue = aRepo.openIssues[c],
-                hasRequest = [issueNumbers containsObject:[issue objectForKey:"number"]];
-
-            [issue setValue:hasRequest forKey:"has_pull_request"];
-        }
-
-        [self _noteRepoChanged:aRepo];
-    }
-    request.send("");
 
 }
 

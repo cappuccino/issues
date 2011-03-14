@@ -303,7 +303,7 @@
     }
 }
 
-- (void)validateToolbarItem:(CPToolbarItem)anItem
+- (BOOL)validateToolbarItem:(CPToolbarItem)anItem
 {
     var hasSelection = [self selectedIssue] !== nil,
         hasMultipleSelection = [[issuesTableView selectedRowIndexes] count] > 1,
@@ -765,6 +765,7 @@
     }
     else if (columnIdentifier === "pull")
         value = [issue objectForKey:"has_pull_request"] ? _cachedHasPullRequestsImage : nil;
+
 
     return value;
 }

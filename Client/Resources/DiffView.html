@@ -1,0 +1,539 @@
+<html>
+	<head>
+
+		<style type="text/css" media="screen">
+			#lijstmetdingen {
+				font-size: 50%;
+			}
+
+body {
+	margin: 0;
+	margin-top: 5px;
+	width: 100%;
+	font-family: 'Lucida Grande', Arial;
+}
+
+/* @group Scrollbars */
+::-webkit-scrollbar {
+	width: 11px;
+	height: 11px;
+    -webkit-box-shadow: 0 -1px 1px white;
+	}
+	::-webkit-scrollbar:vertical {
+		
+		}
+		.light-scrollbars::-webkit-scrollbar:vertical {
+			
+			}
+	::-webkit-scrollbar:horizontal {
+		  top:-10px;
+		}
+		.light-scrollbars::-webkit-scrollbar:horizontal {
+			
+			}
+::-webkit-scrollbar-track {
+	-webkit-border-radius: 9px;
+	}
+	::-webkit-scrollbar-track:vertical {
+		margin: -6px 0;
+		background: -webkit-gradient(linear, left top, 11 top, from(#ccc), to(#fff));
+		-webkit-box-shadow: inset 1px 0 3px rgba(10,10,10,0.5);
+		}
+		.light-scrollbars::-webkit-scrollbar-track:vertical {
+			background: -webkit-gradient(linear, left top, right top, from(#ababab), to(#c6c6c6));
+			}
+	::-webkit-scrollbar-track:horizontal {
+		margin: 0 -6px;
+		background: -webkit-gradient(linear, left top, left 11, from(#ccc), to(#fff));
+		-webkit-box-shadow: inset 0 1px 3px rgba(10,10,10,0.5);
+		}
+		.light-scrollbars::-webkit-scrollbar-track:horizontal {
+			background: -webkit-gradient(linear, left top, left bottom, from(#ababab), to(#c6c6c6));
+			}
+::-webkit-scrollbar-button {
+	
+	}
+	::-webkit-scrollbar-button:vertical {
+		width: 17px;
+		height: 22px;
+		border-left: 1px solid #ccc;
+		}
+		::-webkit-scrollbar-button:vertical:decrement {
+			background: url(Resources/scroller/scroll-triangle-up.png) no-repeat left 6px, -webkit-gradient(linear, left top, right top, from(#fff), to(#dfdfdf));
+			}
+			.light-scrollbars::-webkit-scrollbar-button:vertical:decrement {
+				background: url(Resources/scroller/scroll-triangle-up.png) no-repeat left 6px, -webkit-gradient(linear, left top, right top, from(#bbb), to(#f1f1f1));
+				}
+			::-webkit-scrollbar-button:vertical:decrement:active {
+				background: url(Resources/scroller/scroll-triangle-up.png) no-repeat right 6px, -webkit-gradient(linear, left top, right top, from(#bcc2c8), to(#81888f));
+				}
+		::-webkit-scrollbar-button:vertical:increment {
+			background: url(Resources/scroller/scroll-triangle-down.png) no-repeat left 13px, -webkit-gradient(linear, left top, right top, from(#fff), to(#dfdfdf));
+			}
+			.light-scrollbars::-webkit-scrollbar-button:vertical:increment {
+				
+				}
+			::-webkit-scrollbar-button:vertical:increment:active {
+				background: url(Resources/scroller/scroll-triangle-down.png) no-repeat right 13px, -webkit-gradient(linear, left top, right top, from(#bcc2c8), to(#81888f));
+				}
+		::-webkit-scrollbar-button:vertical:start {
+			
+			}
+			::-webkit-scrollbar-button:vertical:start:decrement {
+				/* SCROLL UP button on top */
+				
+				}
+			::-webkit-scrollbar-button:vertical:start:increment {
+				/* SCROLL DOWN button on top */
+				height: 28px;
+				border-top: 1px solid #ccc;
+				}
+		::-webkit-scrollbar-button:vertical:end {
+			
+			}
+			::-webkit-scrollbar-button:vertical:end:decrement {
+				/* SCROLL UP button on bottom */
+				height: 28px;
+				border-bottom: 1px solid #ccc;
+				}
+			::-webkit-scrollbar-button:vertical:end:increment {
+				/* SCROLL DOWN button on bottom */
+				
+				}
+	::-webkit-scrollbar-button:horizontal {
+		width: 18px;
+		height: 17px;
+		background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#dfdfdf));
+		border-top: 1px solid #ddd;
+		}
+		::-webkit-scrollbar-button:horizontal:active {
+			background: -webkit-gradient(linear, left top, left bottom, from(#bcc2c8), to(#81888f));;
+			}
+		.light-scrollbars::-webkit-scrollbar-button:horizontal {
+			background: -webkit-gradient(linear, left top, left bottom, from(#bbb), to(#f1f1f1));
+			}
+		::-webkit-scrollbar-button:horizontal:start {
+			/*background: -webkit-gradient(linear, left top, left bottom, from(#bbb), to(#f1f1f1));*/
+			}
+		::-webkit-scrollbar-button:horizontal:end {
+			/*background: -webkit-gradient(linear, left top, left bottom, from(#bbb), to(#f1f1f1));*/
+			}
+		::-webkit-scrollbar-button:horizontal:decrement {
+			/* SCROLL LEFT button */
+			
+			}
+		::-webkit-scrollbar-button:horizontal:increment {
+			/* SCROLL RIGHT button */
+			background: url(../images/scroll-triangle-right.png) no-repeat 11px -3px, -webkit-gradient(linear, left top, left bottom, from(#fff), to(#dfdfdf));
+			}
+			.light-scrollbars::-webkit-scrollbar-button:horizontal:increment {
+				
+				}
+			::-webkit-scrollbar-button:horizontal:increment:active {
+				background: url(../images/scroll-triangle-right.png) no-repeat 11px -3px, -webkit-gradient(linear, left top, left bottom, from(#bcc2c8), to(#81888f));
+				}
+		::-webkit-scrollbar-button:horizontal:decrement {
+
+			/* SCROLL RIGHT button */
+			background: url(../images/scroll-triangle-left.png) no-repeat 4px -3px, -webkit-gradient(linear, left top, left bottom, from(#fff), to(#dfdfdf));
+			}
+			.light-scrollbars::-webkit-scrollbar-button:horizontal:decrement {
+				
+				}
+			::-webkit-scrollbar-button:horizontal:decrement:active {
+				background: url(../images/scroll-triangle-left.png) no-repeat 4px -3px, -webkit-gradient(linear, left top, left bottom, from(#bcc2c8), to(#81888f));
+				}
+::-webkit-scrollbar-thumb {
+	background: #ccc;
+	/*border: 2px solid transparent;*/
+	border: 1px solid #777d83;
+	border-right-color: #434b52;
+	border-left-color: #9ea1a6;
+	-webkit-border-radius: 9px;
+	}
+	::-webkit-scrollbar-thumb:vertical {
+		background: -webkit-gradient(linear, left top, right top, from(#bcc2c8), to(#81888f));
+		-webkit-box-shadow: inset 1px 0 1px rgba(255,255,255,0.5);
+		}
+		.light-scrollbars::-webkit-scrollbar-thumb:vertical {
+			background: -webkit-gradient(linear, left top, right top, from(#fff), to(#e1e1e1));
+			}
+	::-webkit-scrollbar-thumb:horizontal {
+		background: -webkit-gradient(linear, left top, left bottom, from(#bcc2c8), to(#81888f));
+		-webkit-box-shadow: inset 0 1px 1px rgba(255,255,255,0.5);
+		}
+		.light-scrollbars::-webkit-scrollbar-thumb:horizontal {
+			background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#e1e1e1));
+			}
+::-webkit-scrollbar-corner {
+	background: #fff;
+	}
+
+/* Turn on single button up on top, and down on bottom */
+::-webkit-scrollbar-button:start:decrement,
+::-webkit-scrollbar-button:end:increment {
+    display: block;
+}
+ 
+/* Turn off the down area up on top, and up area on bottom */
+::-webkit-scrollbar-button:start:increment,
+::-webkit-scrollbar-button:end:decrement {
+    display: none;
+}
+/* @end */
+
+
+
+
+
+.diff .file {
+	margin-bottom: 25px;
+}
+
+.diff .file .fileHeader {
+    padding: 5px;
+	font-weight: bold;
+    font-size: 15px;
+}
+
+.diff .file .diffContent {
+	overflow: auto;
+	white-space: pre;
+	font: 11px/16px Monaco;
+}
+
+.diff .file .diffcontent .lineno {
+	float: left;
+	padding-left: 2px;
+	padding-right: 2px;
+	color: #b2b2b2;
+	border: 1px solid #bfbfbf;
+    border-left: 0;
+	text-align: right;
+	min-width:55px;
+}
+
+.diff .file .diffContent .lines {
+	text-indent: 10px;
+
+    border-top: 1px solid #bfbfbf;
+    border-bottom: 1px solid #bfbfbf;
+}
+
+.diff .file .diffContent .lines .hunkheader {
+  background-color: #f7f7f7;
+  color: #bbb;
+}
+
+span.delline, span.addline {
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+}
+
+.diff .file .diffcontent .lines .delline {
+    background-color: #f3cfcf;
+    border-color: #f3cfcf;
+    color: black;
+}
+
+.diff .file .diffcontent .lines .addline {
+  background-color: #efe6ff;
+  border-color: #efe6ff;
+  color: black;
+}
+
+.diff .file .diffcontent .lines .whitespace {
+	background-color: rgba(255,0,0,0.5);
+}
+
+		</style>
+
+		<script type="text/javascript" charset="utf-8">
+SHOULD_TRIM_LEADING_ACTION_SYMBOL = 1; // ZERO FOR NO!
+
+String.prototype.escapeHTML = function() {
+  return this.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+};
+
+String.prototype.unEscapeHTML = function() {
+  return this.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>');
+};
+
+Element.prototype.toggleDisplay = function() {
+    if (this.style.display != "")
+        this.style.display = "";
+    else
+        this.style.display = "none";
+}
+
+
+var highlightDiff = function(diff, element, callbacks) {
+    if (!diff || diff == "")
+        return;
+
+    if (!callbacks)
+        callbacks = {};
+
+    var start = new Date().getTime();
+    element.className = "diff";
+
+    var content = diff.escapeHTML().replace(/\t/g, "    ");;
+
+    var file_index = 0;
+
+    var startname = "",
+        endname = "",
+        line1 = "",
+        line2 = "",
+        diffContent = "",
+        finalContent = "",
+        lines = content.split('\n'),
+        binary = false,
+        mode_change = false,
+        old_mode = "",
+        new_mode = "";
+
+    var hunk_start_line_1 = -1,
+        hunk_start_line_2 = -1;
+
+    var header = false;
+
+    var finishContent = function()
+    {
+        if (!file_index)
+        {
+            file_index++;
+            return;
+        }
+
+        if (callbacks["newfile"])
+            callbacks["newfile"](startname, endname, "file_index_" + (file_index - 1), mode_change, old_mode, new_mode);
+
+        var title = startname,
+             binaryname = endname;
+
+        if (endname == "/dev/null")
+        {
+            binaryname = startname;
+            title = startname;
+        }
+        else if (startname == "/dev/null")
+            title = endname;
+        else if (startname != endname)
+            title = startname + " renamed to " + endname;
+        
+        if (binary && endname == "/dev/null")    // in cases of a deleted binary file, there is no diff/file to display
+        {
+            line1 = "";
+            line2 = "";
+            diffContent = "";
+            file_index++;
+            startname = "";
+            endname = "";
+            return;                // so printing the filename in the file-list is enough
+        }
+
+        if (diffContent != "" || binary)
+        {
+            finalContent += '<div class="file" id="file_index_' + (file_index - 1) + '">' +
+                '<div class="fileHeader">' + title + '</div>';
+        }
+
+        if (!binary && (diffContent != "")) 
+        {
+            finalContent +=        '<div class="diffContent">' +
+                                '<div class="lineno">' + line1 + "</div>" +
+                                '<div class="lineno">' + line2 + "</div>" +
+                                '<div class="lines">' + diffContent + "\n</div>" + // OFF BY ONE?!?!?!?!?!?
+                            '</div>';
+        }
+        else {
+            if (binary) {
+                if (callbacks["binaryFile"])
+                    finalContent += callbacks["binaryFile"](binaryname);
+                else
+                    finalContent += "<div>Binary file differs</div>";
+            }
+        }
+
+        if (diffContent != "" || binary)
+            finalContent += '</div>';
+
+        line1 = "";
+        line2 = "";
+        diffContent = "";
+        file_index++;
+        startname = "";
+        endname = "";
+    }
+
+    var lineno = 0,
+        lindex = 0,
+        c = lines.length;
+
+    for (; lineno < c; lineno++) {
+        var l = lines[lineno];
+
+        var firstChar = l.charAt(0);
+
+        if (firstChar == "d" && l.charAt(1) == "i") {            // "diff", i.e. new file, we have to reset everything
+            header = true;                        // diff always starts with a header
+
+            finishContent(); // Finish last file
+
+            binary = false;
+            mode_change = false;
+
+            if(match = l.match(/^diff --git (a\/)+(.*) (b\/)+(.*)$/)) {    // there are cases when we need to capture filenames from
+                startname = match[2];                    // the diff line, like with mode-changes.
+                endname = match[4];                    // this can get overwritten later if there is a diff or if
+            }                                // the file is binary
+
+            continue;
+        }
+
+        if (header) {
+            if (firstChar == "n")
+            {
+                if (l.match(/^new file mode .*$/))
+                    startname = "/dev/null";
+
+                if (match = l.match(/^new mode (.*)$/))
+                {
+                    mode_change = true;
+                    new_mode = match[1];
+                }
+                continue;
+            }
+
+            if (firstChar == "o")
+            {
+                if (match = l.match(/^old mode (.*)$/))
+                {
+                    mode_change = true;
+                    old_mode = match[1];
+                }
+                continue;
+            }
+
+            if (firstChar == "d")
+            {
+                if (l.match(/^deleted file mode .*$/))
+                    endname = "/dev/null";
+                continue;
+            }
+
+            if (firstChar == "-")
+            {
+                if (match = l.match(/^--- (a\/)?(.*)$/))
+                    startname = match[2];
+                continue;
+            }
+
+            if (firstChar == "+") 
+            {
+                if (match = l.match(/^\+\+\+ (b\/)?(.*)$/))
+                    endname = match[2];
+                continue;
+            }
+            // If it is a complete rename, we don't know the name yet
+            // We can figure this out from the 'rename from.. rename to.. thing
+            if (firstChar == 'r')
+            {
+                if (match = l.match(/^rename (from|to) (.*)$/))
+                {
+                    if (match[1] == "from")
+                        startname = match[2];
+                    else
+                        endname = match[2];
+                }
+                continue;
+            }
+            if (firstChar == "B") // "Binary files .. and .. differ"
+            {
+                binary = true;
+                // We might not have a diff from the binary file if it's new.
+                // So, we use a regex to figure that out
+
+                if (match = l.match(/^Binary files (a\/)?(.*) and (b\/)?(.*) differ$/))
+                {
+                    startname = match[2];
+                    endname = match[4];
+                }
+            }
+
+            // Finish the header
+            if (firstChar == "@")
+                header = false;
+            else
+                continue;
+        }
+
+        sindex = "index=" + lindex.toString() + " ";
+        if (firstChar == "+")
+        {
+            // Highlight trailing whitespace
+            var m = l.match(/\s+$/); 
+            if (m)
+                l = l.replace(/\s+$/, "<span class='whitespace'>" + m + "</span>");
+
+            line1 += "\n";
+            line2 += "<span class='important-number'>" + ++hunk_start_line_2 + "</span>\n";
+
+            diffContent += "<div " + sindex + "class='addline'><span class='addline' >" + l.substring(SHOULD_TRIM_LEADING_ACTION_SYMBOL) + "</span></div>";
+        }
+        else if (firstChar == "-")
+        {
+            line1 += "<span class='important-number'>" + ++hunk_start_line_1 + "</span>\n";
+            line2 += "\n";
+            diffContent += "<div " + sindex + "class='delline'><span class='delline'>" + l.substring(SHOULD_TRIM_LEADING_ACTION_SYMBOL) + "</span></div>";
+        }
+        else if (firstChar == "@")
+        {
+            if (header)
+            {
+                header = false;
+            }
+
+            if (m = l.match(/@@ \-([0-9]+),?\d* \+(\d+),?\d* @@/))
+            {
+                hunk_start_line_1 = parseInt(m[1]) - 1;
+                hunk_start_line_2 = parseInt(m[2]) - 1;
+            }
+            line1 += "...\n";
+            line2 += "...\n";
+            diffContent += "<div " + sindex + "class='hunkheader'>" + l + "</div>";
+        }
+        else if (firstChar == " ")
+        {
+            line1 += ++hunk_start_line_1 + "\n";
+            line2 += ++hunk_start_line_2 + "\n";
+            diffContent += "<div " + sindex + "class='noopline'>" + l + "</div>";
+        }
+
+        lindex++;
+    }
+
+    finishContent();
+
+    element.innerHTML = finalContent;
+}
+			var load = function()
+			{
+
+			}
+
+window.showDiff = function(aString)
+{
+    highlightDiff(aString,
+    	document.getElementById("lijstmetdingen"),
+    	{ }
+    );
+}
+		</script>
+	</head>
+	<body onload="load()">
+			<div id='lijstmetdingen'></div>
+		</body>
+	</body>
+</html>
