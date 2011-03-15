@@ -129,7 +129,7 @@ APPLICATION_VERSION_NUMBER = 1.8;
                         [[GithubAPIController sharedController] loadIssuesForRepository:repo callback:function(){
                             var issueNumber = parseInt(args[2], 10),
                                 openIssues = repo.openIssues,
-                                count = openIssues.length,
+                                count = [openIssues count],
                                 issueIndex = -1;
 
                             for (var i = 0; i < count && issueIndex < 0; i++)
@@ -139,7 +139,7 @@ APPLICATION_VERSION_NUMBER = 1.8;
                             }
 
                             var closedIssues = repo.closedIssues,
-                                count = closedIssues.length;
+                                count = [closedIssues count];
 
                             for (var i = 0; i < count && issueIndex < 0; i++)
                             {

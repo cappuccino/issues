@@ -200,7 +200,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 - (void)loadRepositoryWithIdentifier:(CPString)anIdentifier callback:(Function)aCallback
 {
     var parts = anIdentifier.split("/");
-    if (parts.length > 2)
+    if ([parts count] > 2)
         anIdentifier = parts.slice(0, 2).join("/");
 
     var request = new CFHTTPRequest();
@@ -247,7 +247,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
                 return;
 
             // Now, for sorting purposes each issue should know if it has a pull request
-            var c = aRepo.openIssues.length;
+            var c = [aRepo.openIssues count];
             while (c--)
             {
                 var issue = aRepo.openIssues[c];
@@ -276,7 +276,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 
                 var maxPosition = 0,
                     minPosition = Infinity;
-                for (var i = 0, count = issues.length; i < count; i++)
+                for (var i = 0, count = [issues count]; i < count; i++)
                 {
                     maxPosition = MAX([issues[i] objectForKey:"position"], maxPosition);
                     minPosition = MIN([issues[i] objectForKey:"position"], minPosition);
@@ -308,7 +308,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 
                 var maxPosition = 0,
                     minPosition = Infinity;
-                for (var i = 0, count = issues.length; i < count; i++)
+                for (var i = 0, count = [issues count]; i < count; i++)
                 {
                     maxPosition = MAX([issues[i] objectForKey:"position"], maxPosition);
                     minPosition = MIN([issues[i] objectForKey:"position"], minPosition);
@@ -350,7 +350,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
             requests = [];
 
         // Cache the numbers fo a much faster lookup by hashing the issue number.
-        var c = requests.length;
+        var c = [requests count];
         aRepo.pullRequests = { };
         while (c--)
         {
