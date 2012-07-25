@@ -475,15 +475,15 @@ function hasUnsubmittedComment() {
                     
                     <div class="issue-meta">
                         <div class="issue-meta-wrapper">
-                            {{#gravatar_id}}
+                            {{#user.gravatar_id}}
                             <div class="issue-image-area">
-                                <img class="issue-author-image" src="http://www.gravatar.com/avatar/{{gravatar_id}}.png?s=68&d=identicon" alt="{{user_email}}" />
+                                <img class="issue-author-image" src="http://www.gravatar.com/avatar/{{user.gravatar_id}}.png?s=68&d=identicon" alt="{{user.login}}" />
                                 <div class="issue-image-paperclip-placeholder"></div>
                             </div>
-                            {{/gravatar_id}}
+                            {{/user.gravatar_id}}
                             <div class="issue-meta-box first-box">
                                 <h3 class="issue-meta-title">Submitter</h3>
-                                <span class="issue-meta-content">{{user}}</span>
+                                <span class="issue-meta-content">{{user.login}}</span>
                             </div>
                             <div class="issue-meta-box first-box">
                                 <h3 class="issue-meta-title">Issue Number</h3>

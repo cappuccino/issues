@@ -227,7 +227,7 @@
     else
     {
         var repo = sortedRepos[selectedRow];
-        [CPApp setArguments:[repo.owner, repo.name]];
+        [CPApp setArguments:[repo.owner.login, repo.name]];
         [issuesController setRepo:repo];
     }
 

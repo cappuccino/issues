@@ -1,4 +1,5 @@
 var HTTP = require("http");
+var HTTPS = require("https");
 var MIME = require("./mime");
 var FS = require("fs");
 
@@ -12,8 +13,8 @@ var puts = require("sys").puts;
 
 // used for the oauth requests
 // REMOVE BEFORE PUSHING
-var CLIENT_SECRET = "";
-var CLIENT_ID     = "c775a44a08cffa50eba3";
+var CLIENT_SECRET = process.env.CLIENT_SECRET;
+var CLIENT_ID     = process.env.CLIENT_ID;
 var CLIENT_REDIRECT_URL = "http://localhost:8001/getAccessToken/";
 
 HTTP.createServer(function (request, response) {
@@ -72,31 +73,37 @@ function getAccessKey(request, response, code) {
 // based on http://github.com/pkrumins/nodejs-proxy
 // http://www.catonmat.net/http-proxy-in-nodejs
 function githubProxy(request, response) {
-    request.headers.host = "github.com";
-    request.url = "/api/v2/json/" + request.url.match(/^\/github\/(.*)$/)[1];
-    delete request.headers.cookie;
+    var options = {
+        host: 'api.github.com',
+        port: 443,
+        path: "/" + request.url.match(/^\/github\/(.*)$/)[1],
+        method: request.method
+    }
 
-    var proxy = HTTP.createClient(80, request.headers.host);
-    var proxy_request = proxy.request(request.method, request.url, request.headers);
-    proxy_request.addListener("response", function (proxy_response) {
+    var proxy_request = HTTPS.request(options, function(proxy_response){
         proxy_response.addListener("data", function(chunk) {
             response.write(chunk);
         });
         proxy_response.addListener("end", function() {
             response.end();
-        });
+        });        
         response.writeHead(proxy_response.statusCode, proxy_response.headers);
     });
+
     request.addListener("data", function(chunk) {
         proxy_request.write(chunk);
     });
+
     request.addListener("end", function() {
         proxy_request.end();
     });
 }
 
+var PREFIX = process.env.STATIC_DIR || 'static'
+console.log("Starting with static directory: "+PREFIX)
+
 function staticServe(request, response) {
-    var path = "static" + request.url + (/\/$/.test(request.url) ? "index.html" : "");
+    var path = PREFIX + request.url + (/\/$/.test(request.url) ? "index.html" : "");
     FS.readFile(path, "binary", function (err, data) {
         if (err) {
             response.writeHead(404, {

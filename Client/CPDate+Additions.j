@@ -49,6 +49,10 @@
         return;
 
     aDate = [aDate stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
+    aDate = aDate.replace('T', ' ');
+    aDate = aDate.replace('Z', '');
+    aDate = aDate+" +0000";
+
     aDate = [[CPDate alloc] initWithString:aDate];
 
     return [aDate simpleDate];

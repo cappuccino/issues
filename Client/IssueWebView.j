@@ -75,7 +75,13 @@ var IssuesHTMLTemplate = nil;
 
         [issue setObject:[CPDate simpleDate:[issue objectForKey:"created_at"]] forKey:"human_readable_created_date"];
         [issue setObject:[CPDate simpleDate:[issue objectForKey:"updated_at"]] forKey:"human_readable_updated_date"];
-        [issue setObject:([issue objectForKey:"labels"] || []).join(", ") forKey:"comma_separated_tags"];
+
+        var tags = []
+        [([issue objectForKey:"labels"] || []) enumerateObjectsUsingBlock:function(tag){
+            tags.push([tag objectForKey:'name']);
+        }];
+
+        [issue setObject:tags.join(", ") forKey:"comma_separated_tags"];
         [issue setObject:BASE_URL forKey:"pref_base_url"];
 
         if (repo)

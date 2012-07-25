@@ -724,7 +724,7 @@
             [issueWebView setRepo:repo];
             [issueWebView loadIssue];
 
-            [CPApp setArguments:[repo.owner, repo.name, [item objectForKey:"number"]]];
+            [CPApp setArguments:[repo.owner.login, repo.name, [item objectForKey:"number"]]];
         }
     }
     else

@@ -4,10 +4,7 @@
 @import "md5-min.js"
 
 BASE_API = "/github/";
-BASE_URL = "https://github.com/";
-
-if (window.location && window.location.protocol === "file:")
-    BASE_API = BASE_URL + "api/v2/json/";
+BASE_URL = "https://github.com/"
 
 var SharedController = nil,
     GravatarBaseURL = "http://www.gravatar.com/avatar/";
@@ -113,7 +110,8 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
 
 - (CPString)_credentialsString
 {
-    var authString = "?app_id=280issues";
+    return ""
+    var authString = "app_id=280issues";
     if ([self isAuthenticated])
     {
         if (oauthAccessToken)
@@ -204,7 +202,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
         anIdentifier = parts.slice(0, 2).join("/");
 
     var request = new CFHTTPRequest();
-    request.open("GET", BASE_API+"repos/show/"+anIdentifier+[self _credentialsString], true);
+    request.open("GET", BASE_API+"repos/"+anIdentifier+[self _credentialsString], true);
 
     request.oncomplete = function()
     {
@@ -212,7 +210,7 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
         if (request.success())
         {
             try {
-                repo = JSON.parse(request.responseText()).repository;
+                repo = JSON.parse(request.responseText());
                 repo.identifier = anIdentifier;
 
                 [repositoriesByIdentifier setObject:repo forKey:anIdentifier];
@@ -261,14 +259,14 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
         };
 
     var openRequest = new CFHTTPRequest();
-    openRequest.open("GET", BASE_API+"issues/list/"+aRepo.identifier+"/open"+[self _credentialsString], true);
+    openRequest.open("GET", BASE_API+"repos/"+aRepo.identifier+"/issues?state=open"+[self _credentialsString], true);
 
     openRequest.oncomplete = function() {
         if (openRequest.success())
         {
             try
             {
-                var issues = [[CPDictionary dictionaryWithJSObject:JSON.parse(openRequest.responseText()) recursively:YES] objectForKey:"issues"];
+                var issues = [[CPDictionary dictionaryWithJSObject:{issues:JSON.parse(openRequest.responseText())} recursively:YES] objectForKey:"issues"];
 
                 [self _noteRepoChanged:aRepo];
 
@@ -296,14 +294,14 @@ CFHTTPRequest.AuthenticationDelegate = function(aRequest)
     }
 
     var closedRequest = new CFHTTPRequest();
-    closedRequest.open("GET", BASE_API + "issues/list/" + aRepo.identifier + "/closed" + [self _credentialsString], true);
+    closedRequest.open("GET", BASE_API + "repos/" + aRepo.identifier + "/issues?state=closed" + [self _credentialsString], true);
 
     closedRequest.oncomplete = function() {
         if (closedRequest.success())
         {
             try
             {
-                var issues = [[CPDictionary dictionaryWithJSObject:JSON.parse(closedRequest.responseText()) recursively:YES] objectForKey:"issues"];
+                var issues = [[CPDictionary dictionaryWithJSObject:{issues:JSON.parse(closedRequest.responseText())} recursively:YES] objectForKey:"issues"];
                 aRepo.closedIssues = issues;
 
                 var maxPosition = 0,
