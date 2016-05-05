@@ -46,12 +46,12 @@
     OPEN_LINK("http://cl.ly/4CUu");
 }
 
-- (@action)downloadSafariExtention:(id)sender
+- (@action)downloadSafariExtension:(id)sender
 {
     OPEN_LINK("http://github.com/downloads/Me1000/PrettyIssues/PrettyIssues.safariextz.zip");
 }
 
-- (@action)downloadChromeExtention:(id)sender
+- (@action)downloadChromeExtension:(id)sender
 {
     OPEN_LINK("https://chrome.google.com/webstore/detail/mlphmcafjfbcoagfoanfaljdmkcimhmi");
 }
