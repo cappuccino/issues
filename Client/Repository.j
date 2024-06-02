@@ -27,7 +27,7 @@
 {
     var repo = [[self alloc] init];
 
-    [repo setDescriptoin:anObject.description];
+    [repo setDescription:anObject.description];
     [repo setName:anObject.name];
     [repo setURL:anObject.URL];
     [repo setOwner:anObject.owner];
